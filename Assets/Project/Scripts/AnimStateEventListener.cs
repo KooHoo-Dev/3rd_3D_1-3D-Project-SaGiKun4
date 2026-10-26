@@ -14,11 +14,11 @@ namespace Study3D.FpsGame
     public class AnimStateEventListener : MonoBehaviour
     {
         // (신호 이름, 매개변수)
-        public event Action<string, string> OnOccursAnimStateEvent;
+        public event Action<string> OnOccursAnimStateEvent;
 
-        public void OccursAnimStateEvent(string eventName, string parameter)
+        public void OccursAnimStateEvent(string eventName)
         {
-            OnOccursAnimStateEvent?.Invoke(eventName, parameter);
+            OnOccursAnimStateEvent?.Invoke(eventName);
         }
     }
 }

@@ -3,7 +3,9 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - StartGateWay
+  - EndGateWay
   layers:
   - Default
   - TransparentFX
@@ -11,12 +13,12 @@ TagManager:
   - 
   - Water
   - UI
-  - Pillars
-  - Buildings
-  - Terrain
-  - Trees
+  - World
+  - Prop
+  - Enemy
   - 
-  - 
+  - Head
+  - LocalBody
   - 
   - 
   - 
