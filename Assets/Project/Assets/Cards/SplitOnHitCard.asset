@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d375b804494bf4d499c68b717eac6376, type: 3}
+  m_Name: SplitOnHitCard
+  m_EditorClassIdentifier: Assembly-CSharp::Study3D.FpsGame.Deck.SplitCardData
+  cardName: "충돌 분열"
+  timing: 2
+  extraCount: 2
+  horizontalAngle: 30
+  verticalAngle: 10
