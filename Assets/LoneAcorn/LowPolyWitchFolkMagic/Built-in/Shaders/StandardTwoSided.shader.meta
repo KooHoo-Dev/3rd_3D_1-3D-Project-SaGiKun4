@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 57e1c303fb1b58e46a697d35584e22ae
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 388082
+  packageName: Low Poly Witch & Folk Magic Pack
+  packageVersion: 1.0
+  assetPath: Assets/LoneAcorn/LowPolyWitchFolkMagic/Built-in/Shaders/StandardTwoSided.shader
+  uploadId: 938486

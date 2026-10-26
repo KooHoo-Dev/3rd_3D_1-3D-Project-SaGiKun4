@@ -1,0 +1,169 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &1587269980922446860
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 4f429d857ff3e9c46a53da08a4d6c267,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4f429d857ff3e9c46a53da08a4d6c267,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4f429d857ff3e9c46a53da08a4d6c267,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4f429d857ff3e9c46a53da08a4d6c267,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4f429d857ff3e9c46a53da08a4d6c267,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4f429d857ff3e9c46a53da08a4d6c267,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4f429d857ff3e9c46a53da08a4d6c267,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4f429d857ff3e9c46a53da08a4d6c267,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4f429d857ff3e9c46a53da08a4d6c267,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4f429d857ff3e9c46a53da08a4d6c267,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 4f429d857ff3e9c46a53da08a4d6c267,
+        type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 15484cd637270a048979a054f268f7cd, type: 2}
+    - target: {fileID: -7511558181221131132, guid: 4f429d857ff3e9c46a53da08a4d6c267,
+        type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 359bdbcd0abf407428328d410fc127b1, type: 2}
+    - target: {fileID: 919132149155446097, guid: 4f429d857ff3e9c46a53da08a4d6c267,
+        type: 3}
+      propertyPath: m_Name
+      value: HangingHerbBundle6_Rope1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 4f429d857ff3e9c46a53da08a4d6c267,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5653948201067065431}
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 4f429d857ff3e9c46a53da08a4d6c267, type: 3}
+--- !u!4 &1264848344576648167 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 4f429d857ff3e9c46a53da08a4d6c267,
+    type: 3}
+  m_PrefabInstance: {fileID: 1587269980922446860}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &2022339229993044424
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1264848344576648167}
+    m_Modifications:
+    - target: {fileID: 4768535625085403888, guid: 3d45e16dd4650d14cafb1649e9a33cb0,
+        type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 15484cd637270a048979a054f268f7cd, type: 2}
+    - target: {fileID: 5937452117997205919, guid: 3d45e16dd4650d14cafb1649e9a33cb0,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5937452117997205919, guid: 3d45e16dd4650d14cafb1649e9a33cb0,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5937452117997205919, guid: 3d45e16dd4650d14cafb1649e9a33cb0,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5937452117997205919, guid: 3d45e16dd4650d14cafb1649e9a33cb0,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5937452117997205919, guid: 3d45e16dd4650d14cafb1649e9a33cb0,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5937452117997205919, guid: 3d45e16dd4650d14cafb1649e9a33cb0,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5937452117997205919, guid: 3d45e16dd4650d14cafb1649e9a33cb0,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5937452117997205919, guid: 3d45e16dd4650d14cafb1649e9a33cb0,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5937452117997205919, guid: 3d45e16dd4650d14cafb1649e9a33cb0,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5937452117997205919, guid: 3d45e16dd4650d14cafb1649e9a33cb0,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6426005079738639141, guid: 3d45e16dd4650d14cafb1649e9a33cb0,
+        type: 3}
+      propertyPath: m_Name
+      value: HangingRope1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 3d45e16dd4650d14cafb1649e9a33cb0, type: 3}
+--- !u!4 &5653948201067065431 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5937452117997205919, guid: 3d45e16dd4650d14cafb1649e9a33cb0,
+    type: 3}
+  m_PrefabInstance: {fileID: 2022339229993044424}
+  m_PrefabAsset: {fileID: 0}
