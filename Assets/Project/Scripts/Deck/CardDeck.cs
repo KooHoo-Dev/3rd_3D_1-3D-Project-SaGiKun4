@@ -30,6 +30,7 @@ namespace Study3D.FpsGame.Deck
 
         public event Action<CardData> OnCardAdded;    // 손패 맨 뒤에 카드가 들어왔을 때
         public event Action<int> OnCardRemoved;       // (빠진 손패 인덱스) 카드를 사용했을 때
+        public event Action<int> OnCardChanged;       // (바뀐 손패 인덱스) 같은 자리의 카드가 다른 카드로 바뀌었을 때 (강화 등)
         public event Action OnHandCleared;            // 손패를 모두 버렸을 때
         public event Action<int> OnSelectionChanged;  // (선택 인덱스, 손패가 비면 -1)
 
@@ -99,6 +100,29 @@ namespace Study3D.FpsGame.Deck
             if (selectedIndex >= hand.Count) selectedIndex = Mathf.Max(0, hand.Count - 1);
 
             OnCardRemoved?.Invoke(removedIndex);
+            OnSelectionChanged?.Invoke(hand.Count > 0 ? selectedIndex : -1);
+        }
+
+        // 손패 index번째 카드를 다른 카드로 바꿉니다. 자리와 선택은 그대로 둡니다.
+        public void ReplaceInHand(int index, CardData card)
+        {
+            if (index < 0 || index >= hand.Count) return;
+
+            hand[index] = card;
+            OnCardChanged?.Invoke(index);
+        }
+
+        // 손패 index번째 카드를 버린 카드로 보내지 않고 덱에서 완전히 없앱니다. (강화 재료 등)
+        // 선택된 카드는 자리가 당겨져도 같은 카드가 계속 선택되고, 선택된 카드가 빠지면 같은 자리의 다음 카드가 선택됩니다.
+        public void RemoveFromHand(int index)
+        {
+            if (index < 0 || index >= hand.Count) return;
+
+            hand.RemoveAt(index);
+            if (index < selectedIndex) selectedIndex--;
+            if (selectedIndex >= hand.Count) selectedIndex = Mathf.Max(0, hand.Count - 1);
+
+            OnCardRemoved?.Invoke(index);
             OnSelectionChanged?.Invoke(hand.Count > 0 ? selectedIndex : -1);
         }
 

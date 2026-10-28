@@ -211,10 +211,17 @@ namespace Study3D.FpsGame.Player
             if (scroll > 0f) Player.LocalPlayer.SelectNextCard(-1);
             else if (scroll < 0f) Player.LocalPlayer.SelectNextCard(1);
 
+            // 강화 상태 켜기/취소
+            if (SimpleInput.GetKeyDown(Key.B)) Player.LocalPlayer.ToggleEnhanceMode();
+
             // 숫자 1~6 = 손패의 1~6번째 카드를 바로 선택합니다. (Key.Digit1~Digit6은 연속된 값입니다)
+            // 강화 상태에서는 선택 대신 강화할 카드를 고릅니다.
             for (int i = 0; i < 6; i++)
             {
-                if (SimpleInput.GetKeyDown(Key.Digit1 + i)) Player.LocalPlayer.SelectCard(i);
+                if (SimpleInput.GetKeyDown(Key.Digit1 + i) == false) continue;
+
+                if (Player.LocalPlayer.IsEnhancing) Player.LocalPlayer.ChooseEnhanceCard(i);
+                else Player.LocalPlayer.SelectCard(i);
             }
 
             // 재장전

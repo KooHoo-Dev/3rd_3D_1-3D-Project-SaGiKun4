@@ -94,6 +94,7 @@ namespace Study3D.FpsGame.UI
             deck = Player.Player.LocalPlayer.Deck;
             deck.OnCardAdded += OnCardAdded;
             deck.OnCardRemoved += OnCardRemoved;
+            deck.OnCardChanged += OnCardChanged;
             deck.OnHandCleared += OnHandCleared;
             deck.OnSelectionChanged += OnSelectionChanged;
             Player.Player.LocalPlayer.OnRequestedReload += OnRequestedReload;
@@ -111,6 +112,7 @@ namespace Study3D.FpsGame.UI
             if (deck == null) return;
             deck.OnCardAdded -= OnCardAdded;
             deck.OnCardRemoved -= OnCardRemoved;
+            deck.OnCardChanged -= OnCardChanged;
             deck.OnHandCleared -= OnHandCleared;
             deck.OnSelectionChanged -= OnSelectionChanged;
         }
@@ -147,6 +149,14 @@ namespace Study3D.FpsGame.UI
             RectTransform slot = shownSlots[index];
             shownSlots.RemoveAt(index);
             StartCoroutine(VanishRoutine(slot));
+        }
+
+        // 같은 자리의 카드가 바뀌면(강화 등) 글자만 새 카드로 바꿉니다.
+        private void OnCardChanged(int index)
+        {
+            if (index < 0 || index >= shownSlots.Count) return;
+
+            ApplyCardData(slotParts[shownSlots[index]], deck.Hand[index]);
         }
 
         private void OnHandCleared()
