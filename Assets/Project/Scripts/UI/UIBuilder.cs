@@ -17,7 +17,7 @@ using UnityEngine.UI;
 public class UIBuilder : MonoBehaviour
 {
 #if UNITY_EDITOR
-    private const string RootName = "cavas";
+    private const string RootName = "HandCanvas";
     private const int MaxCards = 6;
 
     [Header("폰트 (한글 폰트 교체용, 비우면 TMP 기본 폰트)")]

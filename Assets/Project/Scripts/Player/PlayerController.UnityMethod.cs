@@ -1,5 +1,8 @@
 ﻿using System;
+using Study.Utilities;
+using Study3D.FpsGame.UI;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Study3D.FpsGame.Player
 {
@@ -30,7 +33,15 @@ namespace Study3D.FpsGame.Player
         
         private void Update()
         {
-            UpdateMovement();
+            // (테스트용) 강화 화면 열기/닫기. 나중에는 강화 오브젝트가 UpgradeScreen.Instance.Open()을 부릅니다.
+            // 화면이 열려 있어도 닫을 수 있어야 하므로 CanAct보다 먼저 받습니다. (죽었으면 열리지 않음)
+            if (SimpleInput.GetKeyDown(Key.B) && UpgradeScreen.Instance != null) UpgradeScreen.Instance.Toggle();
+            // 조작할 수 없는 동안(강화 화면, 사망 등)은 이동/점프/시점 회전/발사/카드 입력을 모두 막습니다.
+            bool canAct = Player.LocalPlayer.CanAct;
+
+            UpdateMovement(canAct);
+            if (canAct == false) return;
+
             UpdateCameraRotation();
             UpdatePlayerInput();
         }

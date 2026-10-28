@@ -37,6 +37,17 @@ namespace Study3D.FpsGame.Player
         public bool IsDead { get; private set; }
         public bool IsReloading { get; private set; } = false;
 
+        // 메뉴 화면(강화 화면 등)이 열려 있는 동안 true. 화면 쪽이 열고 닫을 때 SetInMenu로 알려 줍니다.
+        // 플레이어는 어떤 화면인지 모릅니다. (메뉴는 한 번에 하나만 열리므로 서로 덮어쓰지 않습니다)
+        public bool IsInMenu { get; private set; }
+
+        // 플레이어가 조작(이동/시점/발사/카드 입력)할 수 있는지. 입력을 받는 쪽(PlayerController)은 이 값만 봅니다.
+        // - 상태(IsDead, IsInMenu 등)는 각자 관리하고, 여기서는 조건만 모아 계산합니다. (직접 켜고 끄는 플래그로 두면 서로 덮어씀)
+        // - 조작을 막는 상태가 새로 생기면 여기에 조건만 추가하면 됩니다.
+        public bool CanAct => IsDead == false && IsInMenu == false;
+
+        public void SetInMenu(bool inMenu) => IsInMenu = inMenu;
+
         #region 유니티 함수들
 
         private void Awake()

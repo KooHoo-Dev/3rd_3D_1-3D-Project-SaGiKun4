@@ -53,15 +53,16 @@ namespace Study3D.FpsGame.Player
         // 마우스로 누적한 상하 시점 각도 (+ = 아래, - = 위). 카메라 스크립트가 읽어갑니다.
         public float VerticalLookAngle => verticalLookAngle;
 
-        private void UpdateMovement()
+        // canAct가 false면(강화 화면 등) 입력이 없는 것으로 처리합니다. 중력과 멈추는 애니메이션은 그대로 진행됩니다.
+        private void UpdateMovement(bool canAct)
         {
             // 첫번째로는 이동 속도를 결정해줍니다. LeftShift가 true이면 runSpeed 입니다.
-            bool isRunning = SimpleInput.GetKey(Key.LeftShift);
+            bool isRunning = canAct && SimpleInput.GetKey(Key.LeftShift);
             float speed = isRunning ? runSpeed : walkSpeed;
 
             // 이동 연산에 사용할 방향의 축값을 가져옵니다. 가져온 데이터는 한축은
             // -1, 0, 1 의 3가지중 하나가 반환됩니다
-            Vector2 inputRaw = SimpleInput.GetMoveAxisRaw();
+            Vector2 inputRaw = canAct ? SimpleInput.GetMoveAxisRaw() : Vector2.zero;
             moveX = SmoothAxis(moveX, inputRaw.x);
             moveZ = SmoothAxis(moveZ, inputRaw.y);
 
@@ -93,7 +94,7 @@ namespace Study3D.FpsGame.Player
             // 아니면 따로 변수를 주세요
             if (isGrounded && velocity.y < 0f) velocity.y = -2f;
 
-            if (isGrounded && SimpleInput.GetKeyDown(Key.Space))
+            if (canAct && isGrounded && SimpleInput.GetKeyDown(Key.Space))
             {
                 // 점프의 최대 높이를 지정해주는게 개발에 쉬움.
                 // 힘으로 점프를 설정하면 플레이어가 얼마 뛸 지를 모르니까
@@ -211,17 +212,10 @@ namespace Study3D.FpsGame.Player
             if (scroll > 0f) Player.LocalPlayer.SelectNextCard(-1);
             else if (scroll < 0f) Player.LocalPlayer.SelectNextCard(1);
 
-            // 강화 상태 켜기/취소
-            if (SimpleInput.GetKeyDown(Key.B)) Player.LocalPlayer.ToggleEnhanceMode();
-
             // 숫자 1~6 = 손패의 1~6번째 카드를 바로 선택합니다. (Key.Digit1~Digit6은 연속된 값입니다)
-            // 강화 상태에서는 선택 대신 강화할 카드를 고릅니다.
             for (int i = 0; i < 6; i++)
             {
-                if (SimpleInput.GetKeyDown(Key.Digit1 + i) == false) continue;
-
-                if (Player.LocalPlayer.IsEnhancing) Player.LocalPlayer.ChooseEnhanceCard(i);
-                else Player.LocalPlayer.SelectCard(i);
+                if (SimpleInput.GetKeyDown(Key.Digit1 + i)) Player.LocalPlayer.SelectCard(i);
             }
 
             // 재장전

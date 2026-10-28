@@ -126,6 +126,43 @@ namespace Study3D.FpsGame.Deck
             OnSelectionChanged?.Invoke(hand.Count > 0 ? selectedIndex : -1);
         }
 
+        // 덱 전체 번호: 손패 → 뽑을 카드 → 버린 카드 순으로 이어 붙인 번호 입니다. (강화 화면 목록과 같은 순서)
+        public int TotalCount => hand.Count + drawPile.Count + discardPile.Count;
+
+        public CardData GetCard(int totalIndex)
+        {
+            List<CardData> pile = FindPile(ref totalIndex);
+            return pile != null ? pile[totalIndex] : null;
+        }
+
+        // 덱 전체 번호의 카드를 다른 카드로 바꿉니다. 손패면 OnCardChanged로 알립니다.
+        public void Replace(int totalIndex, CardData card)
+        {
+            List<CardData> pile = FindPile(ref totalIndex);
+            if (pile == hand) ReplaceInHand(totalIndex, card);
+            else if (pile != null) pile[totalIndex] = card;
+        }
+
+        // 덱 전체 번호의 카드를 덱에서 완전히 없앱니다. 손패면 OnCardRemoved로 알립니다.
+        public void Remove(int totalIndex)
+        {
+            List<CardData> pile = FindPile(ref totalIndex);
+            if (pile == hand) RemoveFromHand(totalIndex);
+            else if (pile != null) pile.RemoveAt(totalIndex);
+        }
+
+        // 덱 전체 번호가 속한 더미를 찾고, 번호를 그 더미 안의 번호로 바꿉니다. 범위 밖이면 null
+        private List<CardData> FindPile(ref int index)
+        {
+            if (index < 0) return null;
+            if (index < hand.Count) return hand;
+            index -= hand.Count;
+            if (index < drawPile.Count) return drawPile;
+            index -= drawPile.Count;
+            if (index < discardPile.Count) return discardPile;
+            return null;
+        }
+
         // 손패를 모두 버린 카드로 보냅니다.
         public void DiscardHand()
         {

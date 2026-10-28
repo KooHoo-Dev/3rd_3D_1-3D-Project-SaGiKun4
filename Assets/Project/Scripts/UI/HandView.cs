@@ -164,15 +164,18 @@ public class HandView : MonoBehaviour
     }
 
     // 위에서 정한 형제 순서를 그대로 정렬 순서로 옮긴다. 카드 하위 파티클은 자기 카드 바로 위에 그려진다.
+    // 손패는 부모 캔버스보다 아래(음수 쪽)에서 정렬한다. 맨 앞 카드가 -SortingStep, 그 뒤로 -2배, -3배...
+    // (같은 순서의 다른 캔버스인 강화 화면 등을 손패가 덮지 않게)
     private void ApplySorting()
     {
         Canvas parentCanvas = GetSortingCanvas();
-        int baseOrder = parentCanvas.sortingOrder + 1;
+        int baseOrder = parentCanvas.sortingOrder;
+        int siblingCount = transform.childCount;
 
         foreach (RectTransform card in hand)
         {
             CardSorting sorting = sortings[card];
-            int order = baseOrder + card.GetSiblingIndex() * SortingStep;
+            int order = baseOrder - (siblingCount - card.GetSiblingIndex()) * SortingStep;
 
             sorting.Canvas.overrideSorting = true;
             sorting.Canvas.sortingLayerID = parentCanvas.sortingLayerID;
