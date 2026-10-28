@@ -3,14 +3,16 @@ using UnityEngine;
 
 /// <summary>
 /// 손패 연출 전용 뷰. 선택 여부는 판단하지 않고, 외부에서 넘겨준 인덱스대로 배치만 한다.
-/// UIBuilder가 만든 HandArea에 붙인다. 자식 중 이름이 "Slot_"으로 시작하는 오브젝트를 카드 한 장의 자리로 사용한다.
+/// UIBuilder가 만든 HandArea에 붙인다. UIBuilder가 슬롯 목록을 넣어 주며, 그 슬롯을 카드 한 장의 자리로 사용한다. (이름으로 찾지 않음)
 /// (슬롯 = 카드 UI + 사라짐 파티클. 배치·회전·확대는 슬롯이 받으므로 둘이 항상 같은 자세를 가진다)
 /// </summary>
 public class HandView : MonoBehaviour
 {
-    private const string SlotPrefix = "Slot_";
     // 슬롯 한 개가 차지하는 정렬 칸 수. 카드 UI가 첫 칸, 슬롯 하위 파티클이 나머지 칸을 쓴다.
     private const int SortingStep = 10;
+
+    [Tooltip("카드 한 장의 자리들 (UIBuilder가 채움)")]
+    [SerializeField] private List<RectTransform> slots = new List<RectTransform>();
 
     [SerializeField] private HandLayoutSettings layout = new HandLayoutSettings();
 
@@ -45,13 +47,22 @@ public class HandView : MonoBehaviour
 
     private void Awake()
     {
-        foreach (Transform child in transform)
+        foreach (RectTransform slot in slots)
         {
-            if (child.name.StartsWith(SlotPrefix)) allCards.Add((RectTransform)child);
+            if (slot != null) allCards.Add(slot);
         }
         foreach (RectTransform card in allCards) sortings.Add(card, CreateSorting(card));
         Refresh(true);
     }
+
+#if UNITY_EDITOR
+    /// <summary>UIBuilder가 조립 직후 슬롯과 배치 값을 넣는다. (배치 값은 복사해서 따로 가짐)</summary>
+    public void EditorSetup(List<RectTransform> builtSlots, HandLayoutSettings settings)
+    {
+        slots = new List<RectTransform>(builtSlots);
+        layout = JsonUtility.FromJson<HandLayoutSettings>(JsonUtility.ToJson(settings));
+    }
+#endif
 
     private static CardSorting CreateSorting(RectTransform card)
     {

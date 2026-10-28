@@ -8,7 +8,7 @@ namespace Study3D.FpsGame.Enemy
     // - 연결하지 않으면 기존처럼 플레이어로 직진합니다.
     public interface IEnemyMover
     {
-        // speed 로 deltaTime 만큼 이동하고, 이동한 수평 방향을 돌려줍니다. (이동하지 않았으면 Vector3.zero)
+        // speed 로 deltaTime 만큼 이동하고, 몸이 바라볼 수평 방향을 돌려줍니다. (이동하지 않았으면 Vector3.zero)
         Vector3 Move(float deltaTime, float speed);
     }
 }

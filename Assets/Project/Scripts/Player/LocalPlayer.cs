@@ -138,7 +138,21 @@ namespace Study3D.FpsGame.Player
 
         public void TakeHeal(HealEvent healEvent)
         {
-            
+
+        }
+
+        #endregion
+
+        #region 이동
+
+        // 플레이어를 순간이동 시킵니다. (맵 생성 후 시작방으로 옮길 때 등)
+        // CharacterController 가 켜져 있으면 위치를 직접 바꿔도 되돌려지므로 잠깐 끄고 옮깁니다.
+        public void Teleport(Vector3 position, Quaternion rotation)
+        {
+            bool wasEnabled = characterController.enabled;
+            characterController.enabled = false;
+            transform.SetPositionAndRotation(position, rotation);
+            characterController.enabled = wasEnabled;
         }
 
         #endregion

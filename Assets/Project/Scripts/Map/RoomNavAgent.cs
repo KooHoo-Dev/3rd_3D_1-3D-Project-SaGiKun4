@@ -13,6 +13,10 @@ namespace Study3D.FpsGame.Map
     //   3. 아니면 표로 다음 연결점을 골라, 그 선분 위 나와 가장 가까운 점으로 이동. 도착하면 다음 영역에 들어간 것으로 처리
     // - 목표 = 플레이어가 마지막으로 지도 위에 있던 지점 (사물 위로 올라가면 올라가기 직전 지점)
     // - 좌표는 모두 방 로컬로 바꿔서 계산합니다. (지도가 방 로컬 기준이라서)
+    // - 높이는 걸음마다 서 있는 영역의 바닥 평면에 맞춥니다. (경사로, 계단, 위층으로 이어진 길을 따라감. 몬스터 피벗 = 발밑 전제)
+    // - 밀어내기: 방의 RoomCrowd 에 등록하고, 추격 이동 중에만 겹친 이웃에게서 멀어지는 쪽으로 더 밀림
+    //   (공격, 대기 중인 몬스터는 밀리지 않고 이웃으로만 쓰임. 밀린 자리가 지도 밖이면 밀림 없이 이동)
+    //   반경 = Enemy 의 MainCollider 반경
     [RequireComponent(typeof(Enemy.Enemy))]
     public class RoomNavAgent : MonoBehaviour, IEnemyMover
     {
@@ -20,6 +24,14 @@ namespace Study3D.FpsGame.Map
         private const float LosInterval = 0.25f;       // 목표가 보이는지 확인하는 간격
         private const float PortalInset = 0.1f;        // 연결점 양 끝(장애물 모서리)에서 띄울 거리
         private const float HeightTolerance = 1f;      // 영역 높이와 이만큼 차이 나도 그 영역 위로 봄 (몬스터 발 기준)
+        private const float DefaultRadius = 0.5f;      // MainCollider 가 없을 때 반경
+
+        [Tooltip("밀려나는 최대 속도 = 이동 속도 × 이 값 (겹친 정도에 비례). 0 이면 밀지 않음")]
+        [SerializeField, Range(0f, 2f)] private float separationWeight = 1f;
+
+        public float Radius { get; private set; }
+        public bool IsSolid => enemy.MainCollider != null && enemy.MainCollider.enabled; // 죽는 중이면 콜라이더가 꺼짐
+        internal int CrowdIndex { get; set; } = -1;
 
         private Enemy.Enemy enemy;
         private RoomNavRegions room;
@@ -39,7 +51,30 @@ namespace Study3D.FpsGame.Map
         private void Awake()
         {
             enemy = GetComponent<Enemy.Enemy>();
+            Radius = enemy.MainCollider != null ? ColliderRadius(enemy.MainCollider) : DefaultRadius;
             losTimer = Random.Range(0f, LosInterval); // 몬스터마다 시야 확인 타이밍을 흩어 둠
+        }
+
+        // 위에서 본 콜라이더 반경 (스케일 포함)
+        private static float ColliderRadius(Collider c)
+        {
+            Vector3 s = c.transform.lossyScale;
+            float scaleXZ = Mathf.Max(Mathf.Abs(s.x), Mathf.Abs(s.z));
+            switch (c)
+            {
+                case CapsuleCollider capsule: return capsule.radius * scaleXZ;
+                case SphereCollider sphere: return sphere.radius * Mathf.Max(scaleXZ, Mathf.Abs(s.y));
+                case BoxCollider box: return Mathf.Max(box.size.x * Mathf.Abs(s.x), box.size.z * Mathf.Abs(s.z)) * 0.5f;
+                case CharacterController controller: return controller.radius * scaleXZ;
+                default: return Mathf.Max(c.bounds.extents.x, c.bounds.extents.z);
+            }
+        }
+
+        // 풀에서 다시 꺼내지면 새 위치에서 바로 방을 찾음
+        private void OnEnable()
+        {
+            roomTimer = 0f;
+            losVisible = false;
         }
 
         private void OnDisable()
@@ -66,6 +101,11 @@ namespace Study3D.FpsGame.Map
                 int found = candidate.FindRegion(local, -1, HeightTolerance);
                 if (found < 0) continue;
 
+                if (room != candidate)
+                {
+                    if (room != null) room.Crowd.Remove(this);
+                    candidate.Crowd.Add(this);
+                }
                 room = candidate;
                 region = found;
                 ResetPath();
@@ -77,12 +117,13 @@ namespace Study3D.FpsGame.Map
 
         private void LeaveRoom()
         {
+            if (room != null) room.Crowd.Remove(this);
             room = null;
             region = -1;
             if (enemy != null) enemy.SetMover(null);
         }
 
-        // IEnemyMover: Enemy 의 추격 상태에서 매 프레임 호출됩니다. 이동한 수평 방향(월드)을 돌려줍니다.
+        // IEnemyMover: Enemy 의 추격 상태에서 매 프레임 호출됩니다. 길찾기 방향(월드, 수평)을 돌려줍니다. (밀린 방향을 보면 몸이 흔들려서)
         public Vector3 Move(float deltaTime, float speed)
         {
             if (room == null || room.TryGetGoal(out int goal, out Vector3 goalPoint) == false) return Vector3.zero;
@@ -90,7 +131,7 @@ namespace Study3D.FpsGame.Map
             Vector3 pos = room.transform.InverseTransformPoint(transform.position);
             Vector3 target = ChooseTarget(deltaTime, pos, goal, goalPoint, out bool towardPortal);
 
-            // 목표 지점 쪽으로 이번 프레임 거리만큼 (높이는 그대로: 평평한 방 전제)
+            // 목표 지점 쪽으로 이번 프레임 거리만큼 (XZ 로 움직이고, 높이는 도착한 영역의 바닥에 맞춤)
             Vector3 to = target - pos;
             to.y = 0f;
             float dist = to.magnitude;
@@ -98,7 +139,8 @@ namespace Study3D.FpsGame.Map
 
             float step = speed * deltaTime;
             bool arrived = dist <= step;
-            Vector3 next = arrived ? new Vector3(target.x, pos.y, target.z) : pos + to / dist * step;
+            Vector3 dir = to / dist;
+            Vector3 next = arrived ? new Vector3(target.x, pos.y, target.z) : pos + dir * step;
 
             if (towardPortal && arrived)
             {
@@ -109,8 +151,18 @@ namespace Study3D.FpsGame.Map
             }
             else
             {
+                // 이웃과 겹쳐 있으면 멀어지는 쪽으로 더 밀림. 밀린 자리가 지도 밖이면 밀림 없이
+                // (연결점에 도착하는 걸음은 영역 전환이 정확해야 해서 밀지 않음)
+                int found = -1;
+                Vector3 push = GetPush(deltaTime, speed);
+                if (push != Vector3.zero)
+                {
+                    found = room.FindRegion(next + push, region, HeightTolerance);
+                    if (found >= 0) next += push;
+                }
+
                 // 지도 밖으로 나가는 걸음은 하지 않음 (시야 확인 사이에 목표가 장애물 뒤로 간 경우 등) → 바로 길찾기로 전환
-                int found = room.FindRegion(next, region, HeightTolerance);
+                if (found < 0) found = room.FindRegion(next, region, HeightTolerance);
                 if (found < 0)
                 {
                     losVisible = false;
@@ -121,11 +173,23 @@ namespace Study3D.FpsGame.Map
                 region = found;
             }
 
-            Vector3 before = transform.position;
+            // 경사로, 계단을 따라 오르내리도록 발을 영역 바닥 높이에 붙임
+            next.y = room.HeightAt(region, next);
+
             transform.position = room.transform.TransformPoint(next);
-            Vector3 moved = transform.position - before;
-            moved.y = 0f;
-            return moved;
+            return room.transform.TransformDirection(dir);
+        }
+
+        // 이웃과 겹친 만큼 멀어지는 이번 프레임 이동량 (방 로컬). 이동 속도 × separationWeight 를 넘지 않음
+        private Vector3 GetPush(float deltaTime, float speed)
+        {
+            if (separationWeight <= 0f) return Vector3.zero;
+
+            Vector3 separation = room.Crowd.GetSeparation(this);
+            if (separation.sqrMagnitude < 1e-6f) return Vector3.zero;
+
+            separation = Vector3.ClampMagnitude(separation, 1f) * (speed * separationWeight * deltaTime);
+            return room.transform.InverseTransformDirection(separation);
         }
 
         // 이번 프레임에 향할 지점 (방 로컬). 연결점으로 가는 중이면 towardPortal = true

@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1825686722782556482
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2841276722675808882}
+  - component: {fileID: 824193321368485048}
+  m_Layer: 0
+  m_Name: a
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2841276722675808882
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1825686722782556482}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 39.02918, y: -13.63507, z: 99.64041}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &824193321368485048
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1825686722782556482}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05505aeff4465974f855ac2ea3642d5e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIBuilder
+  font: {fileID: 11400000, guid: 659ceb8947c683b4a9e1216df0a67515, type: 2}
+  cardCount: 6
+  vanishEffectPrefab: {fileID: 4430845688307698325, guid: c96ba31242b4af746af99a8e4324fab0, type: 3}
+  appearCardMaterial: {fileID: 2100000, guid: 12fdf41b7d08412d906949fab5b1aea2, type: 2}
+  appearEdgeMaterial: {fileID: 2100000, guid: 88df55f178eb4984af6f245b67b321c3, type: 2}
+  appearFlashPrefab: {fileID: 4430845688307698325, guid: 2f176ae35e9946c4adeefb904617308a, type: 3}
+  layout:
+    referenceResolution: {x: 1920, y: 1080}
+    cardSize: {x: 200, y: 280}
+    cardBottomHang: 60
+    sideMarginRatio: 0.27
+    preferredSpacingRatio: 0.95
+    maxEdgeAngle: 8
+    arcDepth: 20
+    selectedRaise: 30
+    selectedScale: 1.2
+    centerSafeRatio: 0.4

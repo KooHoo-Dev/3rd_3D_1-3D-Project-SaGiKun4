@@ -12,6 +12,7 @@ namespace Study3D.FpsGame.UI
     // - 손패 순서와 화면 슬롯 순서를 똑같이 유지합니다. (shownSlots[i] = Deck.Hand[i])
     // - 슬롯(Slot_XX)은 UIBuilder가 미리 만들어 둔 것을 켜고 끄며 재사용합니다.
     //   슬롯 = 카드 UI(Card_XX) + 사라짐 파티클 (+ 등장 플래시). 모두 형제라서 카드를 꺼도 파티클은 계속 재생됩니다.
+    //   슬롯마다 카드 UI, 파티클, 글자 참조는 UIBuilder가 조립하면서 slotViews에 넣어 줍니다. (이름으로 찾지 않음)
     // - 덱 이벤트만 받아서 따라가므로, 덱을 바꾸는 쪽(LocalPlayer)은 UI를 몰라도 됩니다.
     // - 드로우한 카드는 카드 UI에 CardAppearEffect가 있으면 등장 연출을 재생합니다. (없으면 바로 보임)
     // - 사용한 카드는 CardAppearEffect가 있으면 등장 때와 같은 노이즈로 카드 자체를 태워 없앱니다. (사라짐 파티클은 쓰지 않음)
@@ -21,9 +22,21 @@ namespace Study3D.FpsGame.UI
     [RequireComponent(typeof(HandView))]
     public class HandUIBinder : MonoBehaviour
     {
-        private const string CardPrefix = "Card_";
-        private const string TitleTextPath = "TitleBanner/TitleText";
-        private const string TypeTextPath = "TypeLabel/TypeText";
+        // 슬롯 하나의 참조들 (UIBuilder가 채움)
+        [Serializable]
+        public class SlotView
+        {
+            public RectTransform slot;
+            public GameObject card;
+            [Tooltip("비우면 등장/노이즈 사라짐 연출 없음")]
+            public CardAppearEffect appear;
+            [Tooltip("비우면 사라짐 파티클 없음")]
+            public ParticleSystem vanishEffect;
+            public TMP_Text titleText;
+            public TMP_Text typeText;
+        }
+
+        [SerializeField] private List<SlotView> slotViews = new List<SlotView>();
 
         [Header("사라짐 연출")]
         [Tooltip("사라짐 파티클의 재생 시간(Playback Time)이 이 값이 되면 카드를 끕니다 (0.2 ~ 0.3초 권장)")]
@@ -48,7 +61,19 @@ namespace Study3D.FpsGame.UI
             public CardAppearEffect Appear;
             public ParticleSystem Effect;
             public ParticleSystem[] EffectSystems;
+            public TMP_Text TitleText;
+            public TMP_Text TypeText;
         }
+
+        public IReadOnlyList<SlotView> SlotViews => slotViews;
+
+#if UNITY_EDITOR
+        // UIBuilder가 조립 직후 호출합니다.
+        public void EditorSetup(List<SlotView> views)
+        {
+            slotViews = views;
+        }
+#endif
 
         private void Awake()
         {
@@ -103,7 +128,7 @@ namespace Study3D.FpsGame.UI
             }
 
             SlotParts parts = slotParts[slot];
-            ApplyCardData(parts.Card.transform, card);
+            ApplyCardData(parts, card);
             parts.Card.SetActive(true);
             slot.gameObject.SetActive(true);
             shownSlots.Add(slot);
@@ -188,45 +213,33 @@ namespace Study3D.FpsGame.UI
             OnCardVanished?.Invoke(slot);
         }
 
-        // 슬롯마다 카드 UI와 파티클을 찾아 둡니다. 파티클은 꺼 둡니다.
+        // 슬롯마다 넣어 둔 참조를 정리해 둡니다. 파티클은 꺼 둡니다.
         // (켜 둔 채로 두면 Play On Awake 때문에 슬롯이 켜질 때마다, 즉 드로우할 때마다 재생됩니다)
         private void CollectSlotParts()
         {
-            foreach (RectTransform slot in handView.AllCards)
+            foreach (SlotView view in slotViews)
             {
-                SlotParts parts = new SlotParts();
-                foreach (Transform child in slot)
+                if (view.slot == null || view.card == null)
                 {
-                    if (child.name.StartsWith(CardPrefix)) { parts.Card = child.gameObject; break; }
-                }
-                if (parts.Card == null)
-                {
-                    Debug.LogWarning($"[HandUIBinder] {slot.name}에 '{CardPrefix}'로 시작하는 카드 UI가 없습니다.");
+                    Debug.LogWarning("[HandUIBinder] 슬롯이나 카드 UI가 비어 있는 칸이 있습니다. UIBuilder로 다시 조립하세요.");
                     continue;
                 }
 
-                parts.Appear = parts.Card.GetComponent<CardAppearEffect>();
-                parts.Effect = FindVanishEffectOrNull(slot, parts);
+                SlotParts parts = new SlotParts
+                {
+                    Card = view.card,
+                    Appear = view.appear,
+                    Effect = view.vanishEffect,
+                    TitleText = view.titleText,
+                    TypeText = view.typeText,
+                };
                 if (parts.Effect != null)
                 {
                     parts.EffectSystems = parts.Effect.GetComponentsInChildren<ParticleSystem>(true);
                     StopEffect(parts);
                 }
-                slotParts.Add(slot, parts);
+                slotParts.Add(view.slot, parts);
             }
-        }
-
-        // 카드 UI와 등장 플래시를 뺀 슬롯 하위의 첫 파티클이 사라짐 파티클입니다.
-        private static ParticleSystem FindVanishEffectOrNull(Transform slot, SlotParts parts)
-        {
-            Transform flash = parts.Appear != null && parts.Appear.Flash != null ? parts.Appear.Flash.transform : null;
-            foreach (Transform child in slot)
-            {
-                if (child.gameObject == parts.Card || child == flash) continue;
-                ParticleSystem effect = child.GetComponentInChildren<ParticleSystem>(true);
-                if (effect != null) return effect;
-            }
-            return null;
         }
 
         private static void StopEffect(SlotParts parts)
@@ -281,21 +294,10 @@ namespace Study3D.FpsGame.UI
         }
 
         // 카드 UI의 글자를 카드 데이터로 바꿉니다.
-        private static void ApplyCardData(Transform cardView, CardData card)
+        private static void ApplyCardData(SlotParts parts, CardData card)
         {
-            SetText(cardView, TitleTextPath, card.CardName);
-            SetText(cardView, TypeTextPath, card.Type.ToString());
-        }
-
-        private static void SetText(Transform cardView, string path, string value)
-        {
-            Transform child = cardView.Find(path);
-            if (child == null || child.TryGetComponent(out TMP_Text text) == false)
-            {
-                Debug.LogWarning($"[HandUIBinder] {cardView.name}에서 '{path}' 텍스트를 찾지 못했습니다.");
-                return;
-            }
-            text.text = value;
+            if (parts.TitleText != null) parts.TitleText.text = card.CardName;
+            if (parts.TypeText != null) parts.TypeText.text = card.Type.ToString();
         }
     }
 }

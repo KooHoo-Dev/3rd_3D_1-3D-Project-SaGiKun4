@@ -18,11 +18,13 @@ namespace Study3D.FpsGame.Map
     // - 0. 삼각형 꺼내기: 다른 방 네비메시를 잠깐 내리고 이 방 NavMeshSurface 네비메시만 올려서 꺼냄
     //      (안전장치로 방 범위 안에 있는 삼각형만 사용)
     // - 1. 용접: 같은 위치의 꼭짓점에 같은 번호를 붙임 (번호로 공유 변을 찾기 위해)
+    //      + 높이 보정: 꼭짓점 높이를 바닥 콜라이더 표면으로 바꿈 (네비메시 높이는 근사라서)
     // - 2. 이웃 찾기: 두 조각에 똑같이 나오는 변 = 공유 변 = 합칠 후보
     // - 3. 합쳐 보기: 긴 공유 변부터 두 조각을 이어 붙임
     // - 4. 볼록 검사: 합친 다각형을 반시계로 돌며 모든 꺾임이 왼쪽(CCW)이어야 확정
+    //      + 평면 검사: 모든 꼭짓점이 한 평면 위여야 확정 (평지와 경사로를 합치지 않음. 영역 = 평면 하나로 높이 계산)
     // - 5. 반복: 한 바퀴 동안 아무것도 안 합쳐질 때까지
-    // - 연결점: 다른 두 영역의 변이 같은 직선 위에서 겹치는 구간 = 맞닿은 경계
+    // - 연결점: 다른 두 영역의 변이 같은 직선 위에서 겹치고 높이도 같은 구간 = 맞닿은 경계 (위아래 층의 겹친 변은 제외)
     //   (번호가 아니라 위치로 비교해서, 한쪽에만 꼭짓점이 있는 T자 접합도 찾음)
     //   같은 두 영역 사이 조각은 하나로 합치고, 방향별(A→B, B→A)로 저장
     // - 남은 거리 표: 표[연결점 p][목표 영역 T] = p 를 넘은 뒤 T 에 들어가기까지 남은 거리
@@ -45,6 +47,7 @@ namespace Study3D.FpsGame.Map
         private const float WeldPrecision = 100f;   // 0.01 단위로 반올림해서 같으면 같은 꼭짓점
         private const float ConvexEpsilon = 1e-4f;  // 이보다 작은 음수 외적은 일직선으로 보고 허용 (계산 오차)
         private const float MinOverlap = 0.05f;     // 겹친 길이가 이보다 짧으면 모서리끼리 점으로 닿은 것으로 보고 무시
+        private const float PlaneTolerance = 0.15f; // 합친 영역의 꼭짓점이 영역 평면에서 이 높이 안이어야 합침 (평지와 경사로를 합치지 않음)
 
         [Tooltip("저장된 지도. \"지도 저장\" 을 누르면 만들어지고 연결됩니다")]
         [SerializeField] private RoomNavMap navMap;
@@ -54,6 +57,12 @@ namespace Study3D.FpsGame.Map
         [SerializeField] private float boundsMargin = 0.5f;
         [Tooltip("변의 양 끝이 다른 변의 직선에서 이 거리 안이면 같은 직선 위로 보고 연결점을 찾습니다 (m)")]
         [SerializeField] private float lineTolerance = 0.01f;
+        [Tooltip("겹친 구간 양 끝에서 두 변의 높이 차가 이 값 안이어야 연결점입니다. 위아래 층의 겹친 변을 거름 (m)")]
+        [SerializeField] private float portalHeightTolerance = 0.3f;
+        [Tooltip("꼭짓점 높이를 맞출 바닥 콜라이더 레이어. 네비메시 높이는 근사라서 생성할 때 실제 바닥 높이로 바꿈")]
+        [SerializeField] private LayerMask groundMask = ~0;
+        [Tooltip("꼭짓점 위아래로 이 거리 안에서 바닥 콜라이더를 찾습니다 (m). 못 찾으면 네비메시 높이 그대로")]
+        [SerializeField] private float groundSnapDistance = 0.5f;
 
         // 방 로컬 좌표의 꼭짓점들과, 영역마다 반시계 순서의 꼭짓점 번호 목록
         private readonly List<Vector3> points = new List<Vector3>();
@@ -66,10 +75,14 @@ namespace Study3D.FpsGame.Map
         // 남은 거리 표: portalDist[연결점 번호 * 영역 수 + 목표 영역] (갈 수 없으면 float.MaxValue)
         private float[] portalDist;
 
+        // 영역마다 바닥 평면 y = a·x + b·z + c 의 (a, b, c). 꼭짓점에서 계산하므로 저장하지 않고 생성/불러오기 때마다 만듦
+        private readonly List<Vector3> regionPlanes = new List<Vector3>();
+
         // 위 데이터가 이미 채워졌는지 (생성, 불러오기, 지우기 중 하나를 했으면 true. 아니면 처음 쓸 때 에셋에서 불러옴)
         [NonSerialized] private bool isReady;
 
         public RoomNavMap NavMap => navMap;
+        public RoomCrowd Crowd { get; } = new RoomCrowd(); // 이 방에 있는 몬스터끼리 밀어내기
         public int TriangleCount { get; private set; }
         public int RegionCount => regions.Count;
         public int PortalCount => portals.Count / 2; // 방향 두 개 = 연결점 하나
@@ -103,6 +116,7 @@ namespace Study3D.FpsGame.Map
             foreach (List<int> poly in polys)
                 if (poly != null) regions.Add(poly);
 
+            BuildPlanes();
             BuildPortals();
             float regionMs = (float)sw.Elapsed.TotalMilliseconds;
 
@@ -124,6 +138,7 @@ namespace Study3D.FpsGame.Map
             regions.Clear();
             portals.Clear();
             regionPortals.Clear();
+            regionPlanes.Clear();
             portalDist = null;
             TriangleCount = 0;
         }
@@ -159,6 +174,8 @@ namespace Study3D.FpsGame.Map
                 remap[i] = id;
             }
 
+            SnapPointsToGround();
+
             // 0. 방 범위 안의 삼각형만, 위에서 봤을 때 반시계 순서로
             for (int i = 0; i < tri.indices.Length; i += 3)
             {
@@ -176,6 +193,30 @@ namespace Study3D.FpsGame.Map
             }
 
             return polys;
+        }
+
+        // 꼭짓점 높이를 바닥 콜라이더 표면으로 맞춥니다.
+        // - 네비메시는 복셀로 구워서 높이가 들쭉날쭉하고 바닥보다 조금 떠 있음 → 그대로 평면을 만들면 경사로에서 발이 박히거나 뜸
+        // - 꼭짓점 위에서 아래로 레이를 쏴서 처음 맞은 면(= 가장 위 바닥)의 높이를 씀. 위층 바닥은 거리 밖이라 안 맞음
+        // - 프리팹 모드는 따로 물리 씬을 쓰므로 이 방이 속한 씬의 물리 씬으로 쏨
+        private void SnapPointsToGround()
+        {
+            PhysicsScene physics = gameObject.scene.GetPhysicsScene();
+            Physics.SyncTransforms();
+
+            int missed = 0;
+            for (int i = 0; i < points.Count; i++)
+            {
+                Vector3 world = transform.TransformPoint(points[i]);
+                Vector3 origin = world + Vector3.up * groundSnapDistance;
+                if (physics.Raycast(origin, Vector3.down, out RaycastHit hit, groundSnapDistance * 2f, groundMask, QueryTriggerInteraction.Ignore))
+                    points[i] = transform.InverseTransformPoint(new Vector3(world.x, hit.point.y, world.z));
+                else
+                    missed++;
+            }
+
+            if (missed > 0)
+                Debug.LogWarning($"[RoomNavRegions] {name}: 꼭짓점 {missed}/{points.Count}개는 바닥 콜라이더를 못 찾아 네비메시 높이를 그대로 씁니다.");
         }
 
         // 이 방의 NavMeshSurface 네비메시만 올라와 있는 상태에서 삼각형을 꺼냅니다.
@@ -295,7 +336,20 @@ namespace Study3D.FpsGame.Map
             // 두 조각이 변을 두 개 이상 공유하면 같은 꼭짓점이 두 번 나옴 → 꼬인 모양이라 합치지 않음
             if (new HashSet<int>(merged).Count != merged.Count) return null;
 
-            return IsConvex(merged) ? merged : null;
+            return IsConvex(merged) && IsFlat(merged) ? merged : null;
+        }
+
+        // 평면 검사: 모든 꼭짓점이 다각형 평면에서 PlaneTolerance 높이 안 (평지와 경사로, 기울기가 다른 경사로끼리는 합치지 않음)
+        // - 영역 하나를 평면 하나로 보고 높이를 계산하므로, 평면에서 벗어난 영역이 생기면 안 됨
+        private bool IsFlat(List<int> poly)
+        {
+            Vector3 plane = CalculatePlane(poly);
+            foreach (int idx in poly)
+            {
+                Vector3 p = points[idx];
+                if (Mathf.Abs(p.y - PlaneHeight(plane, p)) > PlaneTolerance) return false;
+            }
+            return true;
         }
 
         // 4. 볼록 검사: 반시계로 돌면서 연속한 세 점의 꺾임이 모두 왼쪽(외적 >= 0)
@@ -334,6 +388,52 @@ namespace Study3D.FpsGame.Map
 
         // 위에서 본(XZ) 2D 외적. 양수면 v 가 u 의 왼쪽 (반시계로 꺾임)
         private static float Cross(Vector3 u, Vector3 v) => u.x * v.z - u.z * v.x;
+
+        #endregion
+
+        #region 영역 평면 (높이 계산)
+
+        private void BuildPlanes()
+        {
+            regionPlanes.Clear();
+            foreach (List<int> poly in regions) regionPlanes.Add(CalculatePlane(poly));
+        }
+
+        // 다각형의 평면 y = a·x + b·z + c 를 (a, b, c) 로 구합니다.
+        // - 법선: 뉴웰 방식 (꼭짓점을 한 바퀴 돌며 이웃한 두 점으로 더함. 꼭짓점이 여러 개여도 안정적)
+        // - 평면 위 한 점: 꼭짓점 평균
+        // - 법선 n 인 평면 n·(p - p0) = 0 을 y 에 대해 풀면 y = p0.y - (n.x(x - p0.x) + n.z(z - p0.z)) / n.y
+        private Vector3 CalculatePlane(List<int> poly)
+        {
+            Vector3 normal = Vector3.zero;
+            Vector3 center = Vector3.zero;
+            for (int i = 0; i < poly.Count; i++)
+            {
+                Vector3 cur = points[poly[i]];
+                Vector3 next = points[poly[(i + 1) % poly.Count]];
+                normal.x += (cur.y - next.y) * (cur.z + next.z);
+                normal.y += (cur.z - next.z) * (cur.x + next.x);
+                normal.z += (cur.x - next.x) * (cur.y + next.y);
+                center += cur;
+            }
+            center /= poly.Count;
+
+            // 거의 세로인 면(걸을 수 없음)은 평평한 바닥으로 취급
+            if (Mathf.Abs(normal.y) < 1e-6f) return new Vector3(0f, 0f, center.y);
+
+            float a = -normal.x / normal.y;
+            float b = -normal.z / normal.y;
+            return new Vector3(a, b, center.y - a * center.x - b * center.z);
+        }
+
+        private static float PlaneHeight(Vector3 plane, Vector3 p) => plane.x * p.x + plane.y * p.z + plane.z;
+
+        // 영역 바닥에서 p 와 같은 XZ 위치의 높이 (방 로컬)
+        public float HeightAt(int region, Vector3 localPos)
+        {
+            EnsureReady();
+            return PlaneHeight(regionPlanes[region], localPos);
+        }
 
         #endregion
 
@@ -413,7 +513,22 @@ namespace Study3D.FpsGame.Map
             // 겹친 구간을 변 1 위의 점으로 (높이도 변 1을 따라 보간)
             from = Vector3.Lerp(a1, b1, lo / length);
             to = Vector3.Lerp(a1, b1, hi / length);
+
+            // 높이가 같은지: 겹친 구간 양 끝에서 변 1 높이와 변 2 높이 비교 (위에서 보면 겹쳐도 위아래 층이면 연결점 아님)
+            // 양 끝이 모두 가까우면 두 변이 직선이라 그 사이도 모두 가까움 (기울어진 변이 엇갈리는 경우도 거름)
+            if (Mathf.Abs(from.y - HeightOnEdge(a2, b2, from)) > portalHeightTolerance) return false;
+            if (Mathf.Abs(to.y - HeightOnEdge(a2, b2, to)) > portalHeightTolerance) return false;
             return true;
+        }
+
+        // 변(a~b) 위에서 점 p 와 같은 XZ 위치의 높이 (p 를 변에 투영한 비율로 보간)
+        private static float HeightOnEdge(Vector3 a, Vector3 b, Vector3 p)
+        {
+            Vector3 ab = b - a;
+            float lengthSq = DotXZ(ab, ab);
+            if (lengthSq < 1e-8f) return a.y;
+            float t = Mathf.Clamp01(DotXZ(p - a, ab) / lengthSq);
+            return Mathf.Lerp(a.y, b.y, t);
         }
 
         // 3. 같은 두 영역 사이 조각들의 가장 바깥쪽 두 점
@@ -542,13 +657,6 @@ namespace Study3D.FpsGame.Map
             return p.a + ab * Mathf.Clamp01(t);
         }
 
-        private Vector3 RegionCenter(int region)
-        {
-            Vector3 sum = Vector3.zero;
-            foreach (int idx in regions[region]) sum += points[idx];
-            return sum / regions[region].Count;
-        }
-
         #endregion
 
         #region 실행 중 길찾기 (몬스터가 쓰는 기능, 모두 방 로컬 좌표)
@@ -580,6 +688,9 @@ namespace Study3D.FpsGame.Map
 
         // 점(방 로컬)이 서 있는 영역 번호 (없으면 -1)
         // - hint 영역과 그 이웃부터 확인하고, 없으면 전체를 확인합니다. (몬스터는 보통 같은 영역이나 바로 옆 영역에 있음)
+        //   hint 와 이웃은 지금 층에서 이어진 영역이라 처음 맞는 곳을 그대로 씀
+        // - 전체를 확인할 때는 위아래로 여러 층이 겹칠 수 있으므로, 맞는 영역 중 발밑 아래에서 가장 가까운 층을 고름
+        //   (점프 중인 플레이어가 위층 영역으로 잘못 잡히지 않도록. 발밑 아래 층이 없으면 위쪽에서 가장 가까운 층)
         public int FindRegion(Vector3 localPos, int hint, float heightTolerance)
         {
             EnsureReady();
@@ -590,13 +701,32 @@ namespace Study3D.FpsGame.Map
                     if (IsOnRegion(portals[p].to, localPos, heightTolerance)) return portals[p].to;
             }
 
+            int best = -1;
+            float bestScore = float.MaxValue;
             for (int r = 0; r < regions.Count; r++)
-                if (IsOnRegion(r, localPos, heightTolerance)) return r;
-            return -1;
+            {
+                if (IsInsideXZ(r, localPos) == false) continue;
+
+                float above = localPos.y - HeightAt(r, localPos); // 바닥보다 얼마나 위에 있는지 (음수면 바닥 아래)
+                if (Mathf.Abs(above) > heightTolerance) continue;
+
+                // 발밑 아래 층(above >= 0) 은 가까운 순서, 위쪽 층은 그보다 항상 뒤
+                float score = above >= -InsideEpsilon ? above : heightTolerance - above;
+                if (score >= bestScore) continue;
+                bestScore = score;
+                best = r;
+            }
+            return best;
         }
 
-        // 위에서 봤을 때 볼록 영역 안인지 (반시계로 돌며 모든 변의 왼쪽에 있으면 안쪽 = CCW 판정) + 높이 차
+        // 위에서 봤을 때 볼록 영역 안이고, 그 위치의 바닥 높이와 heightTolerance 안인지
         private bool IsOnRegion(int region, Vector3 p, float heightTolerance)
+        {
+            return IsInsideXZ(region, p) && Mathf.Abs(p.y - HeightAt(region, p)) <= heightTolerance;
+        }
+
+        // 위에서 봤을 때 볼록 영역 안인지 (반시계로 돌며 모든 변의 왼쪽에 있으면 안쪽 = CCW 판정)
+        private bool IsInsideXZ(int region, Vector3 p)
         {
             List<int> poly = regions[region];
             for (int i = 0; i < poly.Count; i++)
@@ -608,14 +738,13 @@ namespace Study3D.FpsGame.Map
                 if (length < 1e-6f) continue;
                 if (Cross(ab, p - a) / length < -InsideEpsilon) return false; // 이 변의 오른쪽(바깥)
             }
-
-            // 지금 방은 평평하다는 전제라, 영역 높이는 꼭짓점 높이의 평균으로 봄
-            return Mathf.Abs(p.y - RegionCenter(region).y) <= heightTolerance;
+            return true;
         }
 
         // 지도 위 시야 판정: start → end 직선이 장애물(지도 밖)을 지나지 않고 갈 수 있는지
         // - 지금 영역에서 직선이 빠져나가는 지점을 찾고, 그 지점이 연결점 위면 옆 영역으로 넘어가 반복
         // - 연결점이 아닌 경계(벽, 장애물)로 빠져나가면 막힘
+        // - 연결점은 높이가 같은 곳에만 있으므로, 층이 바뀌려면 경사로 연결점을 지나야 이어짐
         // - 네비메시가 몬스터 반지름만큼 깎여 있으므로, 통과하면 몸이 장애물에 닿지 않고 직진할 수 있음
         public bool HasLineOfSight(Vector3 start, int startRegion, Vector3 end, int endRegion)
         {
@@ -642,7 +771,11 @@ namespace Study3D.FpsGame.Map
                     if (t < tExit) tExit = t;
                 }
 
-                if (tExit == float.MaxValue) return true; // 끝점이 이 영역 안 (목표 영역 경계 근처의 오차)
+                // 끝점이 위에서 봤을 때 이 영역 안 = 목표 영역 경계 근처의 오차일 때만 보임
+                // 위아래 다른 층(2층 플레이어 바로 아래의 1층 영역 등)이면 안 보임 → 표로 경사로를 찾아감
+                // (플레이어 높이가 아니라 두 영역의 바닥 높이를 비교해서, 점프 중이어도 같은 층이면 보임)
+                if (tExit == float.MaxValue)
+                    return Mathf.Abs(HeightAt(region, end) - HeightAt(endRegion, end)) <= portalHeightTolerance;
                 tExit = Mathf.Max(tExit, tNow);
 
                 // 빠져나가는 지점이 연결점 위인지 (양 끝 모서리를 스치는 경우는 막힌 것으로 봄)
@@ -787,6 +920,7 @@ namespace Study3D.FpsGame.Map
             portals.AddRange(map.portals);
             Unflatten(map.portalStarts, map.regionPortalList, regionPortals);
             portalDist = (float[])map.portalDist.Clone();
+            BuildPlanes();
         }
 
         private static void Flatten(List<List<int>> lists, out int[] starts, out int[] values)

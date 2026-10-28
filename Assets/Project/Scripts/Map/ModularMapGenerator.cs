@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Study3D.FpsGame.Player;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -8,7 +9,8 @@ namespace Study3D.FpsGame.Map
 {
     // ModularMapGenerator
     // : 방 원본들을 통로(Path)로 이어 붙여 큰 맵 하나를 랜덤하게 만듭니다.
-    // - 순서: 방 → 통로 → 방 → 통로 → ... → 방 (통로 원본이 없으면 방끼리 바로 붙임)
+    // - 순서: (시작방 →) 방 → 통로 → 방 → 통로 → ... → 방 (통로 원본이 없으면 방끼리 바로 붙임)
+    //   시작방이 있으면 생성기 위치에 먼저 놓고, 그 출구(EndGateWay)에 통로 없이 첫 방을 바로 붙임. 플레이 중이면 플레이어를 시작방으로 옮김
     // - 통로는 잇기만 하고 열고 닫지 않음. 막는 건 양쪽 방의 차단막이 맡음
     // - 다음 조각의 StartGateWay 문이 앞 조각의 EndGateWay 문과 위치/회전이 똑같아지도록 배치합니다.
     //   (두 문은 같은 에셋, 같은 회전이라 정확히 한 장으로 겹침 → 뒤 조각의 입구 문은 꺼서 이중으로 그리지 않음)
@@ -22,6 +24,7 @@ namespace Study3D.FpsGame.Map
 
         private struct Placement
         {
+            public bool isStart;
             public bool isPath;
             public int template;       // isPath 에 따라 pathTemplates / roomTemplates 의 번호
             public Vector3 position;   // 생성기 로컬
@@ -30,6 +33,12 @@ namespace Study3D.FpsGame.Map
             public Vector3 exitPosition;   // 출구 문 (생성기 로컬)
             public Quaternion exitRotation;
         }
+
+        [Header("시작방")]
+        [Tooltip("맨 처음에 놓을 시작방 원본. 출구(EndGateWay)만 있으면 됨. 비워두면 첫 방부터 시작")]
+        [SerializeField] private GameObject startRoom;
+        [Tooltip("플레이 중 생성하면 플레이어를 시작방 가운데로 옮김")]
+        [SerializeField] private bool movePlayerToStart = true;
 
         [Header("방")]
         [Tooltip("방 원본 (프리팹 권장). 씬에 있는 방을 넣으면 생성할 때 원본은 꺼둡니다")]
@@ -50,12 +59,11 @@ namespace Study3D.FpsGame.Map
 
         [Header("실행")]
         [SerializeField] private bool generateOnStart = true;
-        [Tooltip("첫 방은 전투 없이 시작")]
-        [SerializeField] private bool firstRoomCleared = true;
 
         private readonly List<RoomModule> rooms = new List<RoomModule>();
         public IReadOnlyList<RoomModule> Rooms => rooms;
 
+        private RoomLayout startLayout;
         private RoomLayout[] roomLayouts;
         private RoomLayout[] pathLayouts;
         private System.Random random;
@@ -91,10 +99,21 @@ namespace Study3D.FpsGame.Map
             best.Clear();
             bestRooms = 0;
 
+            // 시작방은 생성기 위치에 먼저 놓고 고정 (뒤 조각이 모두 막혀도 시작방은 남음)
+            if (startRoom != null)
+            {
+                startLayout = RoomModule.CalculateLayout(startRoom, false);
+                Placement start = MakePlacement(false, -1, startLayout);
+                start.isStart = true;
+                placed.Add(start);
+                best.Add(start);
+            }
+
             if (!TryPlace(0))
                 Debug.LogWarning($"[ModularMap] {roomCount}개를 겹치지 않게 잇지 못해서 {bestRooms}개만 배치합니다. (시도 {steps})", this);
 
-            Build(best);
+            GameObject startObject = Build(best);
+            if (startObject != null && movePlayerToStart && Application.isPlaying) MovePlayerToStart(startObject.transform);
             Debug.Log($"[ModularMap] 방 {bestRooms}개, 조각 {best.Count}개 생성 (seed {usedSeed}, 시도 {steps})", this);
         }
 
@@ -122,12 +141,13 @@ namespace Study3D.FpsGame.Map
         }
 
         // 깊이(= 방 번호) 우선으로 한 칸씩 이어 붙이기
-        // - 첫 방 이후에는 (통로, 방) 조합을 후보로 섞어서 통로 → 방 순서로 붙임
+        // - 첫 방은 (시작방이 있으면 그 출구에) 바로 붙이고, 그 뒤로는 (통로, 방) 조합을 후보로 섞어서 통로 → 방 순서로 붙임
         private bool TryPlace(int depth)
         {
             if (depth == roomCount) return true;
 
-            bool usePath = depth > 0 && pathLayouts.Length > 0;
+            // 앞에 놓인 조각이 방이면 통로를 끼움. 시작방 바로 뒤에는 통로 없이 방을 붙임
+            bool usePath = placed.Count > 0 && !placed[placed.Count - 1].isStart && pathLayouts.Length > 0;
             var candidates = new List<(int path, int room)>();
             for (int r = 0; r < roomLayouts.Length; r++)
             {
@@ -228,8 +248,11 @@ namespace Study3D.FpsGame.Map
             return false;
         }
 
-        private void Build(List<Placement> plan)
+        // 시작방을 만들었으면 그 오브젝트를 돌려줌
+        private GameObject Build(List<Placement> plan)
         {
+            GameObject startObject = null;
+            bool hasStart = plan.Count > 0 && plan[0].isStart;
             var container = new GameObject(ContainerName).transform;
             container.SetParent(transform, false);
 #if UNITY_EDITOR
@@ -240,9 +263,9 @@ namespace Study3D.FpsGame.Map
             for (int i = 0; i < plan.Count; i++)
             {
                 Placement p = plan[i];
-                GameObject template = p.isPath ? pathTemplates[p.template] : roomTemplates[p.template];
+                GameObject template = p.isStart ? startRoom : p.isPath ? pathTemplates[p.template] : roomTemplates[p.template];
                 GameObject go = Spawn(template, container);
-                go.name = p.isPath ? $"{template.name}_{pathIndex++:D2}" : $"{template.name}_{roomIndex:D2}";
+                go.name = p.isStart ? $"{template.name}_Start" : p.isPath ? $"{template.name}_{pathIndex++:D2}" : $"{template.name}_{roomIndex:D2}";
                 go.transform.localPosition = p.position;
                 go.transform.localRotation = p.rotation;
 
@@ -252,17 +275,27 @@ namespace Study3D.FpsGame.Map
                     if (entryDoor != null) entryDoor.gameObject.SetActive(false);
                 }
 
-                if (!p.isPath)
+                if (p.isStart)
+                {
+                    // 시작방에 RoomModule 이 있으면 출구만 다음 방과 이어짐 (EnterPoint 를 두지 않으면 전투 없음)
+                    var startModule = go.GetComponent<RoomModule>();
+                    if (startModule != null)
+                    {
+                        startModule.FindGates();
+                        startModule.Entry.connected = false;
+                        startModule.Exit.connected = bestRooms > 0;
+                    }
+                    startObject = go;
+                }
+                else if (!p.isPath)
                 {
                     var module = go.GetComponent<RoomModule>();
                     if (module == null) module = go.AddComponent<RoomModule>();
                     module.FindGates();
 
                     // 앞과 이어진 입구, 뒤와 이어진 출구만 열림. 나머지는 막힌 채로 둠
-                    module.Entry.connected = roomIndex > 0;
-                    module.Exit.connected = roomIndex < bestRooms - 1;
-                    if (roomIndex == 0 && firstRoomCleared) module.StartCleared = true;
-                    rooms.Add(module);
+                    module.Entry.connected = roomIndex > 0 || hasStart;
+                    module.Exit.connected = roomIndex < bestRooms - 1;                    rooms.Add(module);
                     roomIndex++;
                 }
 
@@ -271,10 +304,35 @@ namespace Study3D.FpsGame.Map
             }
 
             // 씬에 있는 원본은 생성된 맵과 겹치지 않게 끔
+            if (startRoom != null) HideSceneTemplate(startRoom);
             foreach (var template in roomTemplates)
                 HideSceneTemplate(template);
             foreach (var template in pathTemplates)
                 HideSceneTemplate(template);
+
+            return startObject;
+        }
+
+        // 플레이어를 시작방 가운데(바닥 높이)로 옮기고 출구 쪽을 보게 함
+        // TODO: 시작방을 만들면 방 안에 플레이어 시작 위치를 따로 두고 그 위치를 사용
+        private void MovePlayerToStart(Transform start)
+        {
+            LocalPlayer player = Player.Player.LocalPlayer;
+            if (player == null)
+            {
+                Debug.LogWarning("[ModularMap] 옮길 플레이어가 없습니다.", this);
+                return;
+            }
+
+            Vector3 center = startLayout.bounds.center;
+            center.y = startLayout.exit.position.y;
+            Vector3 position = start.TransformPoint(center);
+
+            Vector3 toExit = start.TransformPoint(startLayout.exit.center) - position;
+            toExit.y = 0f;
+            Quaternion rotation = toExit.sqrMagnitude > 0.0001f ? Quaternion.LookRotation(toExit) : start.rotation;
+
+            player.Teleport(position, rotation);
         }
 
         private static void HideSceneTemplate(GameObject template)

@@ -89,6 +89,25 @@ namespace Study3D.FpsGame.Enemy
             transform.position += dir * (moveSpeed * deltaTime);
         }
 
+        // 지점 쪽으로 몸을 돌리며 직진합니다. (높이는 그대로) 도착하면 true
+        public bool MoveTowards(Vector3 point, float deltaTime)
+        {
+            Vector3 to = point - transform.position;
+            to.y = 0f;
+            float dist = to.magnitude;
+            float step = moveSpeed * deltaTime;
+            if (dist <= step)
+            {
+                transform.position += to;
+                return true;
+            }
+
+            Vector3 dir = to / dist;
+            LookAt(dir, deltaTime);
+            transform.position += dir * step;
+            return false;
+        }
+
         // 제자리에서 플레이어 쪽으로 몸만 돌립니다.
         public void LookAtPlayer(float deltaTime)
         {

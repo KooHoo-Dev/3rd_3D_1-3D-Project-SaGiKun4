@@ -1,5 +1,4 @@
 using System;
-using Study3D.FpsGame.Player;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -25,7 +24,7 @@ namespace Study3D.FpsGame.Map
     // RoomModule
     // : 모듈식 맵의 방 하나 입니다. (방 루트에 붙임. 없으면 생성기가 배치할 때 붙여 줌)
     // - 입구/출구 = GateWay 아래에 있는 문 오브젝트. 비워두면 태그(StartGateWay / EndGateWay)로 찾습니다.
-    // - 플레이 중: 플레이어가 방 안쪽 트리거에 들어오면 차단막을 올리고 전투 시작 → Clear() 로 연결된 통로를 다시 엶
+    // - 플레이 중: 플레이어가 입구 안쪽 EnterPoint 트리거에 들어오면 차단막을 올리고 전투 시작 → Clear() 로 연결된 통로를 다시 엶
     // - 연결되지 않은 통로(첫 방 입구, 마지막 방 출구)는 항상 막혀 있습니다.
     public class RoomModule : MonoBehaviour
     {
@@ -54,11 +53,8 @@ namespace Study3D.FpsGame.Map
         [SerializeField] private Vector3 barrierSize = new Vector3(4f, 4f, 0.5f);
 
         [Header("전투")]
-        [Tooltip("방 범위에서 이만큼 안쪽에 들어와야 전투 시작 (통로에 서 있을 때 갇히지 않도록)")]
-        [SerializeField] private float triggerInset = 3f;
-        [SerializeField] private float triggerHeight = 3f;
-        [Tooltip("켜면 전투 없이 시작 (시작 방 등)")]
-        [SerializeField] private bool startCleared;
+        [Tooltip("입구 안쪽 진입 판정 (EnterPoint). 플레이어가 이 콜라이더에 들어오면 전투 시작")]
+        [SerializeField] private RoomEnterTrigger enterPoint;
         [SerializeField] private UnityEvent onCombatStart = new UnityEvent();
         [SerializeField] private UnityEvent onCleared = new UnityEvent();
 
@@ -68,22 +64,23 @@ namespace Study3D.FpsGame.Map
         public UnityEvent OnCombatStart => onCombatStart;
         public UnityEvent OnCleared => onCleared;
 
-        public bool StartCleared
-        {
-            get => startCleared;
-            set => startCleared = value;
-        }
-
         private void Start()
         {
             FindGates();
-            RoomLayout layout = CalculateLayout(gameObject);
+            RoomLayout layout = CalculateLayout(gameObject, false);
             CreateBarrier(entry, layout.entry);
             CreateBarrier(exit, layout.exit);
-            CreateTrigger(layout);
 
-            State = startCleared ? RoomState.Cleared : RoomState.Idle;
+            State = RoomState.Idle;
             SetBarriers(false, true);
+
+            if (enterPoint != null) enterPoint.Entered += OnPlayerEntered;
+            else Debug.LogWarning($"[RoomModule] {name}: EnterPoint 가 없어서 전투가 시작되지 않습니다.", this);
+        }
+
+        private void OnDestroy()
+        {
+            if (enterPoint != null) enterPoint.Entered -= OnPlayerEntered;
         }
 
         // 비어 있는 문을 태그로 찾아 채움 (꺼진 오브젝트 포함)
@@ -93,10 +90,9 @@ namespace Study3D.FpsGame.Map
             if (exit.door == null) exit.door = FindTagged(transform, ExitTag);
         }
 
-        private void OnTriggerEnter(Collider other)
+        private void OnPlayerEntered()
         {
             if (State != RoomState.Idle) return;
-            if (other.GetComponentInParent<LocalPlayer>() == null) return;
 
             State = RoomState.Combat;
             SetBarriers(true, false);
@@ -136,34 +132,23 @@ namespace Study3D.FpsGame.Map
             gate.barrier.Setup(info.center + Vector3.up * (barrierSize.y * 0.5f), barrierSize.y);
         }
 
-        private void CreateTrigger(RoomLayout layout)
-        {
-            var box = gameObject.AddComponent<BoxCollider>();
-            box.isTrigger = true;
-            Bounds b = layout.bounds;
-            float floorY = layout.entry.position.y;
-            box.center = new Vector3(b.center.x, floorY + triggerHeight * 0.5f, b.center.z);
-            box.size = new Vector3(
-                Mathf.Max(b.size.x - triggerInset * 2f, 1f),
-                triggerHeight,
-                Mathf.Max(b.size.z - triggerInset * 2f, 1f));
-        }
-
         // 방 원본(프리팹 에셋 포함)에서 배치용 정보를 계산합니다.
         // - Renderer.bounds 는 에셋 상태에서 쓸 수 없으므로 MeshFilter 의 메시 범위를 루트 로컬로 옮겨서 합칩니다.
-        public static RoomLayout CalculateLayout(GameObject root)
+        // - needsEntry 가 false 면 입구 문이 없어도 됨 (시작방은 출구만 있으면 됨)
+        public static RoomLayout CalculateLayout(GameObject root, bool needsEntry = true)
         {
             var module = root.GetComponent<RoomModule>();
             var layout = new RoomLayout { bounds = MeshBounds(root.transform, root.transform, true) };
-            layout.entry = CalculateGate(root.transform, module != null ? module.entry.door : null, EntryTag);
-            layout.exit = CalculateGate(root.transform, module != null ? module.exit.door : null, ExitTag);
+            layout.entry = CalculateGate(root.transform, module != null ? module.entry.door : null, EntryTag, needsEntry);
+            layout.exit = CalculateGate(root.transform, module != null ? module.exit.door : null, ExitTag, true);
             return layout;
         }
 
-        private static RoomLayout.GateInfo CalculateGate(Transform root, Transform door, string tag)
+        private static RoomLayout.GateInfo CalculateGate(Transform root, Transform door, string tag, bool required)
         {
             // 프리팹 에셋을 건드리지 않도록 여기서는 찾기만 함 (저장은 FindGates 에서)
             if (door == null) door = FindTagged(root, tag);
+            if (door == null && required == false) return new RoomLayout.GateInfo { rotation = Quaternion.identity };
             if (door == null) throw new InvalidOperationException($"{root.name}: 태그 '{tag}' 인 통로 문을 찾을 수 없습니다.");
 
             var info = new RoomLayout.GateInfo
