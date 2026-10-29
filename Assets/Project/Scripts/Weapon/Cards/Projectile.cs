@@ -11,6 +11,7 @@ namespace Study3D.FpsGame.Weapon.Cards
     //   같은 역할끼리는 실린 순서(스택 순서)대로 실행합니다.
     // - 카드는 상태를 갖지 않으므로, 카드마다 필요한 런타임 값(남은 반사 수 등)은 여기 counts에 보관합니다.
     // - 소멸은 Die() 한 곳에서만 결정합니다.
+    // - 매 프레임 처리는 Update가 아니라 Tick이며, ProjectileManager가 모든 발사체를 모아서 호출합니다.
     // - 오브젝트 풀에서 재사용되므로, 발사할 때마다 ResetState()로 이전 발사의 상태를 지웁니다.
     //   (풀이 없으면 Instantiate / Destroy로 동작합니다)
     public class Projectile : MonoBehaviour, IObjectPoolItem
@@ -49,6 +50,9 @@ namespace Study3D.FpsGame.Weapon.Cards
         private bool isDead;
         private bool keepFlying;      // 이번 충돌 뒤에도 계속 날아갈지 (반응 카드, 충돌 중 조향이 켭니다)
         private bool responseClaimed; // 이번 충돌의 반응이 이미 정해졌는지 (앞의 반응 카드가 정했으면 뒤 반응 카드는 넘어갑니다)
+
+        // ProjectileManager 목록 안의 위치. 목록에 없으면 -1 (복제될 때도 -1에서 시작하도록 초기값을 둡니다)
+        public int ManagerIndex { get; set; } = -1;
 
         // 지금 실행 중인 시점과 그 시점 안에서 몇 번째 카드인지. 분열된 자식이 이어서 실행할 위치를 정할 때 씁니다.
         private CardTiming runningTiming;
@@ -133,6 +137,7 @@ namespace Study3D.FpsGame.Weapon.Cards
             isDead = false;
             keepFlying = false;
             responseClaimed = false;
+            ProjectileManager.Register(this);
         }
 
         private void BuildTimingSlots()
@@ -148,11 +153,12 @@ namespace Study3D.FpsGame.Weapon.Cards
             }
         }
 
-        private void Update()
+        // 한 프레임 처리. 발사체마다 Update를 두지 않고 ProjectileManager가 모아서 호출합니다.
+        public void Tick(float deltaTime)
         {
             if (isDead) return;
 
-            age += Time.deltaTime;
+            age += deltaTime;
             if (age >= lifeTime)
             {
                 Die(FlightContext());
@@ -160,16 +166,22 @@ namespace Study3D.FpsGame.Weapon.Cards
             }
 
             RunTiming(CardTiming.Flying, FlightContext(), 0);
-            Move();
+            Move(deltaTime);
+        }
+
+        // 풀로 돌아가거나 파괴될 때 매니저 목록에서 빠집니다. (Die를 거치지 않고 꺼지는 경우 대비)
+        private void OnDisable()
+        {
+            ProjectileManager.Unregister(this);
         }
 
         // 이번 프레임에 이동할 거리만큼 발사체 모양의 상자를 앞으로 쓸어서(BoxCast), 맞는 게 있으면 닿는 위치까지만 이동하고 충돌 처리를 합니다.
         // (Rigidbody 없이 Transform으로 움직이므로 충돌 콜백 대신 직접 검사합니다. 빠른 발사체가 벽을 뚫는 것도 막아줍니다)
         // - 상자 크기 = 메시 크기 × 현재 스케일 이라서, Size 배율로 커진 만큼 판정도 커집니다.
         // - BoxCast는 출발할 때 이미 겹쳐 있는 Collider는 감지하지 않습니다. 관통은 이 성질을 이용합니다.
-        private void Move()
+        private void Move(float deltaTime)
         {
-            float distance = speed * Time.deltaTime;
+            float distance = speed * deltaTime;
             int contactMask = CombatSystem.Instance.EnemyMask | CombatSystem.Instance.EnvironmentMask;
 
             if (Physics.BoxCast(transform.position, HalfExtents, transform.forward, out RaycastHit hit,
@@ -241,6 +253,7 @@ namespace Study3D.FpsGame.Weapon.Cards
             isDead = true;
 
             RunTiming(CardTiming.Destroy, context, 0);
+            ProjectileManager.Unregister(this);
             ReturnToPool();
         }
 
