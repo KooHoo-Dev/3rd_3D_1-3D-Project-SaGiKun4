@@ -179,6 +179,17 @@ namespace Study3D.FpsGame.Weapon.Cards
 
             RunTiming(CardTiming.Flying, FlightContext(), 0);
             Move(deltaTime);
+
+            if (isDead == false && ProjectileManager.IsOutsideWorld(transform.position)) Recall();
+        }
+
+        // 회수: 맵 밖으로 나간 발사체를 소멸 시점 카드 없이 조용히 풀로 돌려보냅니다.
+        // (맵 밖에서 폭발 이펙트를 남기거나 분열해서 새 발사체를 만들지 않도록)
+        private void Recall()
+        {
+            isDead = true;
+            ProjectileManager.Unregister(this);
+            ReturnToPool();
         }
 
         // 풀로 돌아가거나 파괴될 때 매니저 목록에서 빠집니다. (Die를 거치지 않고 꺼지는 경우 대비)

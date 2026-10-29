@@ -22,6 +22,20 @@ namespace Study3D.FpsGame.Weapon.Cards
 
         public static bool IsFull => instance != null && instance.projectiles.Count >= Capacity;
 
+        // 맵 경계. 맵 생성기가 맵을 만든 뒤 정해줍니다. 이 밖으로 나간 발사체는 조용히 회수됩니다. (경계가 없으면 검사하지 않음)
+        private static Bounds worldBounds;
+        private static bool hasWorldBounds;
+
+        public static void SetWorldBounds(Bounds bounds)
+        {
+            worldBounds = bounds;
+            hasWorldBounds = true;
+        }
+
+        public static void ClearWorldBounds() => hasWorldBounds = false;
+
+        public static bool IsOutsideWorld(Vector3 position) => hasWorldBounds && worldBounds.Contains(position) == false;
+
         public static void Register(Projectile projectile)
         {
             if (projectile.ManagerIndex >= 0) return;
@@ -54,6 +68,7 @@ namespace Study3D.FpsGame.Weapon.Cards
                 if (projectile != null) projectile.ManagerIndex = -1;
             }
             projectiles.Clear();
+            hasWorldBounds = false; // 다음 씬의 맵 생성기가 새로 정해줍니다.
             if (instance == this) instance = null;
         }
 

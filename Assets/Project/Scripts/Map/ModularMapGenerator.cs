@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Study3D.FpsGame.Player;
+using Study3D.FpsGame.Weapon.Cards;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -18,6 +19,7 @@ namespace Study3D.FpsGame.Map
     //   통로가 층을 오르내릴 수 있으므로 겹침은 높이까지 포함한 3D 범위로 판정합니다.
     // - 계산은 RoomLayout(숫자)만으로 끝내고, 확정된 배치만 실제로 생성합니다. (오브젝트 수가 많은 조각을 시험 삼아 만들지 않음)
     // - 에디터: 컴포넌트 메뉴(⋮)의 "생성"/"지우기" 로 플레이 없이 미리 볼 수 있습니다.
+    // - 플레이 중 생성하면 맵 전체 범위(+ 여유 거리)를 발사체 경계로 넘깁니다. 밖으로 나간 발사체는 조용히 회수됩니다.
     public class ModularMapGenerator : MonoBehaviour
     {
         private const string ContainerName = "GeneratedRooms";
@@ -56,6 +58,10 @@ namespace Study3D.FpsGame.Map
         [SerializeField] private float overlapTolerance = 0.5f;
         [Tooltip("백트래킹 시도 상한. 넘으면 그때까지 가장 길게 이은 배치를 사용")]
         [SerializeField] private int maxSteps = 5000;
+
+        [Header("발사체 경계")]
+        [Tooltip("맵 전체 범위에서 이만큼 더 나간 발사체는 조용히 회수됩니다 (플레이 중 생성할 때만 적용)")]
+        [SerializeField] private float projectileBoundsMargin = 5f;
 
         [Header("실행")]
         [SerializeField] private bool generateOnStart = true;
@@ -114,6 +120,7 @@ namespace Study3D.FpsGame.Map
 
             GameObject startObject = Build(best);
             if (startObject != null && movePlayerToStart && Application.isPlaying) MovePlayerToStart(startObject.transform);
+            if (Application.isPlaying && best.Count > 0) ProjectileManager.SetWorldBounds(CalculateWorldBounds(best));
             Debug.Log($"[ModularMap] 방 {bestRooms}개, 조각 {best.Count}개 생성 (seed {usedSeed}, 시도 {steps})", this);
         }
 
@@ -122,6 +129,32 @@ namespace Study3D.FpsGame.Map
             var layouts = new RoomLayout[templates.Count];
             for (int i = 0; i < templates.Count; i++) layouts[i] = RoomModule.CalculateLayout(templates[i]);
             return layouts;
+        }
+
+        // 배치된 모든 조각의 범위(생성기 로컬)를 월드 좌표로 바꿔 하나로 합치고, 여유 거리만큼 넓힙니다.
+        private Bounds CalculateWorldBounds(List<Placement> placements)
+        {
+            var bounds = new Bounds();
+            bool first = true;
+            foreach (Placement placement in placements)
+            {
+                // 상자의 8개 꼭짓점 (생성기가 회전해 있어도 맞도록 꼭짓점마다 월드로 바꿉니다)
+                for (int corner = 0; corner < 8; corner++)
+                {
+                    Vector3 local = new Vector3(
+                        (corner & 1) == 0 ? placement.min.x : placement.max.x,
+                        (corner & 2) == 0 ? placement.min.y : placement.max.y,
+                        (corner & 4) == 0 ? placement.min.z : placement.max.z);
+                    Vector3 world = transform.TransformPoint(local);
+
+                    if (first) bounds = new Bounds(world, Vector3.zero);
+                    else bounds.Encapsulate(world);
+                    first = false;
+                }
+            }
+
+            bounds.Expand(projectileBoundsMargin * 2f);
+            return bounds;
         }
 
         [ContextMenu("지우기")]
