@@ -7,15 +7,16 @@ namespace Study3D.FpsGame.Weapon.Cards
     // Projectile
     // : Weapon이 ShotPoint에서 Instantiate 하는 투사체 입니다. 덱의 카드(CardData)들이 실려서 날아갑니다.
     // - 생성될 때 받은 회전값 기준으로 자신의 +z(forward) 방향으로 직진합니다.
-    // - 발사 / 진행 중 / 충돌 / 소멸 시점마다, 그 시점에 걸린 카드들을 실린 순서(스택 순서)대로 실행합니다.
-    // - 카드는 상태를 갖지 않으므로, 카드마다 필요한 런타임 값(남은 관통 수 등)은 여기 counts에 보관합니다.
+    // - 발사 / 진행 중 / 충돌 / 소멸 시점마다, 그 시점에 걸린 카드들을 역할 순서(반응 → 조향 → 효과)로,
+    //   같은 역할끼리는 실린 순서(스택 순서)대로 실행합니다.
+    // - 카드는 상태를 갖지 않으므로, 카드마다 필요한 런타임 값(남은 반사 수 등)은 여기 counts에 보관합니다.
     // - 소멸은 Die() 한 곳에서만 결정합니다.
     // - 오브젝트 풀에서 재사용되므로, 발사할 때마다 ResetState()로 이전 발사의 상태를 지웁니다.
     //   (풀이 없으면 Instantiate / Destroy로 동작합니다)
     public class Projectile : MonoBehaviour, IObjectPoolItem
     {
         [SerializeField] private float speed = 30.0f;
-        [SerializeField] private float lifeTime = 5.0f; // 아무것도 맞지 않았을 때 사라지는 시간 (사라질 때 소멸 시점 카드가 발동)
+        [SerializeField] private float lifeTime = 120.0f; // 최대 수명. 관통, 반사, 유도 조합으로 끝없이 날아다니는 발사체를 끝내는 안전장치 (사라질 때 소멸 시점 카드가 발동)
         [SerializeField] private float surfaceOffset = 0.01f; // 통과, 반사 후 같은 면에 바로 다시 맞지 않도록 띄우는 거리
 
         public int Damage { get; private set; }
@@ -31,15 +32,23 @@ namespace Study3D.FpsGame.Weapon.Cards
         private readonly List<CardData> cards = new List<CardData>();
         private readonly List<int> counts = new List<int>(); // cards와 같은 순서. 카드 몫 런타임 값
         // 시점별로 발동할 카드의 위치(cards 인덱스)를 미리 나눠둡니다. (CardTiming 값으로 접근)
+        // 각 시점 안에서는 역할 순서(반응 → 조향 → 효과)로, 같은 역할끼리는 쌓은 순서로 정렬돼 있습니다.
+        private static readonly CardRole[] RoleOrder = { CardRole.Response, CardRole.Steer, CardRole.Effect };
         private readonly List<int>[] timingSlots = { new List<int>(), new List<int>(), new List<int>(), new List<int>() };
 
-        // 이 발사체가 이미 피해를 준 적들. 관통 중 한 적의 여러 Collider에 중복 피해를 주지 않기 위해 사용합니다.
-        private readonly HashSet<IDamageable> hitTargets = new HashSet<IDamageable>();
+        // 직전에 피해를 준 적. 같은 적에 연달아 다시 닿으면(한 적의 여러 Collider 등) 피해 없이 통과합니다.
+        // 다른 적이나 벽에 부딪히면 바뀌므로, 벽에 반사된 뒤나 다른 적을 거친 뒤에는 같은 적을 다시 맞힐 수 있습니다.
+        private IDamageable lastHitTarget;
+
+        public IDamageable LastHitTarget => lastHitTarget;
+
+        // 조향 카드(유도 등)가 쫓고 있는 적의 Collider. 없으면 null 입니다.
+        public Collider SteerTarget { get; set; }
 
         private float age;
         private bool isDead;
-        private bool keepFlying;      // 이번 충돌 뒤에도 계속 날아갈지 (관통, 반사가 켭니다)
-        private bool directionLocked; // 이번 충돌에서 진행 방향이 이미 정해졌는지 (앞 카드가 정했으면 뒤 카드는 바꾸지 않습니다)
+        private bool keepFlying;      // 이번 충돌 뒤에도 계속 날아갈지 (반응 카드, 충돌 중 조향이 켭니다)
+        private bool responseClaimed; // 이번 충돌의 반응이 이미 정해졌는지 (앞의 반응 카드가 정했으면 뒤 반응 카드는 넘어갑니다)
 
         // 지금 실행 중인 시점과 그 시점 안에서 몇 번째 카드인지. 분열된 자식이 이어서 실행할 위치를 정할 때 씁니다.
         private CardTiming runningTiming;
@@ -104,7 +113,8 @@ namespace Study3D.FpsGame.Weapon.Cards
                 counts.Add(parent.counts[i]);
             }
 
-            hitTargets.UnionWith(parent.hitTargets);
+            lastHitTarget = parent.lastHitTarget;
+            SteerTarget = parent.SteerTarget; // 퍼져 나간 자식도 같은 적을 향해 모입니다.
             BuildTimingSlots();
             RunTiming(CardTiming.Shoot, FlightContext(), shootStartIndex);
         }
@@ -117,18 +127,25 @@ namespace Study3D.FpsGame.Weapon.Cards
 
             cards.Clear();
             counts.Clear();
-            hitTargets.Clear();
+            lastHitTarget = null;
+            SteerTarget = null;
             age = 0f;
             isDead = false;
             keepFlying = false;
-            directionLocked = false;
+            responseClaimed = false;
         }
 
         private void BuildTimingSlots()
         {
             foreach (List<int> slots in timingSlots) slots.Clear();
-            for (int i = 0; i < cards.Count; i++)
-                timingSlots[(int)cards[i].Timing].Add(i);
+            // 역할마다 한 바퀴씩 돌며 담으므로, 같은 역할 안의 쌓은 순서가 그대로 유지됩니다.
+            foreach (CardRole role in RoleOrder)
+            {
+                for (int i = 0; i < cards.Count; i++)
+                {
+                    if (cards[i].Role == role) timingSlots[(int)cards[i].Timing].Add(i);
+                }
+            }
         }
 
         private void Update()
@@ -179,21 +196,28 @@ namespace Study3D.FpsGame.Weapon.Cards
             if (isEnemy)
             {
                 IDamageable target = CombatSystem.Instance.GetMonsterOrNull(hit.collider);
-                // 이미 피해를 준 적의 다른 Collider에 닿은 경우: 피해, 카드 발동 없이 그대로 통과합니다.
-                if (target != null && hitTargets.Add(target) == false)
+                // 직전에 피해를 준 적에 다시 닿은 경우: 피해, 카드 발동 없이 그대로 통과합니다.
+                if (target != null && target == lastHitTarget)
                 {
                     PassThrough();
                     return;
                 }
 
+                lastHitTarget = target;
                 CombatSystem.Instance.SendDamage(Player.Player.LocalPlayer, hit.collider, Damage, hit.point);
+            }
+            else
+            {
+                // 벽에 부딪히면 기록을 비웁니다. (반사 뒤에 같은 적을 다시 맞힐 수 있도록)
+                // 벽은 기록하지 않습니다. 방 전체가 Collider 하나여도 연달아 반사될 수 있어야 하기 때문입니다.
+                lastHitTarget = null;
             }
 
             Debug.Log($"[Projectile] 충돌: {hit.collider.name} ({contactKind})");
 
             CardContext context = new CardContext(this, hit.point, hit.normal, hit.collider, isEnemy);
             keepFlying = false;
-            directionLocked = false;
+            responseClaimed = false;
             RunTiming(CardTiming.Hit, context, 0);
 
             if (keepFlying == false) Die(context);
@@ -236,14 +260,29 @@ namespace Study3D.FpsGame.Weapon.Cards
         public int GetCount(int slot) => counts[slot];
         public void SetCount(int slot, int value) => counts[slot] = value;
 
-        // 이번 충돌에서 진행 방향을 정할 권리를 가져갑니다. 앞 카드가 이미 정했으면 false를 반환합니다.
+        // 이번 충돌의 반응(관통, 반사 등)을 정할 권리를 가져갑니다. 앞의 반응 카드가 이미 정했으면 false를 반환합니다.
         // 가져가면 이번 충돌 뒤에도 소멸하지 않고 계속 날아갑니다.
-        public bool TryLockDirection()
+        public bool TryClaimResponse()
         {
-            if (directionLocked) return false;
-            directionLocked = true;
+            if (responseClaimed) return false;
+            responseClaimed = true;
             keepFlying = true;
             return true;
+        }
+
+        // 조향: 진행 방향을 direction으로 바꿉니다. 조향 카드(전이, 유도 등)가 호출합니다.
+        // - 충돌 중에 조향하면 반응 결과가 소멸이어도 계속 날아갑니다. (조향 카드 혼자서도 동작하도록)
+        // - 벽에 부딪힌 충돌이면 회전한 상자가 벽과 다시 겹치지 않도록 면 바깥으로 밀어냅니다.
+        //   (겹친 채로 출발하면 BoxCast가 그 벽을 감지하지 못해 뚫고 나가기 때문입니다)
+        public void Steer(CardContext context, Vector3 direction)
+        {
+            if (direction.sqrMagnitude < 0.0001f) return;
+
+            transform.rotation = Quaternion.LookRotation(direction);
+            if (context.Target == null) return; // 비행 중 조향
+
+            keepFlying = true;
+            if (context.IsEnemy == false) PushOutOfSurface(context.Point, context.Normal);
         }
 
         // 닿은 위치에서 살짝 안쪽으로 들어가 둡니다.

@@ -31,10 +31,13 @@ namespace Study3D.FpsGame.Deck
         public CardTiming Timing => timing;
         public abstract CardType Type { get; }
 
+        // 같은 시점 안에서의 실행 순서를 정합니다. 반응, 조향 카드만 재정의합니다.
+        public virtual CardRole Role => CardRole.Effect;
+
         // 발사체에 실릴 카드들을 순서대로 담습니다. 일반 카드는 자기 자신을, 조합 카드는 재료 카드들을 담습니다.
         public virtual void CollectCards(List<CardData> cards) => cards.Add(this);
 
-        // 발사체에 실릴 때 이 카드 몫 런타임 값(CardContext.Count)의 처음 값 입니다. (남은 관통 수 등)
+        // 발사체에 실릴 때 이 카드 몫 런타임 값(CardContext.Count)의 처음 값 입니다. (남은 반사 수 등)
         public virtual int CreateCount(CardMultiplier multiplier) => 0;
 
         // 발사체가 Timing에 맞춰 호출합니다.

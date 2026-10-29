@@ -105,7 +105,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Study3D.FpsGame.Weapon.Bullet.Card
   speed: 30
-  lifeTime: 5
+  lifeTime: 120
   surfaceOffset: 0.01
 --- !u!114 &5280416937155320771
 MonoBehaviour:

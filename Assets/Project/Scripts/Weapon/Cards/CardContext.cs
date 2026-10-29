@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Study3D.FpsGame.Weapon.Cards
 {
     // 카드가 발동할 때 넘겨받는 "누가, 어디서, 무엇에" 정보 입니다.
-    // - 카드(SO)는 상태를 갖지 않으므로, 이 카드 몫의 런타임 값(남은 관통 수 등)은 Count로 발사체에 읽고 씁니다.
+    // - 카드(SO)는 상태를 갖지 않으므로, 이 카드 몫의 런타임 값(남은 반사 수 등)은 Count로 발사체에 읽고 씁니다.
     public struct CardContext
     {
         public Projectile Projectile;

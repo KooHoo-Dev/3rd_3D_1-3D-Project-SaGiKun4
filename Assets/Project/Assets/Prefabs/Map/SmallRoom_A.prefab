@@ -3691,7 +3691,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2391209576961799319
 Transform:
   m_ObjectHideFlags: 0
@@ -5776,6 +5776,7 @@ GameObject:
   - component: {fileID: 6765340008292022814}
   - component: {fileID: 6857240159959896931}
   - component: {fileID: 7408636655408442887}
+  - component: {fileID: 8187691549254701401}
   m_Layer: 6
   m_Name: CauldronLarge
   m_TagString: Untagged
@@ -5856,6 +5857,28 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &8187691549254701401
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2170021841349757757}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 7300894823068269521, guid: 8955cb55a403c784da7e7c4a41987100, type: 3}
 --- !u!1 &2188846913025205177
 GameObject:
   m_ObjectHideFlags: 0
@@ -9828,7 +9851,7 @@ MonoBehaviour:
   entry:
     door: {fileID: 2391209576961799319}
     barrier: {fileID: 0}
-    connected: 0
+    connected: 1
   exit:
     door: {fileID: 3796613413830176339}
     barrier: {fileID: 0}
@@ -9871,7 +9894,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.16666667
   m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: 5933e5c46abc0aa46a7865e339c68741, type: 2}
+  m_NavMeshData: {fileID: 23800000, guid: ca6e0c76ae890014eb47e078a3a5bdef, type: 2}
   m_BuildHeightMesh: 0
 --- !u!114 &7922339836319272783
 MonoBehaviour:
@@ -15423,6 +15446,7 @@ GameObject:
   - component: {fileID: 8698912826323027474}
   - component: {fileID: 6254260142905962276}
   - component: {fileID: 1961253191684371008}
+  - component: {fileID: 1722023808501047695}
   m_Layer: 6
   m_Name: CauldronStand
   m_TagString: Untagged
@@ -15502,6 +15526,28 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &1722023808501047695
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5480157717271833942}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -5100867067104620875, guid: c28d05e1f8b7302408c7d60f2fe5fe6c, type: 3}
 --- !u!1 &5495833333094731487
 GameObject:
   m_ObjectHideFlags: 0
@@ -23757,6 +23803,7 @@ GameObject:
   - component: {fileID: 3207942775702892951}
   - component: {fileID: 3991218601038014132}
   - component: {fileID: 6662374121358758502}
+  - component: {fileID: 5592847021589727688}
   m_Layer: 6
   m_Name: CauldronCampfire
   m_TagString: Untagged
@@ -23836,6 +23883,28 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &5592847021589727688
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8534476877064912485}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -6416446192955016318, guid: f1e13a8a34fb31c41999c10367ed1df0, type: 3}
 --- !u!1 &8540799450956038185
 GameObject:
   m_ObjectHideFlags: 0

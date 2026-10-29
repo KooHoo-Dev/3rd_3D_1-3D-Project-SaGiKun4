@@ -14,4 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Study3D.FpsGame.Deck.RicochetCardData
   cardName: "\uBC18\uC0AC"
   timing: 2
+  target: 2
   bounceCount: 1

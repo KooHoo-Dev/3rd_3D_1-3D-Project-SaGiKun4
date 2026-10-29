@@ -22,6 +22,10 @@ public class UpgradeUIBuilder : MonoBehaviour
     private const int SlotCount = 2;
     // 카드 내부 배치를 잡은 기준 크기 (UIBuilder의 카드와 같음). 실제 크기는 이 크기에서 스케일로 맞춘다
     private static readonly Vector2 DesignCardSize = new Vector2(200f, 280f);
+    // 선택 칸 파티클(Card_Sheet_01B, 4x4 시트) 한 칸 안의 사각형 실루엣 비율 (512x512 칸 중 241x377, 가운데 정렬)
+    // 선택 칸 카드는 이 비율로 세로를 늘린다. 파티클 크기 = 칸 높이 / SheetSilhouetteFill
+    private const float SheetSilhouetteAspect = 241f / 377f;
+    private const float SheetSilhouetteFill = 377f / 512f;
 
     [Header("폰트 (한글 폰트 교체용, 비우면 TMP 기본 폰트)")]
     [SerializeField] private TMP_FontAsset font;
@@ -95,7 +99,7 @@ public class UpgradeUIBuilder : MonoBehaviour
         Undo.RegisterCreatedObjectUndo(builtRoot, "Build Upgrade UI");
         EditorUtility.SetDirty(this);
         EditorSceneManager.MarkSceneDirty(gameObject.scene);
-        Debug.Log($"[UpgradeUIBuilder] '{RootName}' 생성 완료 (목록 카드 {listCardSize.x:0}x{listCardSize.y:0}, 선택 칸 {slotCardSize.x:0}x{slotCardSize.y:0})");
+        Debug.Log($"[UpgradeUIBuilder] '{RootName}' 생성 완료 (목록 카드 {listCardSize.x:0}x{listCardSize.y:0}, 선택 칸 {slotCardSize.x:0}x{slotCardSize.y:0}, 맞는 파티클 크기 {slotCardSize.y / SheetSilhouetteFill:0})");
     }
 
     [ContextMenu("2. Clear UI")]
@@ -125,15 +129,19 @@ public class UpgradeUIBuilder : MonoBehaviour
         return new Vector2(w, w * DesignCardSize.y / DesignCardSize.x);
     }
 
-    // 목록 카드의 slotScale 배. 왼쪽 절반(두 장 + 간격)이나 화면 높이(확인 버튼 자리 제외)를 넘으면 줄인다
+    // 폭은 목록 카드의 slotScale 배, 높이는 파티클 실루엣 비율에 맞춘다.
+    // 왼쪽 절반(두 장 + 간격)이나 화면 높이(확인 버튼 자리 제외)를 넘으면 줄인다
     private Vector2 CalcSlotCardSize(Vector2 listCardSize)
     {
+        float slotHeightPerWidth = 1f / SheetSilhouetteAspect;
         float maxByWidth = (referenceResolution.x * 0.5f - AreaPadding * 2f - slotGap) / (listCardSize.x * SlotCount);
-        float maxByHeight = (referenceResolution.y - 320f) / listCardSize.y;
+        float maxByHeight = (referenceResolution.y - 320f) / (listCardSize.x * slotHeightPerWidth);
         float scale = Mathf.Min(slotScale, maxByWidth, maxByHeight);
         if (scale < slotScale)
             Debug.LogWarning($"[UpgradeUIBuilder] 선택 칸이 왼쪽 절반에 들어가지 않아 배율을 {slotScale:0.##} → {scale:0.##}로 줄였습니다.");
-        return listCardSize * scale;
+
+        float width = listCardSize.x * scale;
+        return new Vector2(width, width * slotHeightPerWidth);
     }
     #endregion
 
@@ -144,7 +152,12 @@ public class UpgradeUIBuilder : MonoBehaviour
         go.layer = LayerMask.NameToLayer("UI");
 
         Canvas canvas = go.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        // 선택 칸 파티클이 보이도록 카메라 모드 (Overlay에서는 파티클이 그려지지 않음)
+        canvas.renderMode = RenderMode.ScreenSpaceCamera;
+        canvas.worldCamera = Camera.main;
+        canvas.planeDistance = 1f;
+        if (canvas.worldCamera == null)
+            Debug.LogWarning("[UpgradeUIBuilder] MainCamera 태그가 붙은 카메라가 없습니다. Render Camera를 직접 지정하세요.");
 
         CanvasScaler scaler = go.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
@@ -236,7 +249,7 @@ public class UpgradeUIBuilder : MonoBehaviour
         Stretch(emptyText.rectTransform, 0f);
 
         // 선택된 카드 (처음엔 꺼 둠, 글자/그림은 UpgradeView가 목록 카드에서 복사)
-        UpgradeView.CardView card = CreateCard("Card", slot.transform, size, false, false);
+        UpgradeView.CardView card = CreateCard("Card", slot.transform, size, false, false, new Vector2(DesignCardSize.x, DesignCardSize.x * size.y / size.x));
         card.card.SetActive(false);
 
         return new UpgradeView.SlotView { button = button, emptyBox = empty, card = card };
@@ -309,7 +322,7 @@ public class UpgradeUIBuilder : MonoBehaviour
             hit.raycastTarget = true;
             Button button = cell.AddComponent<Button>();
 
-            UpgradeView.CardView card = CreateCard("Card", cell.transform, cardSize, Random.value < 0.5f, Random.value < 0.25f);
+            UpgradeView.CardView card = CreateCard("Card", cell.transform, cardSize, Random.value < 0.5f, Random.value < 0.25f, DesignCardSize);
             button.targetGraphic = card.card.GetComponent<Image>();
 
             items.Add(new UpgradeView.ListItemView { button = button, card = card });
@@ -365,20 +378,21 @@ public class UpgradeUIBuilder : MonoBehaviour
 
     #region Card
     /// <summary>
-    /// 카드 한 장 조립 (UIBuilder의 카드와 같은 구성). 내부는 기준 크기로 만들고, size에 맞게 스케일한다. 피벗은 가운데.
+    /// 카드 한 장 조립 (UIBuilder의 카드와 같은 구성). 내부는 designSize로 만들고, size에 맞게 스케일한다. 피벗은 가운데.
+    /// 내부 요소는 위쪽 기준이라 designSize의 높이만 늘리면 아래쪽 여백이 늘어난다. (선택 칸)
     /// </summary>
-    private UpgradeView.CardView CreateCard(string name, Transform parent, Vector2 size, bool isAttack, bool upgraded)
+    private UpgradeView.CardView CreateCard(string name, Transform parent, Vector2 size, bool isAttack, bool upgraded, Vector2 designSize)
     {
-        GameObject card = NewPanel(name, parent, DesignCardSize);
+        GameObject card = NewPanel(name, parent, designSize);
         card.GetComponent<Image>().color = FrameColor;
-        Place(card.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, DesignCardSize);
-        card.transform.localScale = Vector3.one * (size.x / DesignCardSize.x);
+        Place(card.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, designSize);
+        card.transform.localScale = Vector3.one * (size.x / designSize.x);
 
         GameObject body = NewPanel("CardBody", card.transform, Vector2.zero);
         body.GetComponent<Image>().color = BodyColor;
         Stretch(body.GetComponent<RectTransform>(), 6f);
 
-        float w = DesignCardSize.x;
+        float w = designSize.x;
         string title = (isAttack ? "타격" : "수비") + (upgraded ? "+" : "");
         string desc = isAttack ? $"피해를 {(upgraded ? 9 : 6)} 줍니다." : $"방어도를 {(upgraded ? 8 : 5)} 얻습니다.";
 
