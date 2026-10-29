@@ -18,6 +18,8 @@ namespace Study3D.FpsGame.Weapon
         [Header("발사체 풀")]
         [SerializeField] private string projectilePoolKey = "Projectile"; // 같은 프리팹을 쓰는 무기끼리는 같은 키로 풀을 공유합니다
         [SerializeField] private byte projectilePoolExpandSize = 32;      // 풀이 비었을 때 한 번에 늘리는 수
+        [Tooltip("동시에 존재할 수 있는 발사체 수. 넘으면 분열은 새 발사체 대신 부모의 피해와 크기를 키웁니다")]
+        [SerializeField] private int maxProjectiles = 500;
 
         public float CurrentFireRate { get; protected set; }
 
@@ -33,6 +35,7 @@ namespace Study3D.FpsGame.Weapon
         private void Start()
         {
             mainCam = Camera.main;
+            ProjectileManager.Capacity = maxProjectiles;
             RegisterProjectilePool();
         }
 

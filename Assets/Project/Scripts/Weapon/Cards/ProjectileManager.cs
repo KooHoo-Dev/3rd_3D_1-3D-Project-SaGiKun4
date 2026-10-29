@@ -9,11 +9,18 @@ namespace Study3D.FpsGame.Weapon.Cards
     // - 씬에 따로 둘 필요 없이, 처음 발사체가 등록될 때 스스로 만들어집니다. (씬이 바뀌면 씬과 함께 사라짐)
     // - 발사체는 발사할 때 등록되고, 소멸하거나 꺼질 때 빠집니다.
     // - 이번 프레임에 새로 생긴 발사체(분열 등)는 다음 프레임부터 처리합니다.
+    // - 동시에 존재할 수 있는 발사체 수에 상한(Capacity)이 있습니다. 가득 차면 분열은 새 발사체 대신 부모의 화력을 키웁니다.
+    //   (플레이어가 직접 쏘는 발사체는 상한과 상관없이 나갑니다)
     public class ProjectileManager : MonoBehaviour
     {
         private static ProjectileManager instance;
 
         private readonly List<Projectile> projectiles = new List<Projectile>();
+
+        // 동시 발사체 상한. 매니저는 씬에 따로 두지 않으므로 Weapon이 인스펙터 값으로 정해줍니다.
+        public static int Capacity { get; set; } = 500;
+
+        public static bool IsFull => instance != null && instance.projectiles.Count >= Capacity;
 
         public static void Register(Projectile projectile)
         {

@@ -6,6 +6,7 @@ namespace Study3D.FpsGame.Deck
     // 분열 강화 카드: 발동한 지점에서 발사체를 복제해 랜덤한 방향으로 퍼뜨립니다.
     // - 원본은 그대로 날아가고(또는 소멸하고), extraCount만큼 자식이 추가로 생깁니다. 수는 Effect 배율을 받습니다.
     // - 자식은 이 분열 카드를 빼고 나머지 카드를 물려받으므로 같은 카드로 다시 분열하지 않습니다.
+    // - 동시 발사체 상한에 닿으면 자식을 만들지 않고, 그만큼 원본의 화력(피해, 크기)을 키웁니다.
     // - 퍼지는 기준 방향: 발사/진행 중/적 충돌은 진행 방향, 벽 충돌은 반사 방향
     [CreateAssetMenu(menuName = "Card/Split Card", fileName = "SplitCard")]
     public class SplitCardData : CardData
@@ -29,12 +30,16 @@ namespace Study3D.FpsGame.Deck
             Quaternion baseRotation = Quaternion.LookRotation(baseDirection);
 
             int count = CeilMultiply(extraCount, context.Multiplier.Effect);
+            int absorbed = 0;
             for (int i = 0; i < count; i++)
             {
                 float yaw = Random.Range(-horizontalAngle, horizontalAngle);
                 float pitch = Random.Range(-verticalAngle, verticalAngle);
-                context.Projectile.SpawnSplit(context, baseRotation * Quaternion.Euler(pitch, yaw, 0f));
+                if (context.Projectile.SpawnSplit(context, baseRotation * Quaternion.Euler(pitch, yaw, 0f)) == false) absorbed++;
             }
+
+            // 발사체 상한 때문에 만들지 못한 자식은 원본의 화력으로 바꿉니다.
+            context.Projectile.AbsorbSplits(context, absorbed);
         }
     }
 }

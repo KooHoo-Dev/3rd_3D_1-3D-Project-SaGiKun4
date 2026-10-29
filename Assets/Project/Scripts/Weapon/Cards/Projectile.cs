@@ -19,9 +19,18 @@ namespace Study3D.FpsGame.Weapon.Cards
         [SerializeField] private float speed = 30.0f;
         [SerializeField] private float lifeTime = 120.0f; // 최대 수명. 관통, 반사, 유도 조합으로 끝없이 날아다니는 발사체를 끝내는 안전장치 (사라질 때 소멸 시점 카드가 발동)
         [SerializeField] private float surfaceOffset = 0.01f; // 통과, 반사 후 같은 면에 바로 다시 맞지 않도록 띄우는 거리
+        [SerializeField] private float maxPowerScale = 2.0f;  // 화력 전환으로 커질 수 있는 최대 크기 배율
 
-        public int Damage { get; private set; }
+        private const float MaxPower = 1e8f;     // 화력 배율 상한 (float 넘침 방지)
+        private const float MaxDamage = 2e9f;    // 피해 상한 (int 넘침 방지)
+
+        // 화력 배율: 발사체 상한 때문에 만들지 못한 분열 자식들의 몫을 부모가 대신 가집니다. (자식 n장 → ×(1 + n))
+        // 피해와 폭발 피해에 곱해지고, 크기는 세제곱근만큼 커집니다(maxPowerScale까지).
+        public float Power { get; private set; } = 1f;
+        public int Damage => (int)Mathf.Min(baseDamage * Power, MaxDamage);
         public CardMultiplier Multiplier { get; private set; }
+
+        private int baseDamage; // 화력 배율을 곱하기 전 피해
 
         // 풀에서 꺼낸 발사체는 풀이 Key를 넣어줍니다. Instantiate로 만든 발사체는 null 입니다.
         public string Key { get; set; }
@@ -86,7 +95,7 @@ namespace Study3D.FpsGame.Weapon.Cards
         public void Launch(IReadOnlyList<CardData> launchCards, int baseDamage, CardMultiplier multiplier)
         {
             ResetState(multiplier);
-            Damage = Mathf.CeilToInt(baseDamage * multiplier.Damage);
+            this.baseDamage = Mathf.CeilToInt(baseDamage * multiplier.Damage);
 
             for (int i = 0; i < launchCards.Count; i++)
             {
@@ -106,7 +115,9 @@ namespace Study3D.FpsGame.Weapon.Cards
             // 풀이 없어 부모를 Instantiate로 복제한 경우, Awake가 이미 배율이 곱해진 크기를 기억하므로 부모의 기준 크기를 받아옵니다.
             baseScale = parent.baseScale;
             ResetState(parent.Multiplier);
-            Damage = parent.Damage;
+            baseDamage = parent.baseDamage;
+            Power = parent.Power;
+            ApplyPowerScale();
             if (splitContext.Target != null && splitContext.IsEnemy == false)
                 PushOutOfSurface(splitContext.Point, splitContext.Normal);
 
@@ -127,6 +138,7 @@ namespace Study3D.FpsGame.Weapon.Cards
         private void ResetState(CardMultiplier multiplier)
         {
             Multiplier = multiplier;
+            Power = 1f;
             transform.localScale = baseScale * multiplier.Size;
 
             cards.Clear();
@@ -328,8 +340,11 @@ namespace Study3D.FpsGame.Weapon.Cards
         private Vector3 HalfExtents => Vector3.Scale(meshExtents, transform.lossyScale);
 
         // 분열: 이 발사체를 복제해서 rotation 방향으로 날립니다. 발동 중인 분열 카드(context.Slot)는 자식에게 넘기지 않습니다.
-        public void SpawnSplit(CardContext context, Quaternion rotation)
+        // 발사체 상한에 닿아 만들지 못했으면 false를 반환합니다. (호출한 쪽이 AbsorbSplits로 화력을 넘겨받습니다)
+        public bool SpawnSplit(CardContext context, Quaternion rotation)
         {
+            if (ProjectileManager.IsFull) return false;
+
             // 부모 상자의 중심에서 생성합니다. 적이면 안쪽으로 살짝 들여보내고, 벽이면 LaunchSplit에서 면 바깥으로 밀어냅니다.
             Vector3 position = context.Center;
             if (context.Target != null && context.IsEnemy)
@@ -343,6 +358,25 @@ namespace Study3D.FpsGame.Weapon.Cards
             // 같은 풀에서 꺼냅니다. 풀이 없으면 자기 자신을 복제합니다.
             Projectile child = Spawn(Key, this, position, rotation);
             child.LaunchSplit(this, context, shootStartIndex);
+            return true;
+        }
+
+        // 화력 전환: 만들지 못한 분열 자식 count장의 몫을 이 발사체가 대신 가집니다. (화력 ×(1 + count))
+        // 벽에서 커졌으면 커진 상자가 벽과 겹치지 않도록 다시 면 바깥으로 밀어냅니다.
+        public void AbsorbSplits(CardContext context, int count)
+        {
+            if (count <= 0) return;
+
+            Power = Mathf.Min(Power * (1 + count), MaxPower);
+            ApplyPowerScale();
+            if (context.Target != null && context.IsEnemy == false) PushOutOfSurface(context.Point, context.Normal);
+        }
+
+        // 화력 배율의 세제곱근만큼 키웁니다. (부피가 화력에 비례하도록, maxPowerScale까지)
+        private void ApplyPowerScale()
+        {
+            float powerScale = Mathf.Min(Mathf.Pow(Power, 1f / 3f), maxPowerScale);
+            transform.localScale = baseScale * (Multiplier.Size * powerScale);
         }
     }
 }

@@ -26,7 +26,8 @@ namespace Study3D.FpsGame.Deck
         private void Explode(CardContext context)
         {
             float finalRadius = radius * context.Multiplier.Effect;
-            int finalDamage = CeilMultiply(damage, context.Multiplier.Effect);
+            // 발사체의 화력 배율(분열 상한으로 넘겨받은 몫)도 폭발 피해에 곱합니다.
+            int finalDamage = (int)Mathf.Min(CeilMultiply(damage, context.Multiplier.Effect) * context.Projectile.Power, 2e9f);
             Collider[] colliders = Physics.OverlapSphere(context.Point, finalRadius, CombatSystem.Instance.EnemyMask);
 
             // 한 적의 여러 Collider가 반경 안에 있어도 한 번만 피해를 줍니다.
