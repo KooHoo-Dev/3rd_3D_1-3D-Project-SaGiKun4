@@ -25,10 +25,21 @@ namespace Study3D.FpsGame
             if(particle.IsAlive(true) == false) ReturnToPool();
         }
 
+        // 파티클의 Stop Action이 Disable이면 끝나는 순간 유니티가 먼저 꺼 버려서 Update가 돌지 않습니다.
+        // 스스로 꺼진 경우(activeSelf == false) 풀로 돌아가게 합니다. (이미 풀에 있으면 풀이 무시합니다)
+        // 씬이 끝나며 파괴되거나 부모가 꺼진 경우(activeSelf는 그대로 true)는 반환하지 않습니다.
+        private void OnDisable()
+        {
+            if (gameObject.activeSelf) return;
+            ReturnToPool();
+        }
+
         // 인터페이스에 ReturnToPool이 있는 이유는
         // 솔직히 까먹지말라고 정의해 놓은겁니다.
+        // 씬이 끝나면서 풀 매니저가 먼저 사라졌거나, 풀 없이 만든 이펙트(Key 없음)는 반환하지 않습니다.
         public void ReturnToPool()
         {
+            if (Key == null || ObjectPoolManager.Instance == null) return;
             ObjectPoolManager.Instance.ReturnToPool(this);
         }
         

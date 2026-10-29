@@ -38,6 +38,8 @@ namespace Study3D.FpsGame
         private class ObjectPool
         {
             private readonly Stack<IObjectPoolItem> pool = new Stack<IObjectPoolItem>();
+            // 지금 풀에 들어 있는 아이템. 같은 아이템이 두 번 들어가지 않게 막습니다. (꺼질 때 스스로 반환하는 아이템 등)
+            private readonly HashSet<IObjectPoolItem> inPool = new HashSet<IObjectPoolItem>();
             private readonly GameObject prefab;
             private readonly Transform parent;
             private readonly int expandSize;
@@ -70,12 +72,19 @@ namespace Study3D.FpsGame
             public IObjectPoolItem Get()
             {
                 if (pool.Count == 0) Expand();
-                return pool.Pop();
+                IObjectPoolItem item = pool.Pop();
+                inPool.Remove(item);
+                return item;
             }
 
+            // 이미 풀에 있으면 무시합니다.
+            // - 끄는 순간 OnDisable에서 다시 반환을 부르는 아이템이 있으므로, 끄기 전에 먼저 풀에 있다고 표시합니다.
+            // - 이미 꺼진 상태(꺼지면서 OnDisable에서 반환하는 중)면 다시 끄지 않습니다.
             public void Return(IObjectPoolItem item)
             {
-                item.GameObject.SetActive(false);
+                if (inPool.Add(item) == false) return;
+
+                if (item.GameObject.activeSelf) item.GameObject.SetActive(false);
                 pool.Push(item);
             }
         }
