@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Study3D.FpsGame.Deck;
 using Study3D.FpsGame.Weapon.Cards;
 using UnityEngine;
@@ -101,7 +100,6 @@ namespace Study3D.FpsGame.Weapon
             int hitMask = CombatSystem.Instance.EnemyMask | CombatSystem.Instance.EnvironmentMask;
             if (Physics.Raycast(ray, out RaycastHit hit, Range, hitMask))
             {
-                Debug.DrawLine(ray.origin, hit.point, Color.red, 10f);
                 // ShotPoint -> 맞은 위치 방향 벡터를 카드의 +z로 삼아, 플레이어가 바라본 곳으로 날아가게 합니다.
                 // (LookRotation은 월드 up 기준이라 z 회전(롤)이 0으로 만들어집니다)
                 Vector3 direction = hit.point - shotPoint.position;
@@ -109,7 +107,6 @@ namespace Study3D.FpsGame.Weapon
             }
             else
             {
-                Debug.DrawRay(ray.origin, ray.direction * Range, Color.yellow, 10f);
                 // 맞은 위치가 없으면 ShotPoint의 회전에서 z 회전만 제거해서 총구 정면(+z)으로 날아갑니다.
                 Vector3 euler = shotPoint.eulerAngles;
                 cardRotation = Quaternion.Euler(euler.x, euler.y, 0f);
@@ -147,8 +144,6 @@ namespace Study3D.FpsGame.Weapon
             }
 
             card.CollectCards(launchCards);
-            Debug.Log($"[Weapon] {card.CardName}({card.Type}) / 강화 스택 {EnhanceStack} / " +
-                      $"실린 카드 [{string.Join(", ", launchCards.Select(c => $"{c.CardName}:{c.Timing}"))}] / {multiplier}");
             return launchCards;
         }
     }

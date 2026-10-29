@@ -19,9 +19,7 @@ namespace Study3D.FpsGame.Player
         [ContextMenu("카드 드로우")]
         public bool DrawCard()
         {
-            bool drawn = Deck.Draw();
-            if (drawn) Debug.Log($"[Deck] 드로우: {Deck.Hand[Deck.Hand.Count - 1].CardName} (손패 {Deck.Hand.Count}장, 남은 카드 {Deck.DrawPile.Count}장)");
-            return drawn;
+            return Deck.Draw();
         }
 
         // 손패를 모두 버리고 HandLimit장이 될 때까지 다시 드로우합니다.
@@ -56,7 +54,6 @@ namespace Study3D.FpsGame.Player
                 if (Deck.Hand[i] is not T) continue;
 
                 Deck.Select(i);
-                Debug.Log($"[Deck] 선택: {Deck.SelectedCard.CardName} (손패 {i + 1}번째)");
                 return true;
             }
 

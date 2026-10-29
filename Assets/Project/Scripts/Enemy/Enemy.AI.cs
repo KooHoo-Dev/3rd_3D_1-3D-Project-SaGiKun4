@@ -162,13 +162,5 @@ namespace Study3D.FpsGame.Enemy
         }
 
         #endregion
-
-        private void OnDrawGizmosSelected()
-        {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(transform.position, detectRange);
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(transform.position, attackRange);
-        }
     }
 }

@@ -213,8 +213,6 @@ namespace Study3D.FpsGame.Weapon.Cards
                 lastHitTarget = null;
             }
 
-            Debug.Log($"[Projectile] 충돌: {hit.collider.name} ({contactKind})");
-
             CardContext context = new CardContext(this, hit.point, hit.normal, hit.collider, isEnemy);
             keepFlying = false;
             responseClaimed = false;

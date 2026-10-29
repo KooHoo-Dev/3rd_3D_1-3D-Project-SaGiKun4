@@ -83,7 +83,6 @@ namespace Study3D.FpsGame.UI
 
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
-            Debug.Log("[Enhance] 강화 화면을 열었습니다.");
         }
 
         public void Close()

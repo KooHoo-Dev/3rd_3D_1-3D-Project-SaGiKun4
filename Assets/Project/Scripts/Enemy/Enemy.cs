@@ -134,7 +134,6 @@ namespace Study3D.FpsGame.Enemy
 
             Health.TakeDamage(combatEvent.Damage);
             IsAggro = true;
-            Debug.Log($"[Enemy] {name} 피격 -{combatEvent.Damage} (HP {Health.HP}/{Health.MaxHP})");
 
             if (Health.IsDead)
             {

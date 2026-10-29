@@ -42,8 +42,6 @@ namespace Study3D.FpsGame.Deck
             // 이펙트의 원이 실제 폭발 범위와 같은 크기로 보이도록 맞춥니다.
             float effectScale = finalRadius / effectRadius;
             PlayEffect(context, effectScale);
-            GizmoDrawer.WireSphere(context.Point, finalRadius, Color.red, 2f); // 실제 피해 범위 확인용 (에디터 전용)
-            Debug.Log($"[Explosion] {Timing} {context.Point} 반경 {finalRadius}m (이펙트 x{effectScale:0.##}), 적 {damaged.Count}명에게 -{finalDamage}");
         }
     }
 }
