@@ -14,7 +14,7 @@ namespace Study3D.FpsGame.UI
     // - 선택 칸을 누르면 그 칸이 선택되어, 다음에 누른 목록 카드로 바꿀 수 있습니다.
     // - 이미 다른 칸에 들어 있는 카드를 고르면 그 칸에서 빼고 선택된 칸으로 옮깁니다. (같은 카드가 두 칸에 들어가지 않음)
     // - 선택된 칸 연출(파티클)은 OnSelectedSlotChanged / SelectedSlotIndex / GetSlotRect 로 붙이면 됩니다.
-    // - 목록은 LocalPlayer 덱이 가진 모든 카드(손패 → 뽑을 카드 → 버린 카드 순)입니다. 화면이 켜질 때마다 다시 읽습니다.
+    // - 목록은 LocalPlayer 덱이 가진 모든 카드(손패 → 뽑을 카드 → 버린 카드 → 강화 전용 보관함 순)입니다. 화면이 켜질 때마다 다시 읽습니다.
     public class UpgradeView : MonoBehaviour
     {
         // 카드 한 장의 글자/그림 참조
@@ -120,10 +120,11 @@ namespace Study3D.FpsGame.UI
             }
 
             CardDeck deck = Player.Player.LocalPlayer.Deck;
-            var cards = new List<CardData>(deck.Hand.Count + deck.DrawPile.Count + deck.DiscardPile.Count);
+            var cards = new List<CardData>(deck.TotalCount);
             cards.AddRange(deck.Hand);
             cards.AddRange(deck.DrawPile);
             cards.AddRange(deck.DiscardPile);
+            cards.AddRange(deck.ModifierPile);
             SetCards(cards);
         }
 

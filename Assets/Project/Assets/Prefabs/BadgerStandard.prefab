@@ -4297,6 +4297,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 73d7794dfb544836903ec0a6342b293a, type: 2}
   - {fileID: 11400000, guid: 2ce81fdff7454a0c9d9164222b3b7892, type: 2}
   - {fileID: 11400000, guid: 01b1d86a28f04f14abbb570bfe022621, type: 2}
+  startModifiers:
+  - {fileID: 11400000, guid: 255f5d9122fe45c499998a3d94184c49, type: 2}
+  - {fileID: 11400000, guid: 056f48c29e994da7810046bf2baa0356, type: 2}
+  - {fileID: 11400000, guid: 0252a14a8cef4b69b714cf2e832ea0c6, type: 2}
+  - {fileID: 11400000, guid: ed13c5f7a9d04cd9acb15cf0ce26b281, type: 2}
   handLimit: 6
   maxHp: 100
   weapon: {fileID: 680842510505307335}

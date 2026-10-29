@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Study3D.FpsGame.Weapon.Cards;
 using UnityEngine;
 
 namespace Study3D.FpsGame.Deck
@@ -15,6 +16,21 @@ namespace Study3D.FpsGame.Deck
         public override CardType Type => CardType.Enhance;
         public IReadOnlyList<CardData> Parts => parts;
 
+        // 재료 카드 차수의 합 입니다. 합친 강화 1번이 더해지는 셈입니다. (1 + 1 → 2)
+        public override int EnhanceLevel
+        {
+            get
+            {
+                int level = 0;
+                foreach (CardData part in parts)
+                {
+                    if (part == null || part == this) continue;
+                    level += part.EnhanceLevel;
+                }
+                return Mathf.Max(1, level);
+            }
+        }
+
         public override void CollectCards(List<CardData> cards)
         {
             foreach (CardData part in parts)
@@ -22,6 +38,16 @@ namespace Study3D.FpsGame.Deck
                 if (part == null || part == this) continue;
                 part.CollectCards(cards);
             }
+        }
+
+        // 시점 변경은 맨 첫 재료 카드에만 적용합니다. (첫 재료가 조합 카드면 그 안의 첫 재료까지 내려갑니다)
+        // 나머지 재료는 그대로 공유하고, 조합 카드 자체는 새로 만듭니다.
+        public override CardData WithTiming(CardTiming newTiming, string newName)
+        {
+            var newParts = new List<CardData>(parts);
+            int first = newParts.FindIndex(part => part != null && part != this);
+            if (first >= 0) newParts[first] = newParts[first].WithTiming(newTiming, newParts[first].CardName);
+            return Create(newName, newParts.ToArray());
         }
 
         // 게임 중 카드를 합칠 때 사용합니다. (에셋이 아니라 런타임에만 존재하는 카드가 만들어집니다)

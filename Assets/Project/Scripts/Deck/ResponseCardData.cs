@@ -23,6 +23,7 @@ namespace Study3D.FpsGame.Deck
 
         public override CardType Type => CardType.Enhance;
         public override CardRole Role => CardRole.Response;
+        public override bool CanChangeTiming => false; // 반응은 충돌 순간에만 의미가 있습니다.
         public ContactTarget Target => target;
 
         // 새 에셋을 만들었을 때 들어갈 카드별 기본 대상 입니다.

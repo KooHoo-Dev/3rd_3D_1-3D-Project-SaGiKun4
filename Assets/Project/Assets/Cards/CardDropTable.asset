@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf75f6e04a304b838ebeeea5eefb4fee, type: 3}
+  m_Name: CardDropTable
+  m_EditorClassIdentifier: Assembly-CSharp::Study3D.FpsGame.Drop.CardDropTable
+  dropPrefab: {fileID: 5163940217845512731, guid: 81b38121556976447b7b256b8005cfd2, type: 3}
+  dropChance: 1
+  dropHeight: 0.5
+  optionCount: 3
+  enhancedChance: 0.5
+  attackWeight: 30
+  enhanceWeight: 50
+  modifierWeight: 20
+  cards:
+  - {fileID: 11400000, guid: 7ec1daddb86690043af7d3a0d8c83c11, type: 2}
+  - {fileID: 11400000, guid: 01b1d86a28f04f14abbb570bfe022621, type: 2}
+  - {fileID: 11400000, guid: 50733f49ea6fa1a448c70e43e630f740, type: 2}
+  - {fileID: 11400000, guid: bf5d41d27c184cecab7f2a8c3d97b53f, type: 2}
+  - {fileID: 11400000, guid: 8301f9fb0f6734c4e836562d4637f861, type: 2}
+  - {fileID: 11400000, guid: 317afad263e0be64e9c4061f42959c2d, type: 2}
+  - {fileID: 11400000, guid: 6775643c48614e708ccf68aff08a309d, type: 2}
+  - {fileID: 11400000, guid: 99adc29d96cb41a9ba5688f3ab69804e, type: 2}
+  - {fileID: 11400000, guid: 255f5d9122fe45c499998a3d94184c49, type: 2}
+  - {fileID: 11400000, guid: 056f48c29e994da7810046bf2baa0356, type: 2}
+  - {fileID: 11400000, guid: 0252a14a8cef4b69b714cf2e832ea0c6, type: 2}
+  - {fileID: 11400000, guid: ed13c5f7a9d04cd9acb15cf0ce26b281, type: 2}

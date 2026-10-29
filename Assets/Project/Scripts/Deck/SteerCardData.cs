@@ -13,6 +13,7 @@ namespace Study3D.FpsGame.Deck
 
         public override CardType Type => CardType.Enhance;
         public override CardRole Role => CardRole.Steer;
+        public override bool CanChangeTiming => false; // 조향 카드는 각자 정해진 시점(전이: 충돌, 유도: 진행 중)에서만 동작합니다.
 
         // origin에서 radius 안의 적 중, 벽에 가려지지 않은 가장 가까운 적의 Collider를 찾습니다. 없으면 null 입니다.
         // - exclude(직전에 맞힌 적 등)는 후보에서 뺍니다.

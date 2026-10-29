@@ -10,16 +10,19 @@ namespace Study3D.FpsGame.Deck
     // - 손패 중 선택된 카드는 항상 1장(손패가 비어 있으면 없음) 입니다.
     // - 손패는 HandLimit장까지만 가질 수 있고, 덱(뽑을 카드)은 제한이 없습니다.
     // - 손패가 바뀔 때마다 이벤트로 알려주므로, UI는 이벤트만 구독해서 따라가면 됩니다.
+    // - 강화 전용 카드(CardType.Modifier)는 드로우되지 않도록 강화 전용 보관함에 따로 둡니다.
     public class CardDeck
     {
-        private readonly List<CardData> drawPile;
+        private readonly List<CardData> drawPile = new List<CardData>();
         private readonly List<CardData> hand = new List<CardData>();
         private readonly List<CardData> discardPile = new List<CardData>();
+        private readonly List<CardData> modifierPile = new List<CardData>();
         private int selectedIndex;
 
         public IReadOnlyList<CardData> DrawPile => drawPile;
         public IReadOnlyList<CardData> Hand => hand;
         public IReadOnlyList<CardData> DiscardPile => discardPile;
+        public IReadOnlyList<CardData> ModifierPile => modifierPile;
         public int SelectedIndex => selectedIndex;
         public CardData SelectedCard => hand.Count > 0 ? hand[selectedIndex] : null;
 
@@ -34,9 +37,14 @@ namespace Study3D.FpsGame.Deck
         public event Action OnHandCleared;            // 손패를 모두 버렸을 때
         public event Action<int> OnSelectionChanged;  // (선택 인덱스, 손패가 비면 -1)
 
+        // 강화 전용 카드가 섞여 있으면 강화 전용 보관함으로 보냅니다.
         public CardDeck(IEnumerable<CardData> cards, int handLimit)
         {
-            drawPile = new List<CardData>(cards);
+            foreach (CardData card in cards)
+            {
+                if (card.Type == CardType.Modifier) modifierPile.Add(card);
+                else drawPile.Add(card);
+            }
             HandLimit = handLimit;
         }
 
@@ -62,9 +70,11 @@ namespace Study3D.FpsGame.Deck
         }
 
         // 게임 중 얻은 카드: 손패에 빈칸이 있으면 손패로, 없으면 버린 카드로 넣습니다.
+        // 강화 전용 카드는 항상 강화 전용 보관함으로 갑니다.
         public void Acquire(CardData card)
         {
-            if (IsHandFull) discardPile.Add(card);
+            if (card.Type == CardType.Modifier) modifierPile.Add(card);
+            else if (IsHandFull) discardPile.Add(card);
             else AddToHand(card);
         }
 
@@ -126,8 +136,24 @@ namespace Study3D.FpsGame.Deck
             OnSelectionChanged?.Invoke(hand.Count > 0 ? selectedIndex : -1);
         }
 
-        // 덱 전체 번호: 손패 → 뽑을 카드 → 버린 카드 순으로 이어 붙인 번호 입니다. (강화 화면 목록과 같은 순서)
-        public int TotalCount => hand.Count + drawPile.Count + discardPile.Count;
+        // 덱 카드(손패, 뽑을 카드, 버린 카드)의 평균 강화 차수 입니다. 강화 전용 카드는 세지 않습니다. 카드가 없으면 1
+        public float AverageEnhanceLevel
+        {
+            get
+            {
+                int count = hand.Count + drawPile.Count + discardPile.Count;
+                if (count == 0) return 1f;
+
+                int sum = 0;
+                foreach (CardData card in hand) sum += card.EnhanceLevel;
+                foreach (CardData card in drawPile) sum += card.EnhanceLevel;
+                foreach (CardData card in discardPile) sum += card.EnhanceLevel;
+                return (float)sum / count;
+            }
+        }
+
+        // 덱 전체 번호: 손패 → 뽑을 카드 → 버린 카드 → 강화 전용 보관함 순으로 이어 붙인 번호 입니다. (강화 화면 목록과 같은 순서)
+        public int TotalCount => hand.Count + drawPile.Count + discardPile.Count + modifierPile.Count;
 
         public CardData GetCard(int totalIndex)
         {
@@ -160,6 +186,8 @@ namespace Study3D.FpsGame.Deck
             if (index < drawPile.Count) return drawPile;
             index -= drawPile.Count;
             if (index < discardPile.Count) return discardPile;
+            index -= discardPile.Count;
+            if (index < modifierPile.Count) return modifierPile;
             return null;
         }
 

@@ -1,5 +1,6 @@
 using System;
 using Jay.FSM;
+using Study3D.FpsGame.Drop;
 using Study3D.FpsGame.Enemy.States;
 using UnityEngine;
 
@@ -16,6 +17,8 @@ namespace Study3D.FpsGame.Enemy
     {
         [SerializeField] private int maxHp = 30;
         [SerializeField] private Collider mainCollider;
+        [Tooltip("죽을 때 카드 보상을 떨어뜨릴 표 (비워두면 떨어뜨리지 않음)")]
+        [SerializeField] private CardDropTable dropTable;
 
         public Collider MainCollider => mainCollider;
         public GameObject GameObject => gameObject;
@@ -152,12 +155,13 @@ namespace Study3D.FpsGame.Enemy
             Health.Heal(healEvent.Heal);
         }
 
-        // 죽는 순간 호출됩니다. 더 이상 카드에 맞지 않게 합니다.
+        // 죽는 순간 호출됩니다. 더 이상 카드에 맞지 않게 하고, 카드 보상을 떨어뜨립니다.
         // (칼 판정은 Die 애니메이션으로 넘어가면 애니메이션이 꺼줍니다)
         public void OnDeath()
         {
             mainCollider.enabled = false;
             Unregister();
+            if (dropTable != null) dropTable.TryDrop(transform.position);
         }
 
         // 사망 애니메이션이 끝나면 호출됩니다.

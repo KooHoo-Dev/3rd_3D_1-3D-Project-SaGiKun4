@@ -1643,6 +1643,7 @@ MonoBehaviour:
   animator: {fileID: 0}
   maxHp: 30
   mainCollider: {fileID: 2818290557620801125}
+  dropTable: {fileID: 11400000, guid: ccca140cc8f448ccb23f3199b3a60828, type: 2}
 --- !u!114 &8302051090746460329
 MonoBehaviour:
   m_ObjectHideFlags: 0

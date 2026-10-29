@@ -11,6 +11,7 @@ namespace Study3D.FpsGame.Player
     {
         [Header("덱")]
         [SerializeField] private List<CardData> startDeck = new List<CardData>(); // 시작 시 지급받는 기본 카드
+        [SerializeField] private List<CardData> startModifiers = new List<CardData>(); // 시작 시 강화 전용 보관함에 들어가는 강화 전용 카드 (드랍 시스템 전 테스트용)
         [SerializeField] private int handLimit = 6; // 시작 손패 최대 장수 (런타임 변경은 Deck.HandLimit)
 
         public CardDeck Deck { get; private set; }
@@ -30,7 +31,7 @@ namespace Study3D.FpsGame.Player
             Deck.FillHand();
         }
 
-        // 게임 중 카드 획득: 손패에 빈칸이 있으면 손패로, 없으면 버린 카드로 들어갑니다.
+        // 게임 중 카드 획득: 손패에 빈칸이 있으면 손패로, 없으면 버린 카드로 들어갑니다. (강화 전용 카드는 강화 전용 보관함으로)
         public void AcquireCard(CardData card)
         {
             Deck.Acquire(card);

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Study3D.FpsGame.Weapon.Cards;
 using UnityEngine;
@@ -7,7 +8,8 @@ namespace Study3D.FpsGame.Deck
     public enum CardType
     {
         Attack,  // 쌓아둔 강화 카드를 모두 실어서 발사하는 카드
-        Enhance  // 강화 스택에 쌓이면서, 자기 자신만 실어서 발사하는 카드
+        Enhance, // 강화 스택에 쌓이면서, 자기 자신만 실어서 발사하는 카드
+        Modifier // 강화 전용 카드: 드로우되지 않고 강화 전용 보관함에 들어가며, 강화 재료로만 씁니다. (시점 변경 등)
     }
 
     // CardData
@@ -22,6 +24,9 @@ namespace Study3D.FpsGame.Deck
         [Tooltip("카드가 실제로 발동했을 때 재생할 이펙트 프리팹 (비워두면 재생하지 않음)")]
         [SerializeField] private GameObject activateEffect;
 
+        // 시점 변경 등으로 이 복제본이 거친 강화 횟수. 에셋에는 저장하지 않습니다. (런타임 복제본에만 생김)
+        [NonSerialized] private int addedLevel;
+
         public string CardName
         {
             get => cardName;
@@ -33,6 +38,26 @@ namespace Study3D.FpsGame.Deck
 
         // 같은 시점 안에서의 실행 순서를 정합니다. 반응, 조향 카드만 재정의합니다.
         public virtual CardRole Role => CardRole.Effect;
+
+        // 강화 차수: 기본 카드는 1이고, 강화를 한 번 거칠 때마다 1씩 늘어납니다.
+        // - 시점 변경: 바뀐 카드 = 원래 카드 + 1
+        // - 조합 카드: 재료 카드 차수의 합 (1 + 1 → 2, 2 + 1 → 3. 재료 안에서 거친 강화도 모두 셉니다)
+        public virtual int EnhanceLevel => 1 + addedLevel;
+
+        // 시점 변경 강화를 받을 수 있는지. 특정 시점에서만 의미가 있는 카드(반응, 조향)는 false 입니다.
+        public virtual bool CanChangeTiming => true;
+
+        // 시점만 newTiming으로 바꾼 복제 카드를 만듭니다. (원본 에셋은 모든 덱이 공유하므로 직접 바꾸지 않습니다)
+        // 런타임에만 존재하는 카드가 만들어집니다.
+        public virtual CardData WithTiming(CardTiming newTiming, string newName)
+        {
+            CardData copy = Instantiate(this);
+            copy.name = newName;
+            copy.cardName = newName;
+            copy.timing = newTiming;
+            copy.addedLevel = addedLevel + 1;
+            return copy;
+        }
 
         // 발사체에 실릴 카드들을 순서대로 담습니다. 일반 카드는 자기 자신을, 조합 카드는 재료 카드들을 담습니다.
         public virtual void CollectCards(List<CardData> cards) => cards.Add(this);
