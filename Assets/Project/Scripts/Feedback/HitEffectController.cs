@@ -14,7 +14,19 @@ namespace Study3D.FpsGame.Feedback
         [SerializeField] private string bloodPoolKey = "Blood";
         [SerializeField] private string damageTextPoolKey = "DamageText";
         [SerializeField] private float damageTextDuration = 0.5f;
-        
+
+        [Header("이펙트 예산 (피격, 카드 발동 이펙트 공통)")]
+        [Tooltip("모든 이펙트를 합쳐 한 프레임에 새로 만들 수 있는 수. 넘으면 연출만 생략합니다 (피해는 그대로)")]
+        [SerializeField] private int maxEffectSpawnsPerFrame = 20;
+        [Tooltip("같은 종류의 이펙트가 동시에 살아 있을 수 있는 수")]
+        [SerializeField] private int maxActiveEffectsPerKind = 40;
+
+        private void Awake()
+        {
+            EffectBudget.MaxSpawnsPerFrame = maxEffectSpawnsPerFrame;
+            EffectBudget.MaxActivePerKind = maxActiveEffectsPerKind;
+        }
+
         private void Start()
         {
             CombatSystem.Instance.OnCombatEvent += OnHit;
@@ -26,15 +38,21 @@ namespace Study3D.FpsGame.Feedback
                 CombatSystem.Instance.OnCombatEvent -= OnHit;
         }
 
+        // 피와 데미지 숫자는 각각 이펙트 예산 안에서만 띄웁니다. (피해는 이미 들어간 뒤라 연출만 생략됩니다)
         private void OnHit(CombatEvent combatEvent)
         {
-            var blood = ObjectPoolManager.Instance.GetObjectOrNull(bloodPoolKey);
-            blood.GameObject.transform.position = combatEvent.HitPosition;
-            blood.GameObject.SetActive(true);
-            
-            FloatingText dmgText = 
+            if (EffectBudget.TryUse(bloodPoolKey))
+            {
+                var blood = ObjectPoolManager.Instance.GetObjectOrNull(bloodPoolKey);
+                blood.GameObject.transform.position = combatEvent.HitPosition;
+                blood.GameObject.SetActive(true);
+            }
+
+            if (EffectBudget.TryUse(damageTextPoolKey) == false) return;
+
+            FloatingText dmgText =
                 ObjectPoolManager.Instance.GetObjectOrNull(damageTextPoolKey) as FloatingText;
-            
+
             dmgText.Set(
                 combatEvent.HitPosition, 
                 $"{combatEvent.Damage}",

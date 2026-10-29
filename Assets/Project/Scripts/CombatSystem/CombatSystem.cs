@@ -6,10 +6,6 @@ namespace Study3D.FpsGame
 {
     public class CombatSystem : MonoBehaviour
     {
-        [Header("처리량")]
-        [Tooltip("한 프레임에 처리할 최대 전투 이벤트 수. 남은 이벤트는 다음 프레임으로 넘어갑니다")]
-        [SerializeField] private int maxEventsPerFrame = 10;
-
         [Header("적 판정")]
         [Tooltip("카드가 맞힐 적의 레이어 이름. Project Settings > Tags and Layers의 이름과 같아야 합니다")]
         [SerializeField] private string enemyLayerName = "Enemy";
@@ -55,14 +51,15 @@ namespace Study3D.FpsGame
             if (Instance == this) Instance = null;
         }
 
+        // 쌓인 전투 이벤트를 매 프레임 전부 처리합니다. (피해가 다음 프레임으로 밀리지 않도록)
+        // - 처리 중에 새로 들어온 이벤트는 다음 프레임에 처리합니다.
+        // - 피격 연출(피, 데미지 숫자)이 너무 많아지는 것은 여기서 막지 않고 EffectBudget이 막습니다.
         private void Update()
         {
-            int processCount = 0;
-
-            while (inGameEventQueue.Count > 0 && processCount < maxEventsPerFrame)
+            int count = inGameEventQueue.Count;
+            for (int i = 0; i < count; i++)
             {
                 var inGameEvent = inGameEventQueue.Dequeue();
-                processCount++;
 
                 if (inGameEvent.Receiver is UnityEngine.Object receiverObject && 
                     receiverObject == null) continue;

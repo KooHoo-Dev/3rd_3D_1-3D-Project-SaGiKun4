@@ -42,6 +42,10 @@ namespace Study3D.FpsGame
             private readonly Transform parent;
             private readonly int expandSize;
             private readonly string key;
+            private int createdCount; // 이 풀이 지금까지 만든 수
+
+            // 꺼내져서 사용 중인 수 (만든 수 - 풀에 남은 수)
+            public int ActiveCount => createdCount - pool.Count;
 
             public ObjectPool(GameObject prefab, Transform parent, int expandSize, string key)
             {
@@ -58,6 +62,7 @@ namespace Study3D.FpsGame
                 {
                     var instance = Instantiate(prefab, parent).GetComponent<IObjectPoolItem>();
                     instance.Key = key;
+                    createdCount++;
                     Return(instance);
                 }
             }
@@ -129,6 +134,9 @@ namespace Study3D.FpsGame
         }
 
         public bool HasPool(string key) => objectPoolDic.ContainsKey(key);
+
+        // key 풀에서 꺼내져 사용 중인 수. 풀이 없으면 0 (이펙트 예산이 동시 개수를 셀 때 사용)
+        public int GetActiveCount(string key) => objectPoolDic.TryGetValue(key, out var pool) ? pool.ActiveCount : 0;
 
         public IObjectPoolItem GetObjectOrNull(string key)
         {

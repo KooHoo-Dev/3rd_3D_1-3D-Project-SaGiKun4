@@ -15,9 +15,11 @@ namespace Study3D.FpsGame
 
         private static readonly Dictionary<GameObject, string> poolKeys = new Dictionary<GameObject, string>();
 
+        // 이펙트 예산(EffectBudget)을 넘으면 재생하지 않습니다. (연출만 생략, 카드 효과는 이미 처리된 뒤)
         public static void Play(GameObject prefab, Vector3 position, Quaternion rotation, float scale = 1f)
         {
             if (prefab == null) return;
+            if (EffectBudget.TryUse(ObjectPoolManager.Instance != null ? GetPoolKey(prefab) : null) == false) return;
 
             GameObject effect = GetPooledOrNull(prefab);
             if (effect == null)
@@ -39,16 +41,21 @@ namespace Study3D.FpsGame
             ObjectPoolManager pool = ObjectPoolManager.Instance;
             if (pool == null) return null;
 
-            if (poolKeys.TryGetValue(prefab, out string key) == false)
-            {
-                key = $"Effect_{prefab.name}_{prefab.GetInstanceID()}";
-                poolKeys.Add(prefab, key);
-            }
-
+            string key = GetPoolKey(prefab);
             if (pool.HasPool(key) == false)
                 pool.CreatePool(new ObjectPoolManager.ObjectPoolData(key, CreateTemplate(prefab, pool.transform), POOL_EXPAND_SIZE));
 
             return pool.GetObjectOrNull(key)?.GameObject;
+        }
+
+        // 프리팹마다 하나씩 정해지는 풀 이름
+        private static string GetPoolKey(GameObject prefab)
+        {
+            if (poolKeys.TryGetValue(prefab, out string key)) return key;
+
+            key = $"Effect_{prefab.name}_{prefab.GetInstanceID()}";
+            poolKeys.Add(prefab, key);
+            return key;
         }
 
         // 풀에 넣을 수 있는 원본을 만듭니다. 이미 IObjectPoolItem이 있으면 프리팹을 그대로 씁니다.
