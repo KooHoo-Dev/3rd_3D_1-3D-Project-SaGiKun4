@@ -12,12 +12,18 @@ namespace Study3D.FpsGame.UI
     // : 척추를 굽히면 spine_03(그리고 그 위의 머리)은 spine_01을 중심으로 원을 그리며 움직입니다.
     //   카메라도 같은 원의 바깥쪽 한 점이라고 보고, 시작 위치를 spine_01 중심으로 시점 각도만큼 돌립니다.
     //   중심점과 시작 위치는 애니메이션이 적용되기 전(Awake)에 한 번만 저장해서, 이후 흔들림의 영향을 받지 않습니다.
+    //
+    // 벽 충돌
+    // : 원 위의 위치는 벽을 고려하지 않으므로, 벽에 붙어 숙이면 카메라가 벽 안으로 들어갑니다.
+    //   중심점(몸 안쪽이라 벽 밖)에서 카메라 위치까지 구를 쏴서, 환경에 막히면 막힌 지점 바로 앞에 둡니다.
     public class SpineOrbitCamera : MonoBehaviour
     {
         [Tooltip("마우스 상하 각도를 가져올 플레이어")]
         [SerializeField] private PlayerController player;
         [Tooltip("원의 중심이 될 척추 본 (spine_01)")]
         [SerializeField] private Transform spinePivot;
+        [Tooltip("벽 충돌 검사에 쓰는 구의 반지름 (m). 카메라 Near Clip Plane 보다 커야 화면에 벽 속이 보이지 않습니다")]
+        [SerializeField] private float collisionRadius = 0.15f;
 
         // 아래는 모두 플레이어 루트 기준 값입니다.
         private Vector3 pivotLocalPosition;
@@ -60,8 +66,26 @@ namespace Study3D.FpsGame.UI
             Quaternion lookRotation = Quaternion.Euler(initialPitch + player.VerticalLookAngle, initialYaw, 0f);
 
             transform.SetPositionAndRotation(
-                root.TransformPoint(orbitPosition),
+                BlockByEnvironment(root.TransformPoint(pivotLocalPosition), root.TransformPoint(orbitPosition)),
                 root.rotation * lookRotation);
+        }
+
+        // 중심점(월드) → 원하는 카메라 위치(월드) 사이에 환경이 있으면, 막힌 지점 바로 앞을 돌려줍니다.
+        private Vector3 BlockByEnvironment(Vector3 pivot, Vector3 desired)
+        {
+            if (CombatSystem.Instance == null) return desired;
+
+            Vector3 toCamera = desired - pivot;
+            float distance = toCamera.magnitude;
+            if (distance < 0.0001f) return desired;
+
+            Vector3 dir = toCamera / distance;
+            if (Physics.SphereCast(pivot, collisionRadius, dir, out RaycastHit hit, distance,
+                    CombatSystem.Instance.EnvironmentMask, QueryTriggerInteraction.Ignore) == false)
+                return desired;
+
+            // hit.distance = 구의 중심이 이동한 거리라서, 그 위치에 카메라를 두면 벽과 반지름만큼 떨어짐
+            return pivot + dir * hit.distance;
         }
     }
 }

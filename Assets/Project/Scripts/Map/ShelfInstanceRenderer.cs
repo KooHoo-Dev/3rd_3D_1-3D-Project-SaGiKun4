@@ -42,7 +42,6 @@ namespace Study3D.FpsGame.Map
                 Graphics.RenderMeshInstanced(batch.parameters, batch.mesh, 0, batch.matrices);
         }
 
-        [ContextMenu("Rebuild shelf instances (Play Mode)")]
         public void Rebuild()
         {
             RestoreRenderers();

@@ -64,6 +64,11 @@ namespace Study3D.FpsGame.Map
         [Tooltip("꼭짓점 위아래로 이 거리 안에서 바닥 콜라이더를 찾습니다 (m). 못 찾으면 네비메시 높이 그대로")]
         [SerializeField] private float groundSnapDistance = 0.5f;
 
+        [Header("목표")]
+        [Tooltip("플레이어가 지도 밖이어도 가장 가까운 영역 경계가 이 거리 안이면 그 경계 위의 점을 목표로 씁니다 (m)\n" +
+                 "네비메시는 벽에서 베이크 반지름만큼 깎여 있으므로, 벽에 붙은 플레이어를 찾으려면 베이크 반지름보다 조금 크게")]
+        [SerializeField] private float goalSnapDistance = 0.7f;
+
         // 방 로컬 좌표의 꼭짓점들과, 영역마다 반시계 순서의 꼭짓점 번호 목록
         private readonly List<Vector3> points = new List<Vector3>();
         private readonly List<List<int>> regions = new List<List<int>>();
@@ -719,6 +724,69 @@ namespace Study3D.FpsGame.Map
             return best;
         }
 
+        // 점(방 로컬)이 어느 영역에도 없을 때, maxDistance 안에서 가장 가까운 영역 경계 위의 점으로 옮깁니다. (없으면 -1, 점은 그대로)
+        // - 벽에 붙은 플레이어처럼 네비메시가 깎인 띠(베이크 반지름) 안에 있는 점을 지도 위로 되돌리는 용도
+        // - hint 영역과 그 이웃부터 확인하고, 거기서 못 찾으면 전체를 확인합니다. (벽을 따라 움직이면 보통 hint 근처에서 찾음)
+        // - 옮긴 점의 높이는 그대로 두고 XZ 만 바꿉니다. (경계 위의 점은 InsideEpsilon 덕분에 그 영역 안으로 판정됨)
+        private int SnapToRegion(ref Vector3 localPos, int hint, float heightTolerance, float maxDistance)
+        {
+            int best = -1;
+            float bestSq = maxDistance * maxDistance;
+            Vector3 bestPoint = localPos;
+
+            if (hint >= 0 && hint < regions.Count)
+            {
+                ConsiderSnap(hint, localPos, heightTolerance, ref best, ref bestSq, ref bestPoint);
+                foreach (int p in regionPortals[hint])
+                    ConsiderSnap(portals[p].to, localPos, heightTolerance, ref best, ref bestSq, ref bestPoint);
+            }
+
+            if (best < 0)
+                for (int r = 0; r < regions.Count; r++)
+                    ConsiderSnap(r, localPos, heightTolerance, ref best, ref bestSq, ref bestPoint);
+
+            if (best >= 0) localPos = new Vector3(bestPoint.x, localPos.y, bestPoint.z);
+            return best;
+        }
+
+        // 영역 경계 위의 가장 가까운 점이 지금까지의 후보보다 가깝고 높이도 맞으면 후보로 바꿈
+        private void ConsiderSnap(int region, Vector3 p, float heightTolerance, ref int best, ref float bestSq, ref Vector3 bestPoint)
+        {
+            float sq = ClosestOnBoundaryXZ(region, p, out Vector3 closest);
+            if (sq >= bestSq) return;
+            if (Mathf.Abs(p.y - HeightAt(region, closest)) > heightTolerance) return;
+
+            best = region;
+            bestSq = sq;
+            bestPoint = closest;
+        }
+
+        // 위에서 봤을 때(XZ) 영역 경계의 변들 중 p 에 가장 가까운 점과 그 거리의 제곱
+        private float ClosestOnBoundaryXZ(int region, Vector3 p, out Vector3 closest)
+        {
+            List<int> poly = regions[region];
+            float bestSq = float.MaxValue;
+            closest = p;
+            for (int i = 0; i < poly.Count; i++)
+            {
+                Vector3 a = points[poly[i]];
+                Vector3 ab = points[poly[(i + 1) % poly.Count]] - a;
+                float lengthSq = DotXZ(ab, ab);
+                float t = lengthSq < 1e-8f ? 0f : Mathf.Clamp01(DotXZ(p - a, ab) / lengthSq);
+                Vector3 c = a + ab * t;
+
+                float dx = p.x - c.x;
+                float dz = p.z - c.z;
+                float sq = dx * dx + dz * dz;
+                if (sq < bestSq)
+                {
+                    bestSq = sq;
+                    closest = c;
+                }
+            }
+            return bestSq;
+        }
+
         // 위에서 봤을 때 볼록 영역 안이고, 그 위치의 바닥 높이와 heightTolerance 안인지
         private bool IsOnRegion(int region, Vector3 p, float heightTolerance)
         {
@@ -807,7 +875,9 @@ namespace Study3D.FpsGame.Map
         }
 
         // 몬스터들이 함께 쓰는 목표 (플레이어가 서 있는 영역과 지점). 한 프레임에 한 번만 갱신합니다.
-        // - 플레이어 아래에 영역이 없으면(사물 위, 방 밖) 갱신하지 않아서 마지막으로 지도 위에 있던 곳이 목표로 남음
+        // - 플레이어 아래에 영역이 없으면 goalSnapDistance 안의 가장 가까운 영역 경계 위의 점을 목표로 씀
+        //   (벽에 붙으면 네비메시가 깎인 띠 안에 서게 되므로. 매 프레임 지금 위치에서 다시 구해서 벽을 따라 움직여도 따라감)
+        // - 그보다 멀면(큰 사물 위, 방 밖) 갱신하지 않아서 마지막으로 지도 위에 있던 곳이 목표로 남음
         // - 목표가 아직 한 번도 정해지지 않았으면 false
         public bool TryGetGoal(out int region, out Vector3 localPoint)
         {
@@ -820,6 +890,7 @@ namespace Study3D.FpsGame.Map
                 {
                     Vector3 local = transform.InverseTransformPoint(player.transform.position);
                     int found = FindRegion(local, goalRegion, PlayerHeightTolerance);
+                    if (found < 0) found = SnapToRegion(ref local, goalRegion, PlayerHeightTolerance, goalSnapDistance);
                     IsGoalOffMap = found < 0;
                     if (found >= 0)
                     {

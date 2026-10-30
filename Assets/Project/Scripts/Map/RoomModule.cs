@@ -100,7 +100,6 @@ namespace Study3D.FpsGame.Map
         }
 
         // 전투 종료. 전투 시스템(웨이브 등)이 방의 적을 다 처리했을 때 호출
-        [ContextMenu("전투 종료 (테스트)")]
         public void Clear()
         {
             if (State != RoomState.Combat) return;

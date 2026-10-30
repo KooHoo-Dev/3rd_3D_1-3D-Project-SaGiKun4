@@ -6795,11 +6795,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Study3D.FpsGame.Map.RoomModule
   entry:
     door: {fileID: 1554129828302506705}
-    barrier: {fileID: 0}
+    barrier: {fileID: 6531822186313896994}
     connected: 1
   exit:
     door: {fileID: 2510443228665935424}
-    barrier: {fileID: 0}
+    barrier: {fileID: 1975750889573508281}
     connected: 1
   barrierSize: {x: 4, y: 4, z: 0.5}
   enterPoint: {fileID: 5484316252573638710}
@@ -6861,6 +6861,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   groundSnapDistance: 0.5
+  goalSnapDistance: 0.7
 --- !u!114 &1082834668780986154
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14647,6 +14648,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 4477767962475983398}
+  - {fileID: 9217405401059869373}
   - {fileID: 1554129828302506705}
   - {fileID: 2510443228665935424}
   - {fileID: 2267025515304838799}
@@ -44117,6 +44120,91 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4997264824740438948, guid: 14c8c67ba5e7f3b4e9bb83cf7be34dae, type: 3}
   m_PrefabInstance: {fileID: 3861897702111028249}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &4569725201575322753
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 8736177776835172645}
+    m_Modifications:
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2.5999997
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 68
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5461724027415215238, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_Name
+      value: Exit
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+--- !u!114 &1975750889573508281 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2594541963356979256, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+  m_PrefabInstance: {fileID: 4569725201575322753}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfe6a6bd07552484f9fa35b85c228807, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Study3D.FpsGame.Map.RoomBarrier
+--- !u!4 &9217405401059869373 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+  m_PrefabInstance: {fileID: 4569725201575322753}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &4626651954261638091
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -46201,6 +46289,91 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2432442024970720693, guid: c37b9d2217567b84ebe9bb46ae6fadc0, type: 3}
   m_PrefabInstance: {fileID: 9056266465905879053}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &9125448983944991770
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 8736177776835172645}
+    m_Modifications:
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2.5999997
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5461724027415215238, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+      propertyPath: m_Name
+      value: Enter
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+--- !u!4 &4477767962475983398 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+  m_PrefabInstance: {fileID: 9125448983944991770}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6531822186313896994 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2594541963356979256, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
+  m_PrefabInstance: {fileID: 9125448983944991770}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfe6a6bd07552484f9fa35b85c228807, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Study3D.FpsGame.Map.RoomBarrier
 --- !u!1001 &9216092366245717319
 PrefabInstance:
   m_ObjectHideFlags: 0
