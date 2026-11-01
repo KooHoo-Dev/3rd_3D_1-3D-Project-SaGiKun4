@@ -44,7 +44,8 @@ namespace Study3D.FpsGame.UI
         private void SetTarget(Interactable newTarget)
         {
             target = newTarget;
-            if (target == null) return;
+            if (target == null)
+                return;
 
             keyText.SetText(interactor.InteractKey.ToString());
             actionText.SetText(target.ActionText);
@@ -53,7 +54,7 @@ namespace Study3D.FpsGame.UI
 
         private void LateUpdate()
         {
-            bool visible = target != null && Player.Player.LocalPlayer != null && Player.Player.LocalPlayer.CanAct;
+            bool visible = target != null && CanLocalPlayerAct();
             Vector3 screenPoint = Vector3.zero;
             if (visible)
             {
@@ -62,14 +63,25 @@ namespace Study3D.FpsGame.UI
                 visible = screenPoint.z > 0f;
             }
 
-            if (promptRoot.gameObject.activeSelf != visible) promptRoot.gameObject.SetActive(visible);
-            if (visible == false) return;
+            if (promptRoot.gameObject.activeSelf != visible)
+            {
+                promptRoot.gameObject.SetActive(visible);
+            }
+            if (visible == false)
+                return;
 
             // 화면 좌표 → 캔버스 좌표를 캔버스의 월드 위치 없이 계산합니다. (화면 가운데 = 0, 캔버스 단위 = 픽셀 / scaleFactor)
             // ScreenPointToLocalPointInRectangle은 캔버스 평면의 월드 위치를 쓰는데, Screen Space - Camera 캔버스는
             // 렌더링 직전에야 카메라를 따라 옮겨집니다. 이 시점엔 아직 지난 프레임 위치라, 카메라가 움직인 만큼 어긋나 떨립니다.
             Vector2 halfScreen = new Vector2(Screen.width, Screen.height) * 0.5f;
             promptRoot.anchoredPosition = ((Vector2)screenPoint - halfScreen) / canvas.scaleFactor;
+        }
+
+        // 조작할 수 없는 동안(강화 화면 등)은 false
+        private bool CanLocalPlayerAct()
+        {
+            Player.LocalPlayer localPlayer = Player.Player.LocalPlayer;
+            return localPlayer != null && localPlayer.CanAct;
         }
     }
 }

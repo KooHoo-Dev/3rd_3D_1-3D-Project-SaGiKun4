@@ -21,9 +21,13 @@ namespace Study3D.FpsGame.Map
         private void OnTriggerEnter(Collider other)
         {
             LocalPlayer player = Player.Player.LocalPlayer;
-            if (player == null || other != player.MainCollider) return;
+            if (player == null || other != player.MainCollider)
+                return;
 
-            Entered?.Invoke();
+            if (Entered != null)
+            {
+                Entered.Invoke();
+            }
         }
     }
 }

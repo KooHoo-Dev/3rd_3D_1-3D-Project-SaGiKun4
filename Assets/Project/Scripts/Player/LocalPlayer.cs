@@ -44,9 +44,15 @@ namespace Study3D.FpsGame.Player
         // 플레이어가 조작(이동/시점/발사/카드 입력)할 수 있는지. 입력을 받는 쪽(PlayerController)은 이 값만 봅니다.
         // - 상태(IsDead, IsInMenu 등)는 각자 관리하고, 여기서는 조건만 모아 계산합니다. (직접 켜고 끄는 플래그로 두면 서로 덮어씀)
         // - 조작을 막는 상태가 새로 생기면 여기에 조건만 추가하면 됩니다.
-        public bool CanAct => IsDead == false && IsInMenu == false;
+        public bool CanAct
+        {
+            get { return IsDead == false && IsInMenu == false; }
+        }
 
-        public void SetInMenu(bool inMenu) => IsInMenu = inMenu;
+        public void SetInMenu(bool inMenu)
+        {
+            IsInMenu = inMenu;
+        }
 
         #region 유니티 함수들
 
@@ -55,7 +61,11 @@ namespace Study3D.FpsGame.Player
             Player.LocalPlayer = this;
             Health = new Health(maxHp);
             Deck = new CardDeck(startDeck, handLimit);
-            foreach (CardData card in startModifiers) Deck.Acquire(card); // 강화 전용 카드는 강화 전용 보관함으로 들어갑니다.
+            // 강화 전용 카드는 강화 전용 보관함으로 들어갑니다.
+            foreach (CardData card in startModifiers)
+            {
+                Deck.Acquire(card);
+            }
         }
 
         private void Start()

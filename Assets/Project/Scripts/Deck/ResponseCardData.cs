@@ -23,22 +23,27 @@ namespace Study3D.FpsGame.Deck
 
         public override CardType Type => CardType.Enhance;
         public override CardRole Role => CardRole.Response;
-        public override bool CanChangeTiming => false; // 반응은 충돌 순간에만 의미가 있습니다.
         public ContactTarget Target => target;
 
         // 새 에셋을 만들었을 때 들어갈 카드별 기본 대상 입니다.
         protected abstract ContactTarget DefaultTarget { get; }
 
-        private void Reset() => target = DefaultTarget;
+        private void Reset()
+        {
+            target = DefaultTarget;
+        }
 
         // 이번 충돌 대상이 Target에 포함되면 반응 결정권을 가져갑니다.
         // 충돌이 아니거나, 대상이 아니거나, 앞의 반응 카드가 이미 정했으면 false를 반환합니다.
         protected bool TryRespond(CardContext context)
         {
-            if (context.Target == null) return false;
+            if (context.Target == null)
+                return false;
 
             ContactTarget contact = context.IsEnemy ? ContactTarget.Enemy : ContactTarget.World;
-            if ((target & contact) == 0) return false;
+            bool isTargetContact = (target & contact) != 0;
+            if (isTargetContact == false)
+                return false;
 
             return context.Projectile.TryClaimResponse();
         }

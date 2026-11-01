@@ -58,7 +58,9 @@ namespace Study3D.FpsGame.UI
         // 카드를 켠 뒤 호출합니다. 재생 중이면 처음부터 다시 재생합니다.
         public void Play()
         {
-            if (isActiveAndEnabled == false || cardMaterial == null) return;
+            if (isActiveAndEnabled == false || cardMaterial == null)
+                return;
+
             StartRoutine(AppearRoutine());
         }
 
@@ -66,7 +68,9 @@ namespace Study3D.FpsGame.UI
         // IsVanishing이 false가 되면 다 탄 것이니, 그때 카드를 끄면 원래 상태로 돌아갑니다.
         public void PlayVanish()
         {
-            if (isActiveAndEnabled == false || cardMaterial == null) return;
+            if (isActiveAndEnabled == false || cardMaterial == null)
+                return;
+
             StartRoutine(VanishRoutine());
         }
 
@@ -86,7 +90,9 @@ namespace Study3D.FpsGame.UI
         {
             IsVanishing = false;
             // 꺼지면 코루틴은 알아서 멈추므로 상태만 되돌립니다.
-            if (routine == null) return;
+            if (routine == null)
+                return;
+
             routine = null;
             EndDissolve();
         }
@@ -127,7 +133,10 @@ namespace Study3D.FpsGame.UI
         }
 
         // 첫 프레임부터 startReveal 상태로 시작합니다. (등장은 다 탄 상태 → 카드가 한 번 번쩍 보이지 않게)
-        private void BeginDissolve() => BeginDissolve(revealCurve.Evaluate(0f));
+        private void BeginDissolve()
+        {
+            BeginDissolve(revealCurve.Evaluate(0f));
+        }
 
         private void BeginDissolve(float startReveal)
         {
@@ -150,29 +159,46 @@ namespace Study3D.FpsGame.UI
             mask.enabled = false;
             image.material = baseMaterial;
             image.color = baseColor;
-            if (edge != null) edge.gameObject.SetActive(false);
+            if (edge != null)
+            {
+                edge.gameObject.SetActive(false);
+            }
         }
 
         private void SetReveal(float reveal)
         {
             reveal = Mathf.Clamp01(reveal);
             image.color = new Color(baseColor.r, baseColor.g, baseColor.b, reveal);
-            if (edge != null) edge.color = new Color(1f, 1f, 1f, reveal);
+            if (edge != null)
+            {
+                edge.color = new Color(1f, 1f, 1f, reveal);
+            }
         }
 
         // Mask와 경계 오버레이는 처음 재생할 때 만듭니다. (평소에는 꺼 두므로 카드 모습은 그대로)
         private void EnsureParts()
         {
-            if (image != null) return;
+            if (image != null)
+                return;
 
             image = GetComponent<Image>();
 
-            if (TryGetComponent(out mask) == false) mask = gameObject.AddComponent<Mask>();
+            if (TryGetComponent(out mask) == false)
+            {
+                mask = gameObject.AddComponent<Mask>();
+            }
             mask.showMaskGraphic = true;
             mask.enabled = false;
 
-            if (edgeMaterial == null) return;
+            if (edgeMaterial == null)
+                return;
 
+            edge = CreateEdgeOverlay();
+        }
+
+        // 카드를 꽉 채우는 경계 오버레이 Image (꺼 둔 채로 만듭니다)
+        private Image CreateEdgeOverlay()
+        {
             GameObject go = new GameObject(EdgeName, typeof(RectTransform));
             go.layer = gameObject.layer;
             go.transform.SetParent(transform, false);
@@ -183,10 +209,11 @@ namespace Study3D.FpsGame.UI
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
 
-            edge = go.AddComponent<Image>();
-            edge.material = edgeMaterial;
-            edge.raycastTarget = false;
+            Image overlay = go.AddComponent<Image>();
+            overlay.material = edgeMaterial;
+            overlay.raycastTarget = false;
             go.SetActive(false);
+            return overlay;
         }
     }
 }

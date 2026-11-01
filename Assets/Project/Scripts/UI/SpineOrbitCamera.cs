@@ -65,23 +65,28 @@ namespace Study3D.FpsGame.UI
             // 회전은 pitch와 yaw만으로 다시 만들어서 Z축 기울기(roll)가 생기지 않게 합니다.
             Quaternion lookRotation = Quaternion.Euler(initialPitch + player.VerticalLookAngle, initialYaw, 0f);
 
-            transform.SetPositionAndRotation(
-                BlockByEnvironment(root.TransformPoint(pivotLocalPosition), root.TransformPoint(orbitPosition)),
-                root.rotation * lookRotation);
+            Vector3 pivotWorld = root.TransformPoint(pivotLocalPosition);
+            Vector3 orbitWorld = root.TransformPoint(orbitPosition);
+            Vector3 cameraPosition = BlockByEnvironment(pivotWorld, orbitWorld);
+            transform.SetPositionAndRotation(cameraPosition, root.rotation * lookRotation);
         }
 
         // 중심점(월드) → 원하는 카메라 위치(월드) 사이에 환경이 있으면, 막힌 지점 바로 앞을 돌려줍니다.
         private Vector3 BlockByEnvironment(Vector3 pivot, Vector3 desired)
         {
-            if (CombatSystem.Instance == null) return desired;
+            if (CombatSystem.Instance == null)
+                return desired;
 
             Vector3 toCamera = desired - pivot;
             float distance = toCamera.magnitude;
-            if (distance < 0.0001f) return desired;
+            if (distance < 0.0001f)
+                return desired;
 
             Vector3 dir = toCamera / distance;
-            if (Physics.SphereCast(pivot, collisionRadius, dir, out RaycastHit hit, distance,
-                    CombatSystem.Instance.EnvironmentMask, QueryTriggerInteraction.Ignore) == false)
+            int environmentMask = CombatSystem.Instance.EnvironmentMask;
+            bool blocked = Physics.SphereCast(pivot, collisionRadius, dir, out RaycastHit hit, distance,
+                environmentMask, QueryTriggerInteraction.Ignore);
+            if (blocked == false)
                 return desired;
 
             // hit.distance = 구의 중심이 이동한 거리라서, 그 위치에 카메라를 두면 벽과 반지름만큼 떨어짐

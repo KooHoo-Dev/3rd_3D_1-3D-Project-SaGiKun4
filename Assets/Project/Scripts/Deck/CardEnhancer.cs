@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Study3D.FpsGame.Weapon.Cards;
 using UnityEngine;
 
 namespace Study3D.FpsGame.Deck
@@ -26,6 +27,24 @@ namespace Study3D.FpsGame.Deck
 
             CardData first = deck.GetCard(firstIndex);
             CardData second = deck.GetCard(secondIndex);
+            if (CanUseAsMaterials(first, second) == false)
+                return false;
+
+            TimingCardData firstTiming = first as TimingCardData;
+            if (firstTiming != null)
+                return TryChangeTiming(deck, secondIndex, firstIndex, firstTiming);
+
+            TimingCardData secondTiming = second as TimingCardData;
+            if (secondTiming != null)
+                return TryChangeTiming(deck, firstIndex, secondIndex, secondTiming);
+
+            Combine(deck, firstIndex, secondIndex, first, second);
+            return true;
+        }
+
+        // 두 카드를 강화 재료로 함께 쓸 수 있는지. 쓸 수 없으면 이유를 로그로 남깁니다.
+        private static bool CanUseAsMaterials(CardData first, CardData second)
+        {
             if (first == null || second == null)
             {
                 Debug.LogWarning("[Enhance] 고른 카드를 덱에서 찾지 못했습니다.");
@@ -41,15 +60,17 @@ namespace Study3D.FpsGame.Deck
                 Debug.Log("[Enhance] 강화 전용 카드끼리는 강화할 수 없습니다.");
                 return false;
             }
-            if (first is TimingCardData firstTiming) return TryChangeTiming(deck, secondIndex, firstIndex, firstTiming);
-            if (second is TimingCardData secondTiming) return TryChangeTiming(deck, firstIndex, secondIndex, secondTiming);
+            return true;
+        }
 
+        // 두 카드를 조합 카드 한 장으로 합쳐 첫 번째 카드 자리에 넣고, 두 번째 카드는 덱에서 없앱니다.
+        private static void Combine(CardDeck deck, int firstIndex, int secondIndex, CardData first, CardData second)
+        {
             CompositeCardData combined = CompositeCardData.Create(first.CardName + ENHANCED_MARK, first, second);
             // 바꾸기를 먼저 해야 second를 뺄 때 당겨지는 번호를 신경 쓰지 않아도 됩니다.
             deck.Replace(firstIndex, combined);
             deck.Remove(secondIndex);
             Debug.Log($"[Enhance] {first.CardName}(Lv.{first.EnhanceLevel}) + {second.CardName}(Lv.{second.EnhanceLevel}) → {combined.CardName}(Lv.{combined.EnhanceLevel})");
-            return true;
         }
 
         // 시점 변경: targetIndex 카드의 시점을 바꾼 카드로 교체하고, 시점 변경 카드는 덱에서 없앱니다.
@@ -58,16 +79,8 @@ namespace Study3D.FpsGame.Deck
         {
             CardData target = deck.GetCard(targetIndex);
             CardData head = GetFirstCard(target);
-            if (head == null || head.CanChangeTiming == false)
-            {
-                Debug.Log($"[Enhance] {target.CardName}은(는) 시점을 바꿀 수 없는 카드입니다.");
+            if (CanChangeTimingTo(target, head, modifier.Timing) == false)
                 return false;
-            }
-            if (head.Timing == modifier.Timing)
-            {
-                Debug.Log($"[Enhance] {target.CardName}은(는) 이미 {modifier.Timing} 시점입니다.");
-                return false;
-            }
 
             CardData changed = target.WithTiming(modifier.Timing, target.CardName + ENHANCED_MARK);
             // 바꾸기를 먼저 해야 시점 변경 카드를 뺄 때 당겨지는 번호를 신경 쓰지 않아도 됩니다.
@@ -77,12 +90,60 @@ namespace Study3D.FpsGame.Deck
             return true;
         }
 
+        // target(첫 카드는 head)의 시점을 newTiming으로 바꿀 수 있는지. 바꿀 수 없으면 이유를 로그로 남깁니다.
+        private static bool CanChangeTimingTo(CardData target, CardData head, CardTiming newTiming)
+        {
+            if (head == null || head.CanChangeTiming == false)
+            {
+                Debug.Log($"[Enhance] {target.CardName}은(는) 시점을 바꿀 수 없는 카드입니다.");
+                return false;
+            }
+            if (head.IsTimingBlocked(newTiming))
+            {
+                Debug.Log($"[Enhance] {target.CardName}은(는) {newTiming} 시점으로 바꿀 수 없습니다.");
+                return false;
+            }
+            if (head.Timing == newTiming)
+            {
+                Debug.Log($"[Enhance] {target.CardName}은(는) 이미 {newTiming} 시점입니다.");
+                return false;
+            }
+            return true;
+        }
+
+        // 한쪽이 시점 변경 카드이고, 다른 쪽이 그 시점으로 바뀔 수 없는 카드인지. (칸 순서 상관없음)
+        // 강화 화면이 고를 수 없는 카드를 흐리게 표시할 때 씁니다. 실제 강화 판단은 TryEnhance가 합니다.
+        public static bool IsTimingBlocked(CardData a, CardData b)
+        {
+            if (a == null || b == null)
+                return false;
+
+            TimingCardData aTiming = a as TimingCardData;
+            if (aTiming != null)
+                return IsTimingBlockedFor(b, aTiming.Timing);
+
+            TimingCardData bTiming = b as TimingCardData;
+            if (bTiming != null)
+                return IsTimingBlockedFor(a, bTiming.Timing);
+
+            return false;
+        }
+
+        private static bool IsTimingBlockedFor(CardData target, CardTiming timing)
+        {
+            CardData head = GetFirstCard(target);
+            return head == null || head.CanChangeTiming == false || head.IsTimingBlocked(timing);
+        }
+
         // 발사체에 실릴 때 맨 처음 오는 카드 (조합 카드면 펼친 뒤의 첫 재료)
         private static CardData GetFirstCard(CardData card)
         {
-            var cards = new List<CardData>();
+            List<CardData> cards = new List<CardData>();
             card.CollectCards(cards);
-            return cards.Count > 0 ? cards[0] : null;
+            if (cards.Count == 0)
+                return null;
+
+            return cards[0];
         }
     }
 }

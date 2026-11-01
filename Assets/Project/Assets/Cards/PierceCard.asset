@@ -14,4 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Study3D.FpsGame.Deck.PierceCardData
   cardName: "\uAD00\uD1B5"
   timing: 2
+  blockedTimings:
+  - 0
+  - 1
+  - 3
   target: 1

@@ -18,23 +18,37 @@ namespace Study3D.FpsGame.Interaction
 
         public virtual string DisplayName => displayName;
         public virtual string ActionText => actionText;
-        public Vector3 PromptPosition => promptAnchor != null ? promptAnchor.position : transform.position;
+
+        public Vector3 PromptPosition
+        {
+            get
+            {
+                if (promptAnchor != null)
+                    return promptAnchor.position;
+
+                return transform.position;
+            }
+        }
 
         private PlayerInteractor interactor;
 
         // 상황에 따라 막을 때 override 합니다. (골드 부족 등)
-        public virtual bool CanInteract(LocalPlayer player) => true;
+        public virtual bool CanInteract(LocalPlayer player)
+        {
+            return true;
+        }
 
         // F키를 눌렀을 때 실제 행동
         public abstract void Interact(LocalPlayer player);
 
         private void OnTriggerEnter(Collider other)
         {
-            LocalPlayer player = Player.Player.LocalPlayer;
-            if (player == null || other != player.MainCollider) return;
+            if (IsLocalPlayer(other) == false)
+                return;
 
             // 플레이어 쪽 컴포넌트는 처음 들어올 때 한 번만 찾아 둡니다.
-            if (interactor == null) interactor = player.GetComponent<PlayerInteractor>();
+            if (interactor == null)
+                interactor = Player.Player.LocalPlayer.GetComponent<PlayerInteractor>();
             if (interactor == null)
             {
                 Debug.LogWarning("[Interactable] 플레이어에 PlayerInteractor가 없습니다.", this);
@@ -45,16 +59,24 @@ namespace Study3D.FpsGame.Interaction
 
         private void OnTriggerExit(Collider other)
         {
-            LocalPlayer player = Player.Player.LocalPlayer;
-            if (player == null || other != player.MainCollider) return;
+            if (IsLocalPlayer(other) == false)
+                return;
 
-            if (interactor != null) interactor.RemoveCandidate(this);
+            if (interactor != null)
+                interactor.RemoveCandidate(this);
         }
 
         // 범위 안에서 꺼지거나 사라지면 OnTriggerExit가 오지 않으므로 직접 빠집니다.
         private void OnDisable()
         {
-            if (interactor != null) interactor.RemoveCandidate(this);
+            if (interactor != null)
+                interactor.RemoveCandidate(this);
+        }
+
+        private static bool IsLocalPlayer(Collider other)
+        {
+            LocalPlayer player = Player.Player.LocalPlayer;
+            return player != null && other == player.MainCollider;
         }
     }
 }

@@ -14,7 +14,8 @@ namespace Study3D.FpsGame
         private void Awake()
         {
             // EffectSpawner가 런타임에 붙인 경우처럼 Inspector에서 연결하지 않았으면, 가장 위의 파티클을 찾아 씁니다.
-            if (particle == null) particle = GetComponentInChildren<ParticleSystem>();
+            if (particle == null)
+                particle = GetComponentInChildren<ParticleSystem>();
         }
 
         private void Update()
@@ -22,7 +23,8 @@ namespace Study3D.FpsGame
             // 파티클이 집(ObjectPool)으로 돌아가는 시기는
             // 재생이 끝났을때 입니다.
             // 자식 파티클까지 모두 끝나야 끝난 것으로 봅니다. (여러 파티클로 이루어진 이펙트가 중간에 잘리지 않도록)
-            if(particle.IsAlive(true) == false) ReturnToPool();
+            if (particle.IsAlive(true) == false)
+                ReturnToPool();
         }
 
         // 파티클의 Stop Action이 Disable이면 끝나는 순간 유니티가 먼저 꺼 버려서 Update가 돌지 않습니다.
@@ -30,7 +32,9 @@ namespace Study3D.FpsGame
         // 씬이 끝나며 파괴되거나 부모가 꺼진 경우(activeSelf는 그대로 true)는 반환하지 않습니다.
         private void OnDisable()
         {
-            if (gameObject.activeSelf) return;
+            if (gameObject.activeSelf)
+                return;
+
             ReturnToPool();
         }
 
@@ -39,7 +43,9 @@ namespace Study3D.FpsGame
         // 씬이 끝나면서 풀 매니저가 먼저 사라졌거나, 풀 없이 만든 이펙트(Key 없음)는 반환하지 않습니다.
         public void ReturnToPool()
         {
-            if (Key == null || ObjectPoolManager.Instance == null) return;
+            if (Key == null || ObjectPoolManager.Instance == null)
+                return;
+
             ObjectPoolManager.Instance.ReturnToPool(this);
         }
         

@@ -26,19 +26,36 @@ namespace Study3D.FpsGame.Deck
 
             if (IsChasing(projectile, target, context.Center) == false)
             {
-                projectile.SteerTarget = null;
-                if (context.Count > 0)
-                {
-                    context.Count--;
+                target = SearchNewTarget(context, projectile);
+                if (target == null)
                     return;
-                }
-
-                context.Count = searchInterval;
-                target = FindNearestEnemy(context.Center, radius, projectile.LastHitTarget);
-                if (target == null) return;
-                projectile.SteerTarget = target;
             }
 
+            TurnToward(context, projectile, target);
+        }
+
+        // 쫓던 적을 놓쳤으면 searchInterval 프레임마다 새 적을 찾습니다. 기다리는 중이거나 못 찾았으면 null
+        private Collider SearchNewTarget(CardContext context, Projectile projectile)
+        {
+            projectile.SteerTarget = null;
+            if (context.Count > 0)
+            {
+                context.Count--;
+                return null;
+            }
+
+            context.Count = searchInterval;
+            Collider target = FindNearestEnemy(context.Center, radius, projectile.LastHitTarget);
+            if (target == null)
+                return null;
+
+            projectile.SteerTarget = target;
+            return target;
+        }
+
+        // 제한된 회전 속도로 target을 향해 진행 방향을 틉니다.
+        private void TurnToward(CardContext context, Projectile projectile, Collider target)
+        {
             float maxRadians = turnSpeed * context.Multiplier.Effect * Mathf.Deg2Rad * Time.deltaTime;
             Vector3 direction = Vector3.RotateTowards(context.Forward, target.bounds.center - context.Center, maxRadians, 0f);
             projectile.Steer(context, direction);
@@ -47,8 +64,10 @@ namespace Study3D.FpsGame.Deck
         // 쫓던 적을 계속 쫓을 수 있는지: 살아 있고(Collider가 켜져 있음), 직전에 맞힌 적이 아니고, 너무 멀어지지 않았는지
         private bool IsChasing(Projectile projectile, Collider target, Vector3 origin)
         {
-            if (target == null || target.enabled == false || target.gameObject.activeInHierarchy == false) return false;
-            if (CombatSystem.Instance.GetMonsterOrNull(target) == projectile.LastHitTarget) return false;
+            if (target == null || target.enabled == false || target.gameObject.activeInHierarchy == false)
+                return false;
+            if (CombatSystem.Instance.GetMonsterOrNull(target) == projectile.LastHitTarget)
+                return false;
 
             float maxRange = radius * loseRange;
             return (target.bounds.center - origin).sqrMagnitude <= maxRange * maxRange;

@@ -33,17 +33,33 @@ namespace Study3D.FpsGame.Player
         
         private void Update()
         {
-            // (테스트용) 강화 화면 열기/닫기. 나중에는 강화 오브젝트가 UpgradeScreen.Instance.Open()을 부릅니다.
             // 화면이 열려 있어도 닫을 수 있어야 하므로 CanAct보다 먼저 받습니다. (죽었으면 열리지 않음)
-            if (SimpleInput.GetKeyDown(Key.B) && UpgradeScreen.Instance != null) UpgradeScreen.Instance.Toggle();
+            UpdateMenuInput();
+
             // 조작할 수 없는 동안(강화 화면, 사망 등)은 이동/점프/시점 회전/발사/카드 입력을 모두 막습니다.
             bool canAct = Player.LocalPlayer.CanAct;
 
             UpdateMovement(canAct);
-            if (canAct == false) return;
+            if (canAct == false)
+                return;
 
             UpdateCameraRotation();
             UpdatePlayerInput();
+        }
+
+        // 메뉴 화면 열기/닫기 키 입력
+        private void UpdateMenuInput()
+        {
+            if (MenuScreen.Instance == null)
+                return;
+
+            // (테스트용) 강화 화면 열기/닫기. 대장간은 MenuScreen.Instance.Open(MenuMode.Upgrade)를 부릅니다.
+            if (SimpleInput.GetKeyDown(Key.B))
+                MenuScreen.Instance.Toggle(MenuMode.Upgrade);
+
+            // 인벤토리 열기/닫기. (강화 화면이 열려 있으면 인벤토리로 바뀝니다)
+            if (SimpleInput.GetKeyDown(Key.Tab))
+                MenuScreen.Instance.Toggle(MenuMode.Inventory);
         }
 
         // Animator가 포즈를 적용한 다음에 실행되므로, 여기서 바꾼 본 회전은 덮어써지지 않습니다.

@@ -27,6 +27,15 @@ namespace Study3D.FpsGame.Map
         // 남은 거리 표: portalDist[연결점 번호 * 영역 수 + 목표 영역] (갈 수 없으면 float.MaxValue)
         public float[] portalDist;
 
-        public int RegionCount => regionStarts == null ? 0 : regionStarts.Length;
+        public int RegionCount
+        {
+            get
+            {
+                if (regionStarts == null)
+                    return 0;
+
+                return regionStarts.Length;
+            }
+        }
     }
 }

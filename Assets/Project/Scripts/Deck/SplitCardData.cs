@@ -17,17 +17,29 @@ namespace Study3D.FpsGame.Deck
 
         public override CardType Type => CardType.Enhance;
 
-        protected override void OnShoot(CardContext context) => Split(context);
-        protected override void OnFlying(CardContext context) => Split(context);
-        protected override void OnHit(CardContext context) => Split(context);
-        protected override void OnDestroyed(CardContext context) => Split(context);
+        protected override void OnShoot(CardContext context)
+        {
+            Split(context);
+        }
+
+        protected override void OnFlying(CardContext context)
+        {
+            Split(context);
+        }
+
+        protected override void OnHit(CardContext context)
+        {
+            Split(context);
+        }
+
+        protected override void OnDestroyed(CardContext context)
+        {
+            Split(context);
+        }
 
         private void Split(CardContext context)
         {
-            Vector3 baseDirection = context.Target != null && context.IsEnemy == false
-                ? Vector3.Reflect(context.Forward, context.Normal)
-                : context.Forward;
-            Quaternion baseRotation = Quaternion.LookRotation(baseDirection);
+            Quaternion baseRotation = Quaternion.LookRotation(GetBaseDirection(context));
 
             int count = CeilMultiply(extraCount, context.Multiplier.Effect);
             int absorbed = 0;
@@ -35,11 +47,23 @@ namespace Study3D.FpsGame.Deck
             {
                 float yaw = Random.Range(-horizontalAngle, horizontalAngle);
                 float pitch = Random.Range(-verticalAngle, verticalAngle);
-                if (context.Projectile.SpawnSplit(context, baseRotation * Quaternion.Euler(pitch, yaw, 0f)) == false) absorbed++;
+                Quaternion childRotation = baseRotation * Quaternion.Euler(pitch, yaw, 0f);
+                if (context.Projectile.SpawnSplit(context, childRotation) == false)
+                    absorbed++;
             }
 
             // 발사체 상한 때문에 만들지 못한 자식은 원본의 화력으로 바꿉니다.
             context.Projectile.AbsorbSplits(context, absorbed);
+        }
+
+        // 퍼지는 기준 방향: 벽에 부딪혔으면 반사 방향, 그 밖에는 진행 방향
+        private Vector3 GetBaseDirection(CardContext context)
+        {
+            bool hitWorld = context.Target != null && context.IsEnemy == false;
+            if (hitWorld)
+                return Vector3.Reflect(context.Forward, context.Normal);
+
+            return context.Forward;
         }
     }
 }

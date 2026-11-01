@@ -1,7 +1,14 @@
 fileFormatVersion: 2
 guid: 211ae48c590f0f64dbaeecf142a60ace
+AssetOrigin:
+  serializedVersion: 1
+  productId: 388082
+  packageName: Low Poly Witch & Folk Magic Pack
+  packageVersion: 1.0
+  assetPath: Assets/LoneAcorn/LowPolyWitchFolkMagic/Meshes/Plant1.fbx
+  uploadId: 938486
 ModelImporter:
-  serializedVersion: 22200
+  serializedVersion: 24200
   internalIDToNameTable: []
   externalObjects: {}
   materials:
@@ -30,7 +37,7 @@ ModelImporter:
     extraExposedTransformPaths: []
     extraUserProperties: []
     clipAnimations: []
-    isReadable: 0
+    isReadable: 1
   meshes:
     lODScreenPercentages: []
     globalScale: 1
@@ -56,6 +63,9 @@ ModelImporter:
     maxBonesPerVertex: 4
     minBoneWeight: 0.001
     optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
     meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8
@@ -105,10 +115,3 @@ ModelImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 388082
-  packageName: Low Poly Witch & Folk Magic Pack
-  packageVersion: 1.0
-  assetPath: Assets/LoneAcorn/LowPolyWitchFolkMagic/Meshes/Plant1.fbx
-  uploadId: 938486

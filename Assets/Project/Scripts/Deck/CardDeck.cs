@@ -24,7 +24,17 @@ namespace Study3D.FpsGame.Deck
         public IReadOnlyList<CardData> DiscardPile => discardPile;
         public IReadOnlyList<CardData> ModifierPile => modifierPile;
         public int SelectedIndex => selectedIndex;
-        public CardData SelectedCard => hand.Count > 0 ? hand[selectedIndex] : null;
+
+        public CardData SelectedCard
+        {
+            get
+            {
+                if (hand.Count == 0)
+                    return null;
+
+                return hand[selectedIndex];
+            }
+        }
 
         // 손패 최대 장수. 런타임에 늘리거나 줄일 수 있습니다.
         // 줄였을 때 이미 들고 있는 카드는 버리지 않고, 이후 드로우/획득만 막습니다.
@@ -42,8 +52,14 @@ namespace Study3D.FpsGame.Deck
         {
             foreach (CardData card in cards)
             {
-                if (card.Type == CardType.Modifier) modifierPile.Add(card);
-                else drawPile.Add(card);
+                if (card.Type == CardType.Modifier)
+                {
+                    modifierPile.Add(card);
+                }
+                else
+                {
+                    drawPile.Add(card);
+                }
             }
             HandLimit = handLimit;
         }
@@ -53,14 +69,16 @@ namespace Study3D.FpsGame.Deck
         // 그래도 없으면 false를 반환합니다.
         public bool Draw()
         {
-            if (IsHandFull) return false;
+            if (IsHandFull)
+                return false;
 
             if (drawPile.Count == 0)
             {
                 drawPile.AddRange(discardPile);
                 discardPile.Clear();
             }
-            if (drawPile.Count == 0) return false;
+            if (drawPile.Count == 0)
+                return false;
 
             int index = UnityEngine.Random.Range(0, drawPile.Count);
             CardData card = drawPile[index];
@@ -73,9 +91,18 @@ namespace Study3D.FpsGame.Deck
         // 강화 전용 카드는 항상 강화 전용 보관함으로 갑니다.
         public void Acquire(CardData card)
         {
-            if (card.Type == CardType.Modifier) modifierPile.Add(card);
-            else if (IsHandFull) discardPile.Add(card);
-            else AddToHand(card);
+            if (card.Type == CardType.Modifier)
+            {
+                modifierPile.Add(card);
+            }
+            else if (IsHandFull)
+            {
+                discardPile.Add(card);
+            }
+            else
+            {
+                AddToHand(card);
+            }
         }
 
         // 손패가 가득 차거나 뽑을 카드가 없을 때까지 드로우합니다.
@@ -86,54 +113,91 @@ namespace Study3D.FpsGame.Deck
 
         public void Select(int index)
         {
-            if (index < 0 || index >= hand.Count) return;
+            if (index < 0 || index >= hand.Count)
+                return;
+
             selectedIndex = index;
-            OnSelectionChanged?.Invoke(selectedIndex);
+            if (OnSelectionChanged != null)
+                OnSelectionChanged.Invoke(selectedIndex);
         }
 
         // 선택을 step칸 옮깁니다. 끝을 넘어가면 반대쪽 끝으로 돌아갑니다.
         public void SelectNext(int step)
         {
-            if (hand.Count == 0) return;
-            Select(((selectedIndex + step) % hand.Count + hand.Count) % hand.Count);
+            if (hand.Count == 0)
+                return;
+
+            // step이 음수여도 0 ~ hand.Count - 1 안으로 돌아오도록 한 번 더 더해서 나눕니다.
+            int nextIndex = ((selectedIndex + step) % hand.Count + hand.Count) % hand.Count;
+            Select(nextIndex);
         }
 
         // 선택된 카드를 손패에서 빼서 버린 카드로 보냅니다.
         // 같은 자리에 있던 다음 카드가 자연스럽게 선택됩니다.
         public void DiscardSelected()
         {
-            if (hand.Count == 0) return;
+            if (hand.Count == 0)
+                return;
 
             int removedIndex = selectedIndex;
             discardPile.Add(hand[removedIndex]);
             hand.RemoveAt(removedIndex);
-            if (selectedIndex >= hand.Count) selectedIndex = Mathf.Max(0, hand.Count - 1);
+            ClampSelectedIndex();
 
-            OnCardRemoved?.Invoke(removedIndex);
-            OnSelectionChanged?.Invoke(hand.Count > 0 ? selectedIndex : -1);
+            if (OnCardRemoved != null)
+                OnCardRemoved.Invoke(removedIndex);
+            NotifySelectionAfterRemove();
         }
 
         // 손패 index번째 카드를 다른 카드로 바꿉니다. 자리와 선택은 그대로 둡니다.
         public void ReplaceInHand(int index, CardData card)
         {
-            if (index < 0 || index >= hand.Count) return;
+            if (index < 0 || index >= hand.Count)
+                return;
 
             hand[index] = card;
-            OnCardChanged?.Invoke(index);
+            if (OnCardChanged != null)
+                OnCardChanged.Invoke(index);
         }
 
         // 손패 index번째 카드를 버린 카드로 보내지 않고 덱에서 완전히 없앱니다. (강화 재료 등)
         // 선택된 카드는 자리가 당겨져도 같은 카드가 계속 선택되고, 선택된 카드가 빠지면 같은 자리의 다음 카드가 선택됩니다.
         public void RemoveFromHand(int index)
         {
-            if (index < 0 || index >= hand.Count) return;
+            if (index < 0 || index >= hand.Count)
+                return;
 
             hand.RemoveAt(index);
-            if (index < selectedIndex) selectedIndex--;
-            if (selectedIndex >= hand.Count) selectedIndex = Mathf.Max(0, hand.Count - 1);
+            if (index < selectedIndex)
+                selectedIndex--;
+            ClampSelectedIndex();
 
-            OnCardRemoved?.Invoke(index);
-            OnSelectionChanged?.Invoke(hand.Count > 0 ? selectedIndex : -1);
+            if (OnCardRemoved != null)
+                OnCardRemoved.Invoke(index);
+            NotifySelectionAfterRemove();
+        }
+
+        // 손패가 줄어서 선택 인덱스가 끝을 넘어갔으면 마지막 카드로 당깁니다.
+        private void ClampSelectedIndex()
+        {
+            if (selectedIndex >= hand.Count)
+                selectedIndex = Mathf.Max(0, hand.Count - 1);
+        }
+
+        // 카드가 빠진 뒤의 선택을 알립니다. 손패가 비었으면 -1
+        private void NotifySelectionAfterRemove()
+        {
+            if (OnSelectionChanged == null)
+                return;
+
+            if (hand.Count > 0)
+            {
+                OnSelectionChanged.Invoke(selectedIndex);
+            }
+            else
+            {
+                OnSelectionChanged.Invoke(-1);
+            }
         }
 
         // 덱 카드(손패, 뽑을 카드, 버린 카드)의 평균 강화 차수 입니다. 강화 전용 카드는 세지 않습니다. 카드가 없으면 1
@@ -142,52 +206,88 @@ namespace Study3D.FpsGame.Deck
             get
             {
                 int count = hand.Count + drawPile.Count + discardPile.Count;
-                if (count == 0) return 1f;
+                if (count == 0)
+                    return 1f;
 
-                int sum = 0;
-                foreach (CardData card in hand) sum += card.EnhanceLevel;
-                foreach (CardData card in drawPile) sum += card.EnhanceLevel;
-                foreach (CardData card in discardPile) sum += card.EnhanceLevel;
+                int sum = SumEnhanceLevel(hand) + SumEnhanceLevel(drawPile) + SumEnhanceLevel(discardPile);
                 return (float)sum / count;
             }
         }
 
+        private int SumEnhanceLevel(List<CardData> pile)
+        {
+            int sum = 0;
+            foreach (CardData card in pile)
+            {
+                sum += card.EnhanceLevel;
+            }
+            return sum;
+        }
+
         // 덱 전체 번호: 손패 → 뽑을 카드 → 버린 카드 → 강화 전용 보관함 순으로 이어 붙인 번호 입니다. (강화 화면 목록과 같은 순서)
-        public int TotalCount => hand.Count + drawPile.Count + discardPile.Count + modifierPile.Count;
+        public int TotalCount
+        {
+            get { return hand.Count + drawPile.Count + discardPile.Count + modifierPile.Count; }
+        }
 
         public CardData GetCard(int totalIndex)
         {
             List<CardData> pile = FindPile(ref totalIndex);
-            return pile != null ? pile[totalIndex] : null;
+            if (pile == null)
+                return null;
+
+            return pile[totalIndex];
         }
 
         // 덱 전체 번호의 카드를 다른 카드로 바꿉니다. 손패면 OnCardChanged로 알립니다.
         public void Replace(int totalIndex, CardData card)
         {
             List<CardData> pile = FindPile(ref totalIndex);
-            if (pile == hand) ReplaceInHand(totalIndex, card);
-            else if (pile != null) pile[totalIndex] = card;
+            if (pile == hand)
+            {
+                ReplaceInHand(totalIndex, card);
+            }
+            else if (pile != null)
+            {
+                pile[totalIndex] = card;
+            }
         }
 
         // 덱 전체 번호의 카드를 덱에서 완전히 없앱니다. 손패면 OnCardRemoved로 알립니다.
         public void Remove(int totalIndex)
         {
             List<CardData> pile = FindPile(ref totalIndex);
-            if (pile == hand) RemoveFromHand(totalIndex);
-            else if (pile != null) pile.RemoveAt(totalIndex);
+            if (pile == hand)
+            {
+                RemoveFromHand(totalIndex);
+            }
+            else if (pile != null)
+            {
+                pile.RemoveAt(totalIndex);
+            }
         }
 
         // 덱 전체 번호가 속한 더미를 찾고, 번호를 그 더미 안의 번호로 바꿉니다. 범위 밖이면 null
         private List<CardData> FindPile(ref int index)
         {
-            if (index < 0) return null;
-            if (index < hand.Count) return hand;
+            if (index < 0)
+                return null;
+
+            if (index < hand.Count)
+                return hand;
             index -= hand.Count;
-            if (index < drawPile.Count) return drawPile;
+
+            if (index < drawPile.Count)
+                return drawPile;
             index -= drawPile.Count;
-            if (index < discardPile.Count) return discardPile;
+
+            if (index < discardPile.Count)
+                return discardPile;
             index -= discardPile.Count;
-            if (index < modifierPile.Count) return modifierPile;
+
+            if (index < modifierPile.Count)
+                return modifierPile;
+
             return null;
         }
 
@@ -198,16 +298,21 @@ namespace Study3D.FpsGame.Deck
             hand.Clear();
             selectedIndex = 0;
 
-            OnHandCleared?.Invoke();
-            OnSelectionChanged?.Invoke(-1);
+            if (OnHandCleared != null)
+                OnHandCleared.Invoke();
+            if (OnSelectionChanged != null)
+                OnSelectionChanged.Invoke(-1);
         }
 
         private void AddToHand(CardData card)
         {
             hand.Add(card);
-            OnCardAdded?.Invoke(card);
+            if (OnCardAdded != null)
+                OnCardAdded.Invoke(card);
+
             // 빈 손패에 처음 들어온 카드는 자동으로 선택된 상태가 됩니다.
-            if (hand.Count == 1) OnSelectionChanged?.Invoke(selectedIndex);
+            if (hand.Count == 1 && OnSelectionChanged != null)
+                OnSelectionChanged.Invoke(selectedIndex);
         }
     }
 }

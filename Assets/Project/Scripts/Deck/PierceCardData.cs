@@ -13,7 +13,8 @@ namespace Study3D.FpsGame.Deck
 
         protected override void OnHit(CardContext context)
         {
-            if (TryRespond(context) == false) return;
+            if (TryRespond(context) == false)
+                return;
 
             context.Projectile.PassThrough();
         }

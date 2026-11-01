@@ -9,8 +9,8 @@ namespace Study3D.FpsGame.Weapon.Cards
     public struct CardMultiplier
     {
         public float Size;   // 발사체 크기
-        public float Effect; // 부가 효과 (폭발 반경/피해, 분열 수, 관통/반사 횟수 등)
-        public float Damage; // 발사체가 직접 주는 피해
+        public float Effect; // 부가 효과 (폭발 반경, 분열 수, 관통/반사 횟수 등)
+        public float Damage; // 발사체 피해. 효과 피해(폭발 등)도 발사체 피해를 기준으로 하므로 함께 바뀝니다.
 
         public static CardMultiplier One => new CardMultiplier { Size = 1f, Effect = 1f, Damage = 1f };
 

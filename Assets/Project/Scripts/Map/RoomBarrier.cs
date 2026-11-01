@@ -25,7 +25,10 @@ namespace Study3D.FpsGame.Map
 
         private void Awake()
         {
-            if (!initialized) Setup(transform.localPosition, travel);
+            if (!initialized)
+            {
+                Setup(transform.localPosition, travel);
+            }
         }
 
         // closedLocalPosition: 닫혔을 때 위치 (부모 기준), travelDistance: 열릴 때 내려갈 거리
@@ -40,9 +43,12 @@ namespace Study3D.FpsGame.Map
                 travelDistance = 3f;
                 if (renderers.Length > 0)
                 {
-                    Bounds b = renderers[0].bounds;
-                    foreach (var r in renderers) b.Encapsulate(r.bounds);
-                    travelDistance = b.size.y;
+                    Bounds bounds = renderers[0].bounds;
+                    foreach (Renderer r in renderers)
+                    {
+                        bounds.Encapsulate(r.bounds);
+                    }
+                    travelDistance = bounds.size.y;
                 }
             }
             // 바닥과 겹쳐 깜빡이지 않도록 살짝 더 내림
@@ -51,13 +57,23 @@ namespace Study3D.FpsGame.Map
             SetClosed(closed, true);
         }
 
-        public void Close() => SetClosed(true, false);
-        public void Open() => SetClosed(false, false);
+        public void Close()
+        {
+            SetClosed(true, false);
+        }
+
+        public void Open()
+        {
+            SetClosed(false, false);
+        }
 
         public void SetClosed(bool value, bool immediate)
         {
             closed = value;
-            if (immediate) progress = closed ? 1f : 0f;
+            if (immediate)
+            {
+                progress = closed ? 1f : 0f;
+            }
             Apply();
             enabled = !immediate;
         }
@@ -67,7 +83,10 @@ namespace Study3D.FpsGame.Map
             float target = closed ? 1f : 0f;
             progress = Mathf.MoveTowards(progress, target, Time.deltaTime / Mathf.Max(moveTime, 0.01f));
             Apply();
-            if (Mathf.Approximately(progress, target)) enabled = false;
+            if (Mathf.Approximately(progress, target))
+            {
+                enabled = false;
+            }
         }
 
         private void Apply()
@@ -76,8 +95,14 @@ namespace Study3D.FpsGame.Map
 
             // 움직이는 중에는 보이고 막혀 있어야 함. 완전히 열렸을 때만 끔
             bool visible = progress > 0f;
-            foreach (var r in renderers) r.enabled = visible;
-            foreach (var c in colliders) c.enabled = visible;
+            foreach (Renderer r in renderers)
+            {
+                r.enabled = visible;
+            }
+            foreach (Collider c in colliders)
+            {
+                c.enabled = visible;
+            }
         }
     }
 }

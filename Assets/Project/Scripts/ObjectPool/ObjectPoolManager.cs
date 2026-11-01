@@ -55,14 +55,15 @@ namespace Study3D.FpsGame
                 this.parent = parent;
                 this.expandSize = Mathf.Max(1, expandSize);
                 this.key = key;
-                Expand();
             }
 
-            private void Expand()
+            // 처음 채우기는 딕셔너리에 등록한 뒤 부릅니다. (CreatePool)
+            // 끄는 순간 OnDisable에서 반환하는 아이템이 이 풀을 찾을 수 있어야 하기 때문입니다.
+            public void Expand()
             {
                 for (int i = 0; i < expandSize; i++)
                 {
-                    var instance = Instantiate(prefab, parent).GetComponent<IObjectPoolItem>();
+                    IObjectPoolItem instance = Instantiate(prefab, parent).GetComponent<IObjectPoolItem>();
                     instance.Key = key;
                     createdCount++;
                     Return(instance);
@@ -71,7 +72,9 @@ namespace Study3D.FpsGame
 
             public IObjectPoolItem Get()
             {
-                if (pool.Count == 0) Expand();
+                if (pool.Count == 0)
+                    Expand();
+
                 IObjectPoolItem item = pool.Pop();
                 inPool.Remove(item);
                 return item;
@@ -82,9 +85,11 @@ namespace Study3D.FpsGame
             // - 이미 꺼진 상태(꺼지면서 OnDisable에서 반환하는 중)면 다시 끄지 않습니다.
             public void Return(IObjectPoolItem item)
             {
-                if (inPool.Add(item) == false) return;
+                if (inPool.Add(item) == false)
+                    return;
 
-                if (item.GameObject.activeSelf) item.GameObject.SetActive(false);
+                if (item.GameObject.activeSelf)
+                    item.GameObject.SetActive(false);
                 pool.Push(item);
             }
         }
@@ -110,12 +115,13 @@ namespace Study3D.FpsGame
 
         private void OnDestroy()
         {
-            if (Instance == this) Instance = null;
+            if (Instance == this)
+                Instance = null;
         }
 
         private void Start()
         {
-            foreach (var data in objectPoolDatas)
+            foreach (ObjectPoolData data in objectPoolDatas)
             {
                 CreatePool(data);
             }
@@ -139,17 +145,31 @@ namespace Study3D.FpsGame
             }
 
             Transform poolParent = data.Parent == null ? transform : data.Parent;
-            objectPoolDic.Add(data.Key, new ObjectPool(data.Prefab, poolParent, data.ExpandSize, data.Key));
+            ObjectPool pool = new ObjectPool(data.Prefab, poolParent, data.ExpandSize, data.Key);
+            objectPoolDic.Add(data.Key, pool);
+            pool.Expand();
         }
 
-        public bool HasPool(string key) => objectPoolDic.ContainsKey(key);
+        public bool HasPool(string key)
+        {
+            return objectPoolDic.ContainsKey(key);
+        }
 
         // key 풀에서 꺼내져 사용 중인 수. 풀이 없으면 0 (이펙트 예산이 동시 개수를 셀 때 사용)
-        public int GetActiveCount(string key) => objectPoolDic.TryGetValue(key, out var pool) ? pool.ActiveCount : 0;
+        public int GetActiveCount(string key)
+        {
+            ObjectPool pool;
+            if (objectPoolDic.TryGetValue(key, out pool) == false)
+                return 0;
+
+            return pool.ActiveCount;
+        }
 
         public IObjectPoolItem GetObjectOrNull(string key)
         {
-            if (objectPoolDic.TryGetValue(key, out var pool)) return pool.Get();
+            ObjectPool pool;
+            if (objectPoolDic.TryGetValue(key, out pool))
+                return pool.Get();
 
             Debug.LogWarning($"{key}값의 Pool이 존재하지 않습니다");
             return null;
@@ -161,7 +181,8 @@ namespace Study3D.FpsGame
         //  (내가 너무 많이 실수를 해서 저만 이렇게 처리할수도 있어요)
         public void ReturnToPool(IObjectPoolItem item)
         {
-            if (objectPoolDic.TryGetValue(item.Key, out var pool) == false)
+            ObjectPool pool;
+            if (objectPoolDic.TryGetValue(item.Key, out pool) == false)
             {
                 Debug.LogWarning($"{item.Key}값의 Pool이 존재하지 않습니다");
                 return;

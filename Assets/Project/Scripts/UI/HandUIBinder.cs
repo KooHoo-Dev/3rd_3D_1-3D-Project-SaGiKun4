@@ -34,6 +34,7 @@ namespace Study3D.FpsGame.UI
             public ParticleSystem vanishEffect;
             public TMP_Text titleText;
             public TMP_Text typeText;
+            public TMP_Text descText;
         }
 
         [SerializeField] private List<SlotView> slotViews = new List<SlotView>();
@@ -63,6 +64,7 @@ namespace Study3D.FpsGame.UI
             public ParticleSystem[] EffectSystems;
             public TMP_Text TitleText;
             public TMP_Text TypeText;
+            public TMP_Text DescText;
         }
 
         public IReadOnlyList<SlotView> SlotViews => slotViews;
@@ -107,9 +109,13 @@ namespace Study3D.FpsGame.UI
         {
             // 종료나 씬 전환 때 LocalPlayer가 먼저 파괴됐으면 이미 null이라 해제할 대상이 없습니다.
             if (Player.Player.LocalPlayer != null)
+            {
                 Player.Player.LocalPlayer.OnRequestedReload -= OnRequestedReload;
+            }
 
-            if (deck == null) return;
+            if (deck == null)
+                return;
+
             deck.OnCardAdded -= OnCardAdded;
             deck.OnCardRemoved -= OnCardRemoved;
             deck.OnCardChanged -= OnCardChanged;
@@ -138,13 +144,17 @@ namespace Study3D.FpsGame.UI
             handView.Refresh();
 
             // 카드가 켜진 뒤라야 등장 연출(코루틴)을 시작할 수 있습니다.
-            if (parts.Appear != null) parts.Appear.Play();
+            if (parts.Appear != null)
+            {
+                parts.Appear.Play();
+            }
         }
 
         // 사용한 카드는 사라짐 연출을 시작합니다. 덱 순서와 맞추기 위해 손패 목록에서는 바로 뺍니다.
         private void OnCardRemoved(int index)
         {
-            if (index < 0 || index >= shownSlots.Count) return;
+            if (index < 0 || index >= shownSlots.Count)
+                return;
 
             RectTransform slot = shownSlots[index];
             shownSlots.RemoveAt(index);
@@ -154,9 +164,11 @@ namespace Study3D.FpsGame.UI
         // 같은 자리의 카드가 바뀌면(강화 등) 글자만 새 카드로 바꿉니다.
         private void OnCardChanged(int index)
         {
-            if (index < 0 || index >= shownSlots.Count) return;
+            if (index < 0 || index >= shownSlots.Count)
+                return;
 
-            ApplyCardData(slotParts[shownSlots[index]], deck.Hand[index]);
+            RectTransform slot = shownSlots[index];
+            ApplyCardData(slotParts[slot], deck.Hand[index]);
         }
 
         private void OnHandCleared()
@@ -175,7 +187,10 @@ namespace Study3D.FpsGame.UI
         // - 완료 시점의 HideAll은 사라지는 중인 슬롯을 건너뛰므로 연출이 끊기지 않습니다.
         private void OnRequestedReload()
         {
-            foreach (RectTransform slot in shownSlots) StartCoroutine(VanishRoutine(slot));
+            foreach (RectTransform slot in shownSlots)
+            {
+                StartCoroutine(VanishRoutine(slot));
+            }
             shownSlots.Clear();
         }
 
@@ -194,10 +209,13 @@ namespace Study3D.FpsGame.UI
             handView.BeginLeaving(slot);
 
             SlotParts parts = slotParts[slot];
-            if (parts.Appear != null && parts.Appear.CanVanish && parts.Card.activeInHierarchy)
+            if (CanVanishByNoise(parts))
             {
                 parts.Appear.PlayVanish();
-                while (parts.Appear.IsVanishing) yield return null;
+                while (parts.Appear.IsVanishing)
+                {
+                    yield return null;
+                }
                 // 다 탄 상태에서 끄므로 번쩍임 없이 사라지고, 꺼질 때 카드는 원래 머티리얼로 돌아갑니다.
                 parts.Card.SetActive(false);
             }
@@ -206,10 +224,16 @@ namespace Study3D.FpsGame.UI
                 parts.Effect.gameObject.SetActive(true);
                 parts.Effect.Play(true);
 
-                while (parts.Effect.time < hideCardTime && IsFinished(parts) == false) yield return null;
+                while (parts.Effect.time < hideCardTime && IsFinished(parts) == false)
+                {
+                    yield return null;
+                }
                 parts.Card.SetActive(false);
 
-                while (IsFinished(parts) == false) yield return null;
+                while (IsFinished(parts) == false)
+                {
+                    yield return null;
+                }
                 StopEffect(parts);
             }
             else
@@ -220,7 +244,20 @@ namespace Study3D.FpsGame.UI
             slot.gameObject.SetActive(false);
             vanishingSlots.Remove(slot);
             handView.EndLeaving(slot);
-            OnCardVanished?.Invoke(slot);
+
+            if (OnCardVanished != null)
+            {
+                OnCardVanished.Invoke(slot);
+            }
+        }
+
+        // 노이즈로 태워 없앨 수 있는 카드인지 (등장 연출이 있고, 카드가 켜져 있어야 함)
+        private static bool CanVanishByNoise(SlotParts parts)
+        {
+            if (parts.Appear == null)
+                return false;
+
+            return parts.Appear.CanVanish && parts.Card.activeInHierarchy;
         }
 
         // 슬롯마다 넣어 둔 참조를 정리해 둡니다. 파티클은 꺼 둡니다.
@@ -235,14 +272,14 @@ namespace Study3D.FpsGame.UI
                     continue;
                 }
 
-                SlotParts parts = new SlotParts
-                {
-                    Card = view.card,
-                    Appear = view.appear,
-                    Effect = view.vanishEffect,
-                    TitleText = view.titleText,
-                    TypeText = view.typeText,
-                };
+                SlotParts parts = new SlotParts();
+                parts.Card = view.card;
+                parts.Appear = view.appear;
+                parts.Effect = view.vanishEffect;
+                parts.TitleText = view.titleText;
+                parts.TypeText = view.typeText;
+                parts.DescText = view.descText;
+
                 if (parts.Effect != null)
                 {
                     parts.EffectSystems = parts.Effect.GetComponentsInChildren<ParticleSystem>(true);
@@ -264,8 +301,11 @@ namespace Study3D.FpsGame.UI
         {
             foreach (ParticleSystem system in parts.EffectSystems)
             {
-                if (system.main.loop) continue;
-                if (system.IsAlive(false)) return false;
+                if (system.main.loop)
+                    continue;
+
+                if (system.IsAlive(false))
+                    return false;
             }
             return true;
         }
@@ -278,8 +318,17 @@ namespace Study3D.FpsGame.UI
             HideAll();
             handView.Refresh(true);
 
-            foreach (CardData card in deck.Hand) OnCardAdded(card);
-            handView.SetSelected(deck.Hand.Count > 0 ? deck.SelectedIndex : -1);
+            foreach (CardData card in deck.Hand)
+            {
+                OnCardAdded(card);
+            }
+
+            int selectedIndex = -1;
+            if (deck.Hand.Count > 0)
+            {
+                selectedIndex = deck.SelectedIndex;
+            }
+            handView.SetSelected(selectedIndex);
         }
 
         // 손패를 모두 끕니다. 사라지는 중인 슬롯은 연출이 마저 처리합니다.
@@ -287,7 +336,9 @@ namespace Study3D.FpsGame.UI
         {
             foreach (RectTransform slot in handView.AllCards)
             {
-                if (vanishingSlots.Contains(slot)) continue;
+                if (vanishingSlots.Contains(slot))
+                    continue;
+
                 slot.gameObject.SetActive(false);
             }
             shownSlots.Clear();
@@ -297,7 +348,16 @@ namespace Study3D.FpsGame.UI
         {
             foreach (RectTransform slot in handView.AllCards)
             {
-                if (slot.gameObject.activeSelf || vanishingSlots.Contains(slot) || !slotParts.ContainsKey(slot)) continue;
+                // 이미 켜져 있거나, 사라지는 중이거나, 참조가 없는 슬롯은 건너뜁니다
+                if (slot.gameObject.activeSelf)
+                    continue;
+
+                if (vanishingSlots.Contains(slot))
+                    continue;
+
+                if (!slotParts.ContainsKey(slot))
+                    continue;
+
                 return slot;
             }
             return null;
@@ -306,8 +366,18 @@ namespace Study3D.FpsGame.UI
         // 카드 UI의 글자를 카드 데이터로 바꿉니다.
         private static void ApplyCardData(SlotParts parts, CardData card)
         {
-            if (parts.TitleText != null) parts.TitleText.text = card.CardName;
-            if (parts.TypeText != null) parts.TypeText.text = card.Type.ToString();
+            if (parts.TitleText != null)
+            {
+                parts.TitleText.text = card.CardName;
+            }
+            if (parts.TypeText != null)
+            {
+                parts.TypeText.text = card.Type.ToString();
+            }
+            if (parts.DescText != null)
+            {
+                parts.DescText.text = card.Description;
+            }
         }
     }
 }

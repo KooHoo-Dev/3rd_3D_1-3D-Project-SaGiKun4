@@ -56,7 +56,7 @@ MonoBehaviour:
   entry:
     door: {fileID: 4483368021285172042}
     barrier: {fileID: 9076517011469970514}
-    connected: 0
+    connected: 1
   exit:
     door: {fileID: 162059181278023684}
     barrier: {fileID: 4834666007352921411}
@@ -15771,7 +15771,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4483368021285172042
 Transform:
   m_ObjectHideFlags: 0
@@ -24292,7 +24292,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -20.5
+      value: -19.5
       objectReference: {fileID: 0}
     - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
       propertyPath: m_LocalPosition.y
@@ -24377,7 +24377,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -20.5
+      value: -19.5
       objectReference: {fileID: 0}
     - target: {fileID: 4647751908293666364, guid: 5663bcc1554e72f4e90963d06fb72619, type: 3}
       propertyPath: m_LocalPosition.y

@@ -18,7 +18,8 @@ namespace Study3D.FpsGame
 
         public void OccursAnimStateEvent(string eventName)
         {
-            OnOccursAnimStateEvent?.Invoke(eventName);
+            if (OnOccursAnimStateEvent != null)
+                OnOccursAnimStateEvent.Invoke(eventName);
         }
     }
 }

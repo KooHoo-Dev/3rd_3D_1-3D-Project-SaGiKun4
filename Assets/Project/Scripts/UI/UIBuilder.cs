@@ -110,7 +110,9 @@ public class UIBuilder : MonoBehaviour
         int added = 0;
         foreach (HandUIBinder.SlotView view in builtBinder.SlotViews)
         {
-            if (view.card == null || view.appear != null) continue;
+            if (view.card == null || view.appear != null)
+                continue;
+
             view.appear = CreateAppearEffect((RectTransform)view.card.transform, view.slot, true);
             added++;
         }
@@ -154,43 +156,62 @@ public class UIBuilder : MonoBehaviour
         RectTransform hand = NewUI("HandArea", canvas).GetComponent<RectTransform>();
         Place(hand, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), Vector2.zero, new Vector2(layout.MaxHandWidth, layout.cardSize.y));
 
-        var slots = new List<RectTransform>();
-        var views = new List<HandUIBinder.SlotView>();
+        List<RectTransform> slots = new List<RectTransform>();
+        List<HandUIBinder.SlotView> views = new List<HandUIBinder.SlotView>();
 
         for (int i = 0; i < MaxCards; i++)
         {
-            // 슬롯 = 카드 UI + 사라짐 파티클. 배치는 슬롯이 받는다 (피벗은 카드와 같은 하단 중앙)
-            RectTransform slot = NewUI($"Slot_{i:00}", hand).GetComponent<RectTransform>();
-            Place(slot, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), Vector2.zero, layout.cardSize);
+            HandUIBinder.SlotView view = CreateSlot(i, hand);
+            slots.Add(view.slot);
+            views.Add(view);
 
-            bool isAttack = Random.value < 0.5f;
-            bool upgraded = Random.value < 0.25f;
-            RectTransform card = CreateCard($"Card_{i:00}", slot, isAttack, upgraded, out TMP_Text titleText, out TMP_Text typeText);
-
-            slots.Add(slot);
-            views.Add(new HandUIBinder.SlotView
-            {
-                slot = slot,
-                card = card.gameObject,
-                vanishEffect = CreateVanishEffect(slot),
-                appear = CreateAppearEffect(card, slot, false),
-                titleText = titleText,
-                typeText = typeText,
-            });
-
-            if (i < count)
-            {
-                // 초기 배치는 선택 없음(-1). 게임 중 선택 연출은 HandView.SetSelected 가 담당
-                HandLayout.Apply(slot, HandLayout.Calculate(i, count, -1, layout));
-            }
-            else
-            {
-                // 대기 중인 슬롯: 기본 자세로 두고 꺼 둔다 (드로우 시 데이터 적용 후 켜고 HandView.Refresh)
-                slot.anchoredPosition = new Vector2(0f, -layout.cardBottomHang);
-                slot.gameObject.SetActive(false);
-            }
+            PlaceSlotAtStart(view.slot, i, count);
         }
 
+        AttachHandComponents(hand, slots, views);
+    }
+
+    // 슬롯 하나 조립 (카드 UI + 사라짐 파티클 + 등장 연출)
+    private HandUIBinder.SlotView CreateSlot(int index, Transform hand)
+    {
+        // 슬롯 = 카드 UI + 사라짐 파티클. 배치는 슬롯이 받는다 (피벗은 카드와 같은 하단 중앙)
+        RectTransform slot = NewUI($"Slot_{index:00}", hand).GetComponent<RectTransform>();
+        Place(slot, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), Vector2.zero, layout.cardSize);
+
+        bool isAttack = Random.value < 0.5f;
+        bool upgraded = Random.value < 0.25f;
+        RectTransform card = CreateCard($"Card_{index:00}", slot, isAttack, upgraded, out TMP_Text titleText, out TMP_Text typeText, out TMP_Text descText);
+
+        return new HandUIBinder.SlotView
+        {
+            slot = slot,
+            card = card.gameObject,
+            vanishEffect = CreateVanishEffect(slot),
+            appear = CreateAppearEffect(card, slot, false),
+            titleText = titleText,
+            typeText = typeText,
+            descText = descText,
+        };
+    }
+
+    // 앞에서부터 count 개는 부채꼴로 펼치고, 나머지는 꺼 둔다
+    private void PlaceSlotAtStart(RectTransform slot, int index, int count)
+    {
+        if (index < count)
+        {
+            // 초기 배치는 선택 없음(-1). 게임 중 선택 연출은 HandView.SetSelected 가 담당
+            HandLayout.Apply(slot, HandLayout.Calculate(index, count, -1, layout));
+        }
+        else
+        {
+            // 대기 중인 슬롯: 기본 자세로 두고 꺼 둔다 (드로우 시 데이터 적용 후 켜고 HandView.Refresh)
+            slot.anchoredPosition = new Vector2(0f, -layout.cardBottomHang);
+            slot.gameObject.SetActive(false);
+        }
+    }
+
+    private void AttachHandComponents(RectTransform hand, List<RectTransform> slots, List<HandUIBinder.SlotView> views)
+    {
         // 손패 연출(HandView)과 플레이어 덱 연동(HandUIBinder)을 붙이고 참조를 넣음
         HandView handView = hand.gameObject.AddComponent<HandView>();
         handView.EditorSetup(slots, layout);
@@ -203,7 +224,8 @@ public class UIBuilder : MonoBehaviour
     /// <summary>카드 UI의 형제로 사라짐 파티클을 넣는다. 카드 중앙에 두고 꺼 둔다 (재생은 HandUIBinder)</summary>
     private ParticleSystem CreateVanishEffect(Transform slot)
     {
-        if (vanishEffectPrefab == null) return null;
+        if (vanishEffectPrefab == null)
+            return null;
 
         GameObject effect = (GameObject)PrefabUtility.InstantiatePrefab(vanishEffectPrefab, slot);
         effect.transform.localPosition = new Vector3(0f, layout.cardSize.y * 0.5f, 0f);
@@ -211,7 +233,10 @@ public class UIBuilder : MonoBehaviour
         effect.SetActive(false);
 
         ParticleSystem system = effect.GetComponentInChildren<ParticleSystem>(true);
-        if (system == null) Debug.LogWarning($"[UIBuilder] 사라짐 파티클 프리팹 '{vanishEffectPrefab.name}'에 ParticleSystem이 없습니다.");
+        if (system == null)
+        {
+            Debug.LogWarning($"[UIBuilder] 사라짐 파티클 프리팹 '{vanishEffectPrefab.name}'에 ParticleSystem이 없습니다.");
+        }
         return system;
     }
 
@@ -221,55 +246,75 @@ public class UIBuilder : MonoBehaviour
     /// </summary>
     private CardAppearEffect CreateAppearEffect(RectTransform card, Transform slot, bool undo)
     {
-        if (appearCardMaterial == null) return null;
+        if (appearCardMaterial == null)
+            return null;
 
-        ParticleSystem flash = null;
-        if (appearFlashPrefab != null)
+        ParticleSystem flash = CreateAppearFlash(card, slot, undo);
+
+        CardAppearEffect appear;
+        if (undo)
         {
-            GameObject effect = (GameObject)PrefabUtility.InstantiatePrefab(appearFlashPrefab, slot);
-            effect.transform.localPosition = new Vector3(0f, card.sizeDelta.y * 0.5f, 0f);
-            effect.transform.localRotation = Quaternion.identity;
-            flash = effect.GetComponent<ParticleSystem>();
-            if (undo) Undo.RegisterCreatedObjectUndo(effect, "Add Appear Effect");
+            appear = Undo.AddComponent<CardAppearEffect>(card.gameObject);
         }
-
-        CardAppearEffect appear = undo
-            ? Undo.AddComponent<CardAppearEffect>(card.gameObject)
-            : card.gameObject.AddComponent<CardAppearEffect>();
+        else
+        {
+            appear = card.gameObject.AddComponent<CardAppearEffect>();
+        }
         appear.Setup(appearCardMaterial, appearEdgeMaterial, flash);
         EditorUtility.SetDirty(appear);
         return appear;
     }
 
+    // 카드 중앙 높이에 플래시 파티클을 넣는다 (프리팹이 비어 있으면 생략)
+    private ParticleSystem CreateAppearFlash(RectTransform card, Transform slot, bool undo)
+    {
+        if (appearFlashPrefab == null)
+            return null;
+
+        GameObject effect = (GameObject)PrefabUtility.InstantiatePrefab(appearFlashPrefab, slot);
+        effect.transform.localPosition = new Vector3(0f, card.sizeDelta.y * 0.5f, 0f);
+        effect.transform.localRotation = Quaternion.identity;
+        if (undo)
+        {
+            Undo.RegisterCreatedObjectUndo(effect, "Add Appear Effect");
+        }
+        return effect.GetComponent<ParticleSystem>();
+    }
+
     /// <summary>카드 한 장 조립. 피벗은 하단 중앙 (부채꼴 회전·확대 기준)</summary>
-    private RectTransform CreateCard(string name, Transform parent, bool isAttack, bool upgraded, out TMP_Text titleText, out TMP_Text typeText)
+    private RectTransform CreateCard(string name, Transform parent, bool isAttack, bool upgraded, out TMP_Text titleText, out TMP_Text typeText, out TMP_Text descText)
     {
         GameObject card = NewPanel(name, parent, layout.cardSize);
         card.GetComponent<Image>().color = FrameColor;
         RectTransform rect = card.GetComponent<RectTransform>();
-        rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0f);
+        rect.anchorMin = new Vector2(0.5f, 0f);
+        rect.anchorMax = new Vector2(0.5f, 0f);
         rect.pivot = new Vector2(0.5f, 0f);
 
         GameObject body = NewPanel("CardBody", card.transform, Vector2.zero);
         body.GetComponent<Image>().color = BodyColor;
         Stretch(body.GetComponent<RectTransform>(), 6f);
 
-        float w = layout.cardSize.x;
-        string title = (isAttack ? "타격" : "수비") + (upgraded ? "+" : "");
-        string desc = isAttack ? $"피해를 {(upgraded ? 9 : 6)} 줍니다." : $"방어도를 {(upgraded ? 8 : 5)} 얻습니다.";
+        float width = layout.cardSize.x;
+        string title = GetCardTitle(isAttack, upgraded);
+        string desc = GetCardDescription(isAttack, upgraded);
 
         // 카드 이름 배너
         GameObject banner = NewPanel("TitleBanner", card.transform, Vector2.zero);
         banner.GetComponent<Image>().color = BannerColor;
-        Place(banner.GetComponent<RectTransform>(), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -12f), new Vector2(w - 24f, 34f));
+        Place(banner.GetComponent<RectTransform>(), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -12f), new Vector2(width - 24f, 34f));
         titleText = NewText("TitleText", banner.transform, title, 22f, TextAlignmentOptions.Center);
-        if (upgraded) titleText.color = UpgradedTextColor;
+        if (upgraded)
+        {
+            titleText.color = UpgradedTextColor;
+        }
         Stretch(titleText.rectTransform, 0f);
 
         // 카드 일러스트 자리 (스프라이트 대체 색상 블록)
-        GameObject art = NewPanel(isAttack ? "ArtImage_Attack" : "ArtImage_Skill", card.transform, Vector2.zero);
+        string artName = isAttack ? "ArtImage_Attack" : "ArtImage_Skill";
+        GameObject art = NewPanel(artName, card.transform, Vector2.zero);
         art.GetComponent<Image>().color = isAttack ? AttackArtColor : SkillArtColor;
-        Place(art.GetComponent<RectTransform>(), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -50f), new Vector2(w - 24f, 120f));
+        Place(art.GetComponent<RectTransform>(), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -50f), new Vector2(width - 24f, 120f));
 
         // 카드 타입 라벨
         GameObject typeLabel = NewPanel("TypeLabel", card.transform, Vector2.zero);
@@ -279,10 +324,34 @@ public class UIBuilder : MonoBehaviour
         Stretch(typeText.rectTransform, 0f);
 
         // 설명 (시안처럼 화면 하단에 일부 잘려도 무방)
-        TMP_Text descText = NewText("DescText", card.transform, desc, 18f, TextAlignmentOptions.Top);
-        Place(descText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -190f), new Vector2(w - 30f, 70f));
+        descText = NewText("DescText", card.transform, desc, 18f, TextAlignmentOptions.Top);
+        Place(descText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -190f), new Vector2(width - 30f, 70f));
 
         return rect;
+    }
+
+    // 시안용 카드 이름 (강화되면 뒤에 +)
+    private string GetCardTitle(bool isAttack, bool upgraded)
+    {
+        string title = isAttack ? "타격" : "수비";
+        if (upgraded)
+        {
+            title += "+";
+        }
+        return title;
+    }
+
+    // 시안용 카드 설명
+    private string GetCardDescription(bool isAttack, bool upgraded)
+    {
+        if (isAttack)
+        {
+            int damage = upgraded ? 9 : 6;
+            return $"피해를 {damage} 줍니다.";
+        }
+
+        int block = upgraded ? 8 : 5;
+        return $"방어도를 {block} 얻습니다.";
     }
     #endregion
 
@@ -307,7 +376,10 @@ public class UIBuilder : MonoBehaviour
     {
         GameObject go = NewUI(name, parent);
         TextMeshProUGUI tmp = go.AddComponent<TextMeshProUGUI>();
-        if (font != null) tmp.font = font;
+        if (font != null)
+        {
+            tmp.font = font;
+        }
         tmp.text = text;
         tmp.fontSize = size;
         tmp.alignment = align;
@@ -341,7 +413,8 @@ public class UIBuilder : MonoBehaviour
 
     private void Place(RectTransform rect, Vector2 anchor, Vector2 pivot, Vector2 pos, Vector2 size)
     {
-        rect.anchorMin = rect.anchorMax = anchor;
+        rect.anchorMin = anchor;
+        rect.anchorMax = anchor;
         rect.pivot = pivot;
         rect.anchoredPosition = pos;
         rect.sizeDelta = size;

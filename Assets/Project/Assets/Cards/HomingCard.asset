@@ -14,6 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Study3D.FpsGame.Deck.HomingCardData
   cardName: "유도"
   timing: 1
+  blockedTimings:
+  - 0
+  - 2
+  - 3
   activateEffect: {fileID: 0}
   radius: 15
   turnSpeed: 360

@@ -27,15 +27,28 @@ namespace Study3D.FpsGame.Map
 
         private enum RoomSize { Small, Medium, Large }
 
-        // 슬롯별 크기. 두 번째 값이 다르면 50:50 으로 둘 중 하나
-        private static readonly (RoomSize a, RoomSize b)[] Slots =
+        // 슬롯 하나에 올 수 있는 크기 두 개
+        private struct Slot
         {
-            (RoomSize.Small, RoomSize.Small),
-            (RoomSize.Small, RoomSize.Small),
-            (RoomSize.Small, RoomSize.Medium),
-            (RoomSize.Medium, RoomSize.Medium),
-            (RoomSize.Medium, RoomSize.Large),
-            (RoomSize.Large, RoomSize.Large),
+            public RoomSize first;
+            public RoomSize second;
+
+            public Slot(RoomSize first, RoomSize second)
+            {
+                this.first = first;
+                this.second = second;
+            }
+        }
+
+        // 슬롯별 크기. 두 번째 값이 다르면 50:50 으로 둘 중 하나
+        private static readonly Slot[] Slots =
+        {
+            new Slot(RoomSize.Small, RoomSize.Small),
+            new Slot(RoomSize.Small, RoomSize.Small),
+            new Slot(RoomSize.Small, RoomSize.Medium),
+            new Slot(RoomSize.Medium, RoomSize.Medium),
+            new Slot(RoomSize.Medium, RoomSize.Large),
+            new Slot(RoomSize.Large, RoomSize.Large),
         };
 
         private struct Placement
@@ -45,7 +58,8 @@ namespace Study3D.FpsGame.Map
             public GameObject template;
             public Vector3 position;   // 생성기 로컬
             public Quaternion rotation;
-            public Vector3 min, max;   // 범위 (생성기 로컬)
+            public Vector3 min;        // 범위 (생성기 로컬)
+            public Vector3 max;
             public Vector3 exitPosition;   // 출구 문 (생성기 로컬)
             public Quaternion exitRotation;
         }
@@ -90,23 +104,61 @@ namespace Study3D.FpsGame.Map
 
         private void Start()
         {
-            if (generateOnStart) Generate();
+            if (generateOnStart)
+            {
+                Generate();
+            }
         }
 
         [ContextMenu("생성")]
         public void Generate()
         {
             Clear();
-            int usedSeed = seed != 0 ? seed : System.Environment.TickCount;
-            var random = new System.Random(usedSeed);
 
-            List<GameObject> order = testRooms.Count > 0 ? testRooms : PickRooms(random);
-            if (order == null) return;
+            int usedSeed;
+            if (seed != 0)
+            {
+                usedSeed = seed;
+            }
+            else
+            {
+                usedSeed = System.Environment.TickCount;
+            }
+            System.Random random = new System.Random(usedSeed);
+
+            List<GameObject> order;
+            if (testRooms.Count > 0)
+            {
+                order = testRooms;
+            }
+            else
+            {
+                order = PickRooms(random);
+            }
+            if (order == null)
+                return;
 
             layoutCache.Clear();
             placed.Clear();
             roomTotal = order.Count;
 
+            PlanPlacements(order, random);
+
+            GameObject startObject = Build(placed);
+            if (startObject != null && movePlayerToStart && Application.isPlaying)
+            {
+                MovePlayerToStart(startObject.transform);
+            }
+            if (Application.isPlaying && placed.Count > 0)
+            {
+                ProjectileManager.SetWorldBounds(CalculateWorldBounds(placed));
+            }
+            Debug.Log($"[ModularMap] 방 {roomTotal}개, 조각 {placed.Count}개 생성 (seed {usedSeed})", this);
+        }
+
+        // (시작방 →) 방 → 통로 → 방 ... 순서로 배치를 계산해서 placed 에 쌓음
+        private void PlanPlacements(List<GameObject> order, System.Random random)
+        {
             // 시작방은 생성기 위치에 먼저 놓음
             if (startRoom != null)
             {
@@ -126,11 +178,6 @@ namespace Study3D.FpsGame.Map
                 }
                 placed.Add(MakePlacement(false, order[i], GetLayout(order[i])));
             }
-
-            GameObject startObject = Build(placed);
-            if (startObject != null && movePlayerToStart && Application.isPlaying) MovePlayerToStart(startObject.transform);
-            if (Application.isPlaying && placed.Count > 0) ProjectileManager.SetWorldBounds(CalculateWorldBounds(placed));
-            Debug.Log($"[ModularMap] 방 {roomTotal}개, 조각 {placed.Count}개 생성 (seed {usedSeed})", this);
         }
 
         // 슬롯 순서대로 크기를 정하고, 그 크기 목록에서 방을 하나씩 랜덤으로 꺼냄
@@ -142,14 +189,36 @@ namespace Study3D.FpsGame.Map
                 return null;
             }
 
-            var order = new List<GameObject>();
-            foreach (var (a, b) in Slots)
+            List<GameObject> order = new List<GameObject>();
+            foreach (Slot slot in Slots)
             {
-                RoomSize size = random.Next(2) == 0 ? a : b;
-                List<GameObject> list = size == RoomSize.Small ? smallRooms : size == RoomSize.Medium ? mediumRooms : largeRooms;
+                RoomSize size;
+                if (random.Next(2) == 0)
+                {
+                    size = slot.first;
+                }
+                else
+                {
+                    size = slot.second;
+                }
+
+                List<GameObject> list = GetRoomList(size);
                 order.Add(list[random.Next(list.Count)]);
             }
             return order;
+        }
+
+        private List<GameObject> GetRoomList(RoomSize size)
+        {
+            switch (size)
+            {
+                case RoomSize.Small:
+                    return smallRooms;
+                case RoomSize.Medium:
+                    return mediumRooms;
+                default:
+                    return largeRooms;
+            }
         }
 
         private RoomLayout GetLayout(GameObject template)
@@ -165,21 +234,24 @@ namespace Study3D.FpsGame.Map
         // 배치된 모든 조각의 범위(생성기 로컬)를 월드 좌표로 바꿔 하나로 합치고, 여유 거리만큼 넓힙니다.
         private Bounds CalculateWorldBounds(List<Placement> placements)
         {
-            var bounds = new Bounds();
+            Bounds bounds = new Bounds();
             bool first = true;
             foreach (Placement placement in placements)
             {
                 // 상자의 8개 꼭짓점 (생성기가 회전해 있어도 맞도록 꼭짓점마다 월드로 바꿉니다)
                 for (int corner = 0; corner < 8; corner++)
                 {
-                    Vector3 local = new Vector3(
-                        (corner & 1) == 0 ? placement.min.x : placement.max.x,
-                        (corner & 2) == 0 ? placement.min.y : placement.max.y,
-                        (corner & 4) == 0 ? placement.min.z : placement.max.z);
+                    Vector3 local = BoxCorner(placement.min, placement.max, corner);
                     Vector3 world = transform.TransformPoint(local);
 
-                    if (first) bounds = new Bounds(world, Vector3.zero);
-                    else bounds.Encapsulate(world);
+                    if (first)
+                    {
+                        bounds = new Bounds(world, Vector3.zero);
+                    }
+                    else
+                    {
+                        bounds.Encapsulate(world);
+                    }
                     first = false;
                 }
             }
@@ -188,12 +260,37 @@ namespace Study3D.FpsGame.Map
             return bounds;
         }
 
+        // 상자의 꼭짓점 8개 중 index(0~7) 번째
+        // - index 를 2진수로 보면 1의 자리 = x, 2의 자리 = y, 4의 자리 = z 가 max 쪽인지
+        private static Vector3 BoxCorner(Vector3 min, Vector3 max, int index)
+        {
+            bool maxX = index % 2 == 1;
+            bool maxY = (index / 2) % 2 == 1;
+            bool maxZ = (index / 4) % 2 == 1;
+
+            Vector3 corner = min;
+            if (maxX)
+            {
+                corner.x = max.x;
+            }
+            if (maxY)
+            {
+                corner.y = max.y;
+            }
+            if (maxZ)
+            {
+                corner.z = max.z;
+            }
+            return corner;
+        }
+
         [ContextMenu("지우기")]
         public void Clear()
         {
             rooms.Clear();
             Transform container = transform.Find(ContainerName);
-            if (container == null) return;
+            if (container == null)
+                return;
 #if UNITY_EDITOR
             if (!Application.isPlaying)
             {
@@ -207,13 +304,13 @@ namespace Study3D.FpsGame.Map
         // 지금까지 놓인 마지막 조각의 출구에 이어 붙이는 배치 계산
         private Placement MakePlacement(bool isPath, GameObject template, RoomLayout layout)
         {
-            var p = new Placement { isPath = isPath, template = template };
+            Placement placement = new Placement { isPath = isPath, template = template };
 
             if (placed.Count == 0)
             {
                 // 첫 조각은 생성기 위치에 그대로
-                p.rotation = Quaternion.identity;
-                p.position = Vector3.zero;
+                placement.rotation = Quaternion.identity;
+                placement.position = Vector3.zero;
             }
             else
             {
@@ -221,28 +318,25 @@ namespace Study3D.FpsGame.Map
                 Placement prev = placed[placed.Count - 1];
                 Quaternion rotation = prev.exitRotation * Quaternion.Inverse(layout.entry.rotation);
                 // 문끼리 정확히 겹치도록 Y 회전만 남기고 90도 단위로 맞춤 (곱셈 오차가 쌓이지 않게)
-                p.rotation = Quaternion.Euler(0f, Mathf.Round(rotation.eulerAngles.y / 90f) * 90f, 0f);
-                p.position = prev.exitPosition - p.rotation * layout.entry.position;
+                placement.rotation = Quaternion.Euler(0f, Mathf.Round(rotation.eulerAngles.y / 90f) * 90f, 0f);
+                placement.position = prev.exitPosition - placement.rotation * layout.entry.position;
             }
 
-            p.exitPosition = p.position + p.rotation * layout.exit.position;
-            p.exitRotation = p.rotation * layout.exit.rotation;
+            placement.exitPosition = placement.position + placement.rotation * layout.exit.position;
+            placement.exitRotation = placement.rotation * layout.exit.rotation;
 
             // 회전한 범위의 꼭짓점 8개로 다시 감싼 상자 (발사체 경계, 기즈모용)
-            Bounds b = layout.bounds;
-            p.min = Vector3.positiveInfinity;
-            p.max = Vector3.negativeInfinity;
+            Bounds layoutBounds = layout.bounds;
+            placement.min = Vector3.positiveInfinity;
+            placement.max = Vector3.negativeInfinity;
             for (int i = 0; i < 8; i++)
             {
-                Vector3 corner = new Vector3(
-                    (i & 1) == 0 ? b.min.x : b.max.x,
-                    (i & 2) == 0 ? b.min.y : b.max.y,
-                    (i & 4) == 0 ? b.min.z : b.max.z);
-                Vector3 w = p.position + p.rotation * corner;
-                p.min = Vector3.Min(p.min, w);
-                p.max = Vector3.Max(p.max, w);
+                Vector3 corner = BoxCorner(layoutBounds.min, layoutBounds.max, i);
+                Vector3 world = placement.position + placement.rotation * corner;
+                placement.min = Vector3.Min(placement.min, world);
+                placement.max = Vector3.Max(placement.max, world);
             }
-            return p;
+            return placement;
         }
 
         // 시작방을 만들었으면 그 오브젝트를 돌려줌
@@ -250,49 +344,54 @@ namespace Study3D.FpsGame.Map
         {
             GameObject startObject = null;
             bool hasStart = plan.Count > 0 && plan[0].isStart;
-            var container = new GameObject(ContainerName).transform;
+            Transform container = new GameObject(ContainerName).transform;
             container.SetParent(transform, false);
 #if UNITY_EDITOR
-            if (!Application.isPlaying) Undo.RegisterCreatedObjectUndo(container.gameObject, "Generate Modular Map");
+            if (!Application.isPlaying)
+            {
+                Undo.RegisterCreatedObjectUndo(container.gameObject, "Generate Modular Map");
+            }
 #endif
 
-            int roomIndex = 0, pathIndex = 0;
+            int roomIndex = 0;
+            int pathIndex = 0;
             for (int i = 0; i < plan.Count; i++)
             {
-                Placement p = plan[i];
-                GameObject go = Spawn(p.template, container);
-                go.name = p.isStart ? $"{p.template.name}_Start" : p.isPath ? $"{p.template.name}_{pathIndex++:D2}" : $"{p.template.name}_{roomIndex:D2}";
-                go.transform.localPosition = p.position;
-                go.transform.localRotation = p.rotation;
+                Placement placement = plan[i];
+                GameObject go = Spawn(placement.template, container);
+                if (placement.isStart)
+                {
+                    go.name = $"{placement.template.name}_Start";
+                }
+                else if (placement.isPath)
+                {
+                    go.name = $"{placement.template.name}_{pathIndex:D2}";
+                    pathIndex++;
+                }
+                else
+                {
+                    go.name = $"{placement.template.name}_{roomIndex:D2}";
+                }
+                go.transform.localPosition = placement.position;
+                go.transform.localRotation = placement.rotation;
 
                 if (i > 0 && hideDuplicateGate)
                 {
                     Transform entryDoor = RoomModule.FindTagged(go.transform, RoomModule.EntryTag);
-                    if (entryDoor != null) entryDoor.gameObject.SetActive(false);
+                    if (entryDoor != null)
+                    {
+                        entryDoor.gameObject.SetActive(false);
+                    }
                 }
 
-                if (p.isStart)
+                if (placement.isStart)
                 {
-                    // 시작방에 RoomModule 이 있으면 출구만 다음 방과 이어짐 (EnterPoint 를 두지 않으면 전투 없음)
-                    var startModule = go.GetComponent<RoomModule>();
-                    if (startModule != null)
-                    {
-                        startModule.FindGates();
-                        startModule.Entry.connected = false;
-                        startModule.Exit.connected = roomTotal > 0;
-                    }
+                    SetupStartRoom(go);
                     startObject = go;
                 }
-                else if (!p.isPath)
+                else if (!placement.isPath)
                 {
-                    var module = go.GetComponent<RoomModule>();
-                    if (module == null) module = go.AddComponent<RoomModule>();
-                    module.FindGates();
-
-                    // 앞과 이어진 입구, 뒤와 이어진 출구만 열림. 나머지는 막힌 채로 둠
-                    module.Entry.connected = roomIndex > 0 || hasStart;
-                    module.Exit.connected = roomIndex < roomTotal - 1;
-                    rooms.Add(module);
+                    SetupRoom(go, roomIndex, hasStart);
                     roomIndex++;
                 }
 
@@ -301,10 +400,39 @@ namespace Study3D.FpsGame.Map
             }
 
             // 씬에 있는 원본은 생성된 맵과 겹치지 않게 끔
-            foreach (Placement p in plan)
-                HideSceneTemplate(p.template);
+            foreach (Placement placement in plan)
+            {
+                HideSceneTemplate(placement.template);
+            }
 
             return startObject;
+        }
+
+        private void SetupStartRoom(GameObject go)
+        {
+            // 시작방에 RoomModule 이 있으면 출구만 다음 방과 이어짐 (EnterPoint 를 두지 않으면 전투 없음)
+            RoomModule startModule = go.GetComponent<RoomModule>();
+            if (startModule != null)
+            {
+                startModule.FindGates();
+                startModule.Entry.connected = false;
+                startModule.Exit.connected = roomTotal > 0;
+            }
+        }
+
+        private void SetupRoom(GameObject go, int roomIndex, bool hasStart)
+        {
+            RoomModule module = go.GetComponent<RoomModule>();
+            if (module == null)
+            {
+                module = go.AddComponent<RoomModule>();
+            }
+            module.FindGates();
+
+            // 앞과 이어진 입구, 뒤와 이어진 출구만 열림. 나머지는 막힌 채로 둠
+            module.Entry.connected = roomIndex > 0 || hasStart;
+            module.Exit.connected = roomIndex < roomTotal - 1;
+            rooms.Add(module);
         }
 
         // 플레이어를 시작방 가운데(바닥 높이)로 옮기고 출구 쪽을 보게 함
@@ -324,16 +452,29 @@ namespace Study3D.FpsGame.Map
 
             Vector3 toExit = start.TransformPoint(startLayout.exit.center) - position;
             toExit.y = 0f;
-            Quaternion rotation = toExit.sqrMagnitude > 0.0001f ? Quaternion.LookRotation(toExit) : start.rotation;
+
+            Quaternion rotation;
+            if (toExit.sqrMagnitude > 0.0001f)
+            {
+                rotation = Quaternion.LookRotation(toExit);
+            }
+            else
+            {
+                rotation = start.rotation;
+            }
 
             player.Teleport(position, rotation);
         }
 
         private static void HideSceneTemplate(GameObject template)
         {
-            if (!template.scene.IsValid() || !template.activeSelf) return;
+            if (!template.scene.IsValid() || !template.activeSelf)
+                return;
 #if UNITY_EDITOR
-            if (!Application.isPlaying) Undo.RecordObject(template, "Hide Map Template");
+            if (!Application.isPlaying)
+            {
+                Undo.RecordObject(template, "Hide Map Template");
+            }
 #endif
             template.SetActive(false);
         }
@@ -352,12 +493,19 @@ namespace Study3D.FpsGame.Map
         {
             // 마지막 생성 결과의 범위(방 = 하늘색, 통로 = 주황)와 연결 지점
             Gizmos.matrix = transform.localToWorldMatrix;
-            foreach (var p in placed)
+            foreach (Placement placement in placed)
             {
-                Gizmos.color = p.isPath ? new Color(1f, 0.5f, 0f) : Color.cyan;
-                Gizmos.DrawWireCube((p.min + p.max) * 0.5f, p.max - p.min);
+                if (placement.isPath)
+                {
+                    Gizmos.color = new Color(1f, 0.5f, 0f);
+                }
+                else
+                {
+                    Gizmos.color = Color.cyan;
+                }
+                Gizmos.DrawWireCube((placement.min + placement.max) * 0.5f, placement.max - placement.min);
                 Gizmos.color = Color.red;
-                Gizmos.DrawSphere(p.exitPosition, 0.5f);
+                Gizmos.DrawSphere(placement.exitPosition, 0.5f);
             }
         }
     }

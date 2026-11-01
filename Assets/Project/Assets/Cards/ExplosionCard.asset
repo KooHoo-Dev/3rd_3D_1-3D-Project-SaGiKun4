@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Study3D.FpsGame.Deck.ExplosionCardData
   cardName: "\uD3ED\uBC1C"
   timing: 3
+  blockedTimings:
+  - 1
   activateEffect: {fileID: 7893391835017853327, guid: 14cab4773dd054c4a8056ae753a3cdd5, type: 3}
   radius: 5
-  damage: 10
+  damageRatio: 0.8
   effectRadius: 2

@@ -65,8 +65,9 @@ namespace Study3D.FpsGame
         {
             for (int i = 0; i < events.Length; i++)
             {
-                var eventData = events[i];
-                if (eventData.IsComplete || eventData.SendOnExit == false) continue;
+                AnimStateEvent eventData = events[i];
+                if (eventData.IsComplete || eventData.SendOnExit == false)
+                    continue;
 
                 eventData.IsComplete = true;
                 eventListener.OccursAnimStateEvent(eventData.Name);

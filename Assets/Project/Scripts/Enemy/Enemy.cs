@@ -78,11 +78,23 @@ namespace Study3D.FpsGame.Enemy
             if (needsStart)
             {
                 needsStart = false;
-                if (hasEntrance) stateMachine.ChangeState<EnemyEnterState>();
-                else stateMachine.ChangeState<EnemyIdleState>();
+                StartFirstState();
             }
 
             stateMachine.Tick(Time.deltaTime);
+        }
+
+        // 등장 지점을 받았으면 등장 상태로, 아니면 대기 상태로 시작합니다.
+        private void StartFirstState()
+        {
+            if (hasEntrance)
+            {
+                stateMachine.ChangeState<EnemyEnterState>();
+            }
+            else
+            {
+                stateMachine.ChangeState<EnemyIdleState>();
+            }
         }
 
         private void OnDisable()
@@ -114,7 +126,10 @@ namespace Study3D.FpsGame.Enemy
         // 도착 지점으로 한 걸음 이동합니다. 도착하면 true
         public bool MoveToEntrance(float deltaTime)
         {
-            return hasEntrance == false || MoveTowards(entranceTarget, deltaTime);
+            if (hasEntrance == false)
+                return true;
+
+            return MoveTowards(entranceTarget, deltaTime);
         }
 
         // 등장이 끝나면 감지 거리와 상관없이 플레이어를 쫓습니다.
@@ -142,7 +157,8 @@ namespace Study3D.FpsGame.Enemy
             }
 
             // 등장 중에는 피격 모션 없이 계속 걸어옵니다. (맵 밖에서 멈추면 길찾기 없이 쫓아오게 됨)
-            if (stateMachine.CurrentState is EnemyEnterState) return;
+            if (stateMachine.CurrentState is EnemyEnterState)
+                return;
 
             // 피격 중에 또 맞으면 피격 모션을 처음부터 다시 재생합니다.
             if (stateMachine.CurrentState is EnemyHitState hitState) hitState.Enter();
@@ -160,36 +176,49 @@ namespace Study3D.FpsGame.Enemy
         {
             mainCollider.enabled = false;
             Unregister();
-            if (dropTable != null) dropTable.TryDrop(transform.position);
+            if (dropTable != null)
+                dropTable.TryDrop(transform.position);
         }
 
         // 사망 애니메이션이 끝나면 호출됩니다.
         public void Despawn()
         {
-            Despawned?.Invoke(this);
+            if (Despawned != null)
+                Despawned.Invoke(this);
             ReturnToPool();
         }
 
         // 풀에서 꺼낸 적은 풀로 돌려보내고, 씬에 직접 둔 적은 Destroy 합니다.
         public void ReturnToPool()
         {
-            if (Key != null && ObjectPoolManager.Instance != null) ObjectPoolManager.Instance.ReturnToPool(this);
-            else Destroy(gameObject);
+            if (Key != null && ObjectPoolManager.Instance != null)
+            {
+                ObjectPoolManager.Instance.ReturnToPool(this);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
 
         #endregion
 
         private void Register()
         {
-            if (isRegistered || CombatSystem.Instance == null) return;
+            if (isRegistered || CombatSystem.Instance == null)
+                return;
+
             CombatSystem.Instance.RegisterMonster(this);
             isRegistered = true;
         }
 
         private void Unregister()
         {
-            if (isRegistered == false) return;
-            if (CombatSystem.Instance != null) CombatSystem.Instance.UnregisterMonster(mainCollider);
+            if (isRegistered == false)
+                return;
+
+            if (CombatSystem.Instance != null)
+                CombatSystem.Instance.UnregisterMonster(mainCollider);
             isRegistered = false;
         }
     }

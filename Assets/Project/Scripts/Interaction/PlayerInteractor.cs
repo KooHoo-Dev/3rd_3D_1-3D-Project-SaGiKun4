@@ -29,24 +29,30 @@ namespace Study3D.FpsGame.Interaction
 
         public void AddCandidate(Interactable interactable)
         {
-            if (candidates.Contains(interactable) == false) candidates.Add(interactable);
+            if (candidates.Contains(interactable) == false)
+                candidates.Add(interactable);
         }
 
         public void RemoveCandidate(Interactable interactable)
         {
             candidates.Remove(interactable);
-            if (Target == interactable) SetTarget(null);
+            if (Target == interactable)
+                SetTarget(null);
         }
 
         private void Update()
         {
-            if (candidates.Count == 0) return;
+            if (candidates.Count == 0)
+                return;
 
             SetTarget(PickTarget());
 
             LocalPlayer player = Player.Player.LocalPlayer;
-            if (Target == null || player == null || player.CanAct == false) return;
-            if (SimpleInput.GetKeyDown(interactKey) && Target.CanInteract(player)) Target.Interact(player);
+            if (Target == null || player == null || player.CanAct == false)
+                return;
+
+            if (SimpleInput.GetKeyDown(interactKey) && Target.CanInteract(player))
+                Target.Interact(player);
         }
 
         // 카메라 정면과 후보 방향의 내적이 가장 큰(가장 정면에 있는) 후보
@@ -69,9 +75,12 @@ namespace Study3D.FpsGame.Interaction
 
         private void SetTarget(Interactable target)
         {
-            if (Target == target) return;
+            if (Target == target)
+                return;
+
             Target = target;
-            OnTargetChanged?.Invoke(target);
+            if (OnTargetChanged != null)
+                OnTargetChanged.Invoke(target);
         }
     }
 }

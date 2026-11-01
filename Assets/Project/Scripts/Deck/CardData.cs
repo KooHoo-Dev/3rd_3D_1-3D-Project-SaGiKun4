@@ -21,6 +21,8 @@ namespace Study3D.FpsGame.Deck
     {
         [SerializeField] private string cardName;
         [SerializeField] private CardTiming timing;
+        [Tooltip("시점 변경 강화로 바꿀 수 없는 시점 (그 시점에선 의미가 없거나 밸런스를 해치는 경우. 예: 반사의 소멸, 폭발의 진행 중)")]
+        [SerializeField] private List<CardTiming> blockedTimings = new List<CardTiming>();
         [Tooltip("카드가 실제로 발동했을 때 재생할 이펙트 프리팹 (비워두면 재생하지 않음)")]
         [SerializeField] private GameObject activateEffect;
 
@@ -42,10 +44,20 @@ namespace Study3D.FpsGame.Deck
         // 강화 차수: 기본 카드는 1이고, 강화를 한 번 거칠 때마다 1씩 늘어납니다.
         // - 시점 변경: 바뀐 카드 = 원래 카드 + 1
         // - 조합 카드: 재료 카드 차수의 합 (1 + 1 → 2, 2 + 1 → 3. 재료 안에서 거친 강화도 모두 셉니다)
-        public virtual int EnhanceLevel => 1 + addedLevel;
+        public virtual int EnhanceLevel
+        {
+            get { return 1 + addedLevel; }
+        }
 
-        // 시점 변경 강화를 받을 수 있는지. 특정 시점에서만 의미가 있는 카드(반응, 조향)는 false 입니다.
+        // 시점 변경 강화를 받을 수 있는지. 시점 변경 카드 자신처럼 아예 대상이 아닌 카드만 false 입니다.
+        // 카드마다 막을 시점은 에셋의 blockedTimings에서 고릅니다. (IsTimingBlocked)
         public virtual bool CanChangeTiming => true;
+
+        // 시점 변경 강화로 이 시점이 될 수 없는지
+        public bool IsTimingBlocked(CardTiming newTiming)
+        {
+            return blockedTimings.Contains(newTiming);
+        }
 
         // 시점만 newTiming으로 바꾼 복제 카드를 만듭니다. (원본 에셋은 모든 덱이 공유하므로 직접 바꾸지 않습니다)
         // 런타임에만 존재하는 카드가 만들어집니다.
@@ -59,21 +71,60 @@ namespace Study3D.FpsGame.Deck
             return copy;
         }
 
+        // 카드 UI(손패, 메뉴 목록)의 설명 글자 입니다. 카드마다 재정의해서 효과를 적습니다.
+        // 시점 문구는 TimingText로 붙이면 시점 변경 강화로 바뀐 시점이 그대로 반영됩니다.
+        public virtual string Description
+        {
+            get { return $"{TimingText(timing)}, 효과를 발동합니다."; }
+        }
+
+        // 시점을 설명 문구로 바꿉니다. (예: Destroy → "소멸할 때")
+        protected static string TimingText(CardTiming cardTiming)
+        {
+            switch (cardTiming)
+            {
+                case CardTiming.Shoot:
+                    return "발사할 때";
+                case CardTiming.Flying:
+                    return "날아가는 동안";
+                case CardTiming.Hit:
+                    return "충돌할 때";
+                case CardTiming.Destroy:
+                    return "소멸할 때";
+                default:
+                    return cardTiming.ToString();
+            }
+        }
+
         // 발사체에 실릴 카드들을 순서대로 담습니다. 일반 카드는 자기 자신을, 조합 카드는 재료 카드들을 담습니다.
-        public virtual void CollectCards(List<CardData> cards) => cards.Add(this);
+        public virtual void CollectCards(List<CardData> cards)
+        {
+            cards.Add(this);
+        }
 
         // 발사체에 실릴 때 이 카드 몫 런타임 값(CardContext.Count)의 처음 값 입니다. (남은 반사 수 등)
-        public virtual int CreateCount(CardMultiplier multiplier) => 0;
+        public virtual int CreateCount(CardMultiplier multiplier)
+        {
+            return 0;
+        }
 
         // 발사체가 Timing에 맞춰 호출합니다.
         public void Activate(CardContext context)
         {
             switch (timing)
             {
-                case CardTiming.Shoot: OnShoot(context); break;
-                case CardTiming.Flying: OnFlying(context); break;
-                case CardTiming.Hit: OnHit(context); break;
-                case CardTiming.Destroy: OnDestroyed(context); break;
+                case CardTiming.Shoot:
+                    OnShoot(context);
+                    break;
+                case CardTiming.Flying:
+                    OnFlying(context);
+                    break;
+                case CardTiming.Hit:
+                    OnHit(context);
+                    break;
+                case CardTiming.Destroy:
+                    OnDestroyed(context);
+                    break;
             }
         }
 
@@ -84,7 +135,10 @@ namespace Study3D.FpsGame.Deck
 
         // 발동 이펙트를 발동 위치에 재생합니다. 크기는 Effect 배율을 따릅니다.
         // - 발동 시점이 와도 아무 일도 하지 않는 경우(벽에 닿은 관통 카드 등)가 있어서, 자동으로 재생하지 않고 카드가 실제로 동작했을 때 직접 호출합니다.
-        protected void PlayEffect(CardContext context) => PlayEffect(context, context.Multiplier.Effect);
+        protected void PlayEffect(CardContext context)
+        {
+            PlayEffect(context, context.Multiplier.Effect);
+        }
 
         // 크기를 직접 정해서 재생합니다. (폭발 반경에 맞추는 경우 등)
         protected void PlayEffect(CardContext context, float scale)
@@ -93,6 +147,9 @@ namespace Study3D.FpsGame.Deck
         }
 
         // 실수 수치에 배율을 곱한 정수 값. 올림 처리합니다.
-        protected static int CeilMultiply(int value, float multiplier) => Mathf.CeilToInt(value * multiplier);
+        protected static int CeilMultiply(int value, float multiplier)
+        {
+            return Mathf.CeilToInt(value * multiplier);
+        }
     }
 }

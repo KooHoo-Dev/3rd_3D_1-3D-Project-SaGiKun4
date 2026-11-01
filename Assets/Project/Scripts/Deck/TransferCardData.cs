@@ -15,14 +15,19 @@ namespace Study3D.FpsGame.Deck
         [SerializeField] private int transferCount = 1; // 이 카드 한 장으로 옮겨갈 수 있는 횟수
         [SerializeField] private float radius = 8.0f;   // 다음 적을 찾는 반경
 
-        public override int CreateCount(CardMultiplier multiplier) => CeilMultiply(transferCount, multiplier.Effect);
+        public override int CreateCount(CardMultiplier multiplier)
+        {
+            return CeilMultiply(transferCount, multiplier.Effect);
+        }
 
         protected override void OnHit(CardContext context)
         {
-            if (context.IsEnemy == false || context.Count <= 0) return;
+            if (context.IsEnemy == false || context.Count <= 0)
+                return;
 
             Collider next = FindNearestEnemy(context.Center, radius, context.Projectile.LastHitTarget);
-            if (next == null) return;
+            if (next == null)
+                return;
 
             context.Count--;
             context.Projectile.Steer(context, next.bounds.center - context.Center);

@@ -48,7 +48,8 @@ namespace Study3D.FpsGame.Feedback
                 blood.GameObject.SetActive(true);
             }
 
-            if (EffectBudget.TryUse(damageTextPoolKey) == false) return;
+            if (EffectBudget.TryUse(damageTextPoolKey) == false)
+                return;
 
             FloatingText dmgText =
                 ObjectPoolManager.Instance.GetObjectOrNull(damageTextPoolKey) as FloatingText;

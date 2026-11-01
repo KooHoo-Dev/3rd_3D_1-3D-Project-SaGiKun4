@@ -40,7 +40,10 @@ public class HandView : MonoBehaviour
     }
 
     /// <summary>사라지는 중인 카드를 뺀 손패 장수</summary>
-    public int Count => hand.Count - CountLeavingInHand();
+    public int Count
+    {
+        get { return hand.Count - CountLeavingInHand(); }
+    }
     public int SelectedIndex => selectedIndex;
     /// <summary>미리 만들어 둔 슬롯 전체 (켜짐/꺼짐 포함, 이름 순)</summary>
     public IReadOnlyList<RectTransform> AllCards => allCards;
@@ -49,9 +52,17 @@ public class HandView : MonoBehaviour
     {
         foreach (RectTransform slot in slots)
         {
-            if (slot != null) allCards.Add(slot);
+            if (slot != null)
+            {
+                allCards.Add(slot);
+            }
         }
-        foreach (RectTransform card in allCards) sortings.Add(card, CreateSorting(card));
+
+        foreach (RectTransform card in allCards)
+        {
+            sortings.Add(card, CreateSorting(card));
+        }
+
         Refresh(true);
     }
 
@@ -66,30 +77,53 @@ public class HandView : MonoBehaviour
 
     private static CardSorting CreateSorting(RectTransform card)
     {
-        if (!card.TryGetComponent(out Canvas canvas)) canvas = card.gameObject.AddComponent<Canvas>();
+        Canvas canvas;
+        if (!card.TryGetComponent(out canvas))
+        {
+            canvas = card.gameObject.AddComponent<Canvas>();
+        }
 
         // 슬롯 하위 파티클은 카드 UI 바로 위에 그려진다
         ParticleSystemRenderer[] renderers = card.GetComponentsInChildren<ParticleSystemRenderer>(true);
         int minOrder = int.MaxValue;
-        foreach (ParticleSystemRenderer r in renderers) minOrder = Mathf.Min(minOrder, r.sortingOrder);
+        foreach (ParticleSystemRenderer particleRenderer in renderers)
+        {
+            minOrder = Mathf.Min(minOrder, particleRenderer.sortingOrder);
+        }
 
         int[] offsets = new int[renderers.Length];
         for (int i = 0; i < renderers.Length; i++)
+        {
             offsets[i] = Mathf.Clamp(renderers[i].sortingOrder - minOrder + 1, 1, SortingStep - 1);
+        }
 
-        return new CardSorting { Canvas = canvas, Renderers = renderers, Offsets = offsets };
+        CardSorting sorting = new CardSorting();
+        sorting.Canvas = canvas;
+        sorting.Renderers = renderers;
+        sorting.Offsets = offsets;
+        return sorting;
     }
 
     /// <summary>index 번째 카드를 선택 상태로 보여준다. 범위를 벗어나면 선택 해제. (사라지는 중인 카드는 세지 않음)</summary>
     public void SetSelected(int index)
     {
-        int next = index >= 0 && index < Count ? index : -1;
-        if (next == selectedIndex) return;
+        int next = -1;
+        if (index >= 0 && index < Count)
+        {
+            next = index;
+        }
+
+        if (next == selectedIndex)
+            return;
+
         selectedIndex = next;
         RecalculateTargets();
     }
 
-    public void ClearSelection() => SetSelected(-1);
+    public void ClearSelection()
+    {
+        SetSelected(-1);
+    }
 
     /// <summary>
     /// 카드를 켜거나 끈 뒤 호출한다. 꺼진 카드는 손패에서 빠지고, 새로 켜진 카드는 오른쪽 끝에 붙는다.
@@ -98,22 +132,56 @@ public class HandView : MonoBehaviour
     /// <param name="snap">true면 애니메이션 없이 즉시 배치</param>
     public void Refresh(bool snap = false)
     {
-        hand.RemoveAll(card => !card.gameObject.activeSelf && !leavingCards.Contains(card));
-        foreach (RectTransform card in allCards)
-        {
-            if (card.gameObject.activeSelf && !hand.Contains(card)) hand.Add(card);
-        }
+        RemoveHiddenCardsFromHand();
+        AddShownCardsToHand();
 
-        if (selectedIndex >= Count) selectedIndex = -1;
+        if (selectedIndex >= Count)
+        {
+            selectedIndex = -1;
+        }
         RecalculateTargets();
 
         if (snap)
         {
-            for (int i = 0; i < hand.Count; i++)
+            SnapToTargets();
+        }
+    }
+
+    // 꺼진 카드를 손패에서 뺀다. (사라지는 중인 카드는 자리를 유지)
+    private void RemoveHiddenCardsFromHand()
+    {
+        // 뒤에서부터 지워야 남은 카드의 순서가 그대로 유지된다
+        for (int i = hand.Count - 1; i >= 0; i--)
+        {
+            RectTransform card = hand[i];
+            if (!card.gameObject.activeSelf && !leavingCards.Contains(card))
             {
-                if (leavingCards.Contains(hand[i])) continue;
-                HandLayout.Apply(hand[i], targets[i]);
+                hand.RemoveAt(i);
             }
+        }
+    }
+
+    // 새로 켜진 카드를 손패 오른쪽 끝에 붙인다.
+    private void AddShownCardsToHand()
+    {
+        foreach (RectTransform card in allCards)
+        {
+            if (card.gameObject.activeSelf && !hand.Contains(card))
+            {
+                hand.Add(card);
+            }
+        }
+    }
+
+    // 애니메이션 없이 목표 자세로 바로 옮긴다. (사라지는 중인 카드는 그 자리에 둔다)
+    private void SnapToTargets()
+    {
+        for (int i = 0; i < hand.Count; i++)
+        {
+            if (leavingCards.Contains(hand[i]))
+                continue;
+
+            HandLayout.Apply(hand[i], targets[i]);
         }
     }
 
@@ -124,19 +192,29 @@ public class HandView : MonoBehaviour
     public void BeginLeaving(RectTransform card)
     {
         int viewIndex = hand.IndexOf(card);
-        if (viewIndex < 0 || !leavingCards.Add(card)) return;
+        if (viewIndex < 0)
+            return;
+
+        // 이미 사라지는 중이면 무시
+        if (!leavingCards.Add(card))
+            return;
 
         // 선택되지 않은 자세(-1)로 즉시 되돌린다
         HandLayout.Apply(card, HandLayout.Calculate(viewIndex, hand.Count, -1, layout));
 
-        if (selectedIndex >= Count) selectedIndex = Count - 1;
+        if (selectedIndex >= Count)
+        {
+            selectedIndex = Count - 1;
+        }
         RecalculateTargets();
     }
 
     /// <summary>사라짐이 끝난 카드의 자리를 비운다. (카드는 먼저 꺼져 있어야 손패에서 빠진다)</summary>
     public void EndLeaving(RectTransform card)
     {
-        if (!leavingCards.Remove(card)) return;
+        if (!leavingCards.Remove(card))
+            return;
+
         Refresh();
     }
 
@@ -152,12 +230,18 @@ public class HandView : MonoBehaviour
         }
 
         // 선택 카드는 맨 위에 그린다
-        if (selectedViewIndex >= 0) hand[selectedViewIndex].SetAsLastSibling();
+        if (selectedViewIndex >= 0)
+        {
+            hand[selectedViewIndex].SetAsLastSibling();
+        }
 
         // 사라지는 중인 카드는 다른 카드를 가리지 않도록 맨 뒤에 그린다
         foreach (RectTransform card in hand)
         {
-            if (leavingCards.Contains(card)) card.SetAsFirstSibling();
+            if (leavingCards.Contains(card))
+            {
+                card.SetAsFirstSibling();
+            }
         }
 
         ApplySorting();
@@ -194,19 +278,29 @@ public class HandView : MonoBehaviour
     {
         Canvas canvas = transform.GetComponentInParent<Canvas>();
         while (!canvas.isRootCanvas && !canvas.overrideSorting)
+        {
             canvas = canvas.transform.parent.GetComponentInParent<Canvas>();
+        }
         return canvas;
     }
 
     // 사라지는 중인 카드를 뺀 인덱스를 화면 hand 인덱스로 바꾼다. 없으면 -1.
     private int ToViewIndex(int index)
     {
-        if (index < 0) return -1;
+        if (index < 0)
+            return -1;
 
+        // 사라지는 중이 아닌 카드만 세면서, index 번째 카드가 나오면 그 화면 위치를 돌려준다
+        int remaining = index;
         for (int i = 0; i < hand.Count; i++)
         {
-            if (leavingCards.Contains(hand[i])) continue;
-            if (index-- == 0) return i;
+            if (leavingCards.Contains(hand[i]))
+                continue;
+
+            if (remaining == 0)
+                return i;
+
+            remaining--;
         }
         return -1;
     }
@@ -216,32 +310,38 @@ public class HandView : MonoBehaviour
         int count = 0;
         foreach (RectTransform card in hand)
         {
-            if (leavingCards.Contains(card)) count++;
+            if (leavingCards.Contains(card))
+            {
+                count++;
+            }
         }
         return count;
     }
 
     private void Update()
     {
-        float k = 1f - Mathf.Exp(-followSpeed * Time.deltaTime);
+        float followRate = 1f - Mathf.Exp(-followSpeed * Time.deltaTime);
         for (int i = 0; i < hand.Count; i++)
         {
             RectTransform card = hand[i];
             // 사라지는 중인 카드는 이펙트가 그 자리에서 재생되도록 움직이지 않는다
-            if (leavingCards.Contains(card)) continue;
+            if (leavingCards.Contains(card))
+                continue;
 
             CardPose target = targets[i];
 
-            card.anchoredPosition = Vector2.Lerp(card.anchoredPosition, target.position, k);
-            float angle = Mathf.LerpAngle(card.localEulerAngles.z, target.angle, k);
+            card.anchoredPosition = Vector2.Lerp(card.anchoredPosition, target.position, followRate);
+            float angle = Mathf.LerpAngle(card.localEulerAngles.z, target.angle, followRate);
             card.localEulerAngles = new Vector3(0f, 0f, angle);
-            card.localScale = Vector3.one * Mathf.Lerp(card.localScale.x, target.scale, k);
+            card.localScale = Vector3.one * Mathf.Lerp(card.localScale.x, target.scale, followRate);
         }
     }
 
     private void OnValidate()
     {
         if (layout.selectedScale > layout.SafeSelectedScale)
+        {
             Debug.LogWarning($"[HandView] 선택 배율 {layout.selectedScale:0.00} → {layout.SafeSelectedScale:0.00} 로 제한됩니다 (화면 중앙 침범 방지)");
+        }
     }
 }

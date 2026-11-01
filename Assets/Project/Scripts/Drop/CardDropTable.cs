@@ -40,7 +40,8 @@ namespace Study3D.FpsGame.Drop
         // 확률에 당첨되면 position에 보상을 떨어뜨립니다.
         public void TryDrop(Vector3 position)
         {
-            if (dropPrefab == null || Roll(dropChance) == false) return;
+            if (dropPrefab == null || Roll(dropChance) == false)
+                return;
 
             CardDrop drop = Instantiate(dropPrefab, position + Vector3.up * dropHeight, Quaternion.identity);
             drop.Setup(this);
@@ -50,37 +51,51 @@ namespace Study3D.FpsGame.Drop
         public List<CardData> CreateOptions(CardDeck deck)
         {
             int maxLevel = (int)Math.Round(deck.AverageEnhanceLevel, MidpointRounding.AwayFromZero);
-            var remaining = new List<CardData>();
-            var enhanceCards = new List<CardData>();
-            foreach (CardData card in cards)
-            {
-                if (card == null || card is CompositeCardData || remaining.Contains(card)) continue;
-                remaining.Add(card);
-                if (card.Type == CardType.Enhance) enhanceCards.Add(card);
-            }
+            List<CardData> remaining = new List<CardData>();
+            List<CardData> enhanceCards = new List<CardData>();
+            CollectBaseCards(remaining, enhanceCards);
 
-            var options = new List<CardData>(optionCount);
+            List<CardData> options = new List<CardData>(optionCount);
             for (int i = 0; i < optionCount; i++)
             {
                 if (maxLevel >= 2 && enhanceCards.Count > 0 && Roll(enhancedChance))
                 {
-                    options.Add(CreateEnhancedCard(enhanceCards, Random.Range(2, maxLevel + 1)));
+                    int level = Random.Range(2, maxLevel + 1);
+                    options.Add(CreateEnhancedCard(enhanceCards, level));
                     continue;
                 }
 
                 CardData picked = PickBaseCard(remaining);
-                if (picked == null) break; // 남은 기본 카드가 없음
+                if (picked == null)
+                    break; // 남은 기본 카드가 없음
                 options.Add(picked);
             }
 
             return options;
         }
 
+        // cards에서 기본 카드만 중복 없이 remaining에 담고, 그중 강화 카드는 enhanceCards에도 담습니다.
+        private void CollectBaseCards(List<CardData> remaining, List<CardData> enhanceCards)
+        {
+            foreach (CardData card in cards)
+            {
+                if (card == null || card is CompositeCardData || remaining.Contains(card))
+                    continue;
+
+                remaining.Add(card);
+                if (card.Type == CardType.Enhance)
+                    enhanceCards.Add(card);
+            }
+        }
+
         // 강화 카드 level장을 랜덤으로 골라 합친 조합 카드. 기본 카드는 1차라서 차수가 정확히 level이 됩니다.
         private static CardData CreateEnhancedCard(List<CardData> enhanceCards, int level)
         {
-            var parts = new CardData[level];
-            for (int i = 0; i < level; i++) parts[i] = enhanceCards[Random.Range(0, enhanceCards.Count)];
+            CardData[] parts = new CardData[level];
+            for (int i = 0; i < level; i++)
+            {
+                parts[i] = enhanceCards[Random.Range(0, enhanceCards.Count)];
+            }
             return CompositeCardData.Create(parts[0].CardName + "+", parts);
         }
 
@@ -91,22 +106,55 @@ namespace Study3D.FpsGame.Drop
             float enhance = HasType(remaining, CardType.Enhance) ? enhanceWeight : 0f;
             float modifier = HasType(remaining, CardType.Modifier) ? modifierWeight : 0f;
             float total = attack + enhance + modifier;
-            if (total <= 0f) return null;
+            if (total <= 0f)
+                return null;
 
             float roll = Random.Range(0f, total);
-            CardType type = roll < attack ? CardType.Attack
-                : roll < attack + enhance ? CardType.Enhance
-                : CardType.Modifier;
+            CardType type = PickTypeByRoll(roll, attack, enhance);
 
-            var candidates = remaining.FindAll(card => card.Type == type);
-            if (candidates.Count == 0) candidates = remaining; // roll이 정확히 total인 경우 등
+            List<CardData> candidates = FindCardsOfType(remaining, type);
+            if (candidates.Count == 0)
+                candidates = remaining; // roll이 정확히 total인 경우 등
             CardData picked = candidates[Random.Range(0, candidates.Count)];
             remaining.Remove(picked);
             return picked;
         }
 
-        private static bool HasType(List<CardData> cards, CardType type) => cards.Exists(card => card.Type == type);
+        // 가중치 구간 [공격 | 강화 | 강화 전용] 중 roll이 떨어진 종류
+        private static CardType PickTypeByRoll(float roll, float attack, float enhance)
+        {
+            if (roll < attack)
+                return CardType.Attack;
+            if (roll < attack + enhance)
+                return CardType.Enhance;
 
-        private static bool Roll(float chance) => chance > 0f && Random.value <= chance;
+            return CardType.Modifier;
+        }
+
+        private static List<CardData> FindCardsOfType(List<CardData> cards, CardType type)
+        {
+            List<CardData> result = new List<CardData>();
+            foreach (CardData card in cards)
+            {
+                if (card.Type == type)
+                    result.Add(card);
+            }
+            return result;
+        }
+
+        private static bool HasType(List<CardData> cards, CardType type)
+        {
+            foreach (CardData card in cards)
+            {
+                if (card.Type == type)
+                    return true;
+            }
+            return false;
+        }
+
+        private static bool Roll(float chance)
+        {
+            return chance > 0f && Random.value <= chance;
+        }
     }
 }

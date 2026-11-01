@@ -20,7 +20,10 @@ namespace Study3D.FpsGame.Weapon.Cards
         // 동시 발사체 상한. 매니저는 씬에 따로 두지 않으므로 Weapon이 인스펙터 값으로 정해줍니다.
         public static int Capacity { get; set; } = 500;
 
-        public static bool IsFull => instance != null && instance.projectiles.Count >= Capacity;
+        public static bool IsFull
+        {
+            get { return instance != null && instance.projectiles.Count >= Capacity; }
+        }
 
         // 맵 경계. 맵 생성기가 맵을 만든 뒤 정해줍니다. 이 밖으로 나간 발사체는 조용히 회수됩니다. (경계가 없으면 검사하지 않음)
         private static Bounds worldBounds;
@@ -32,15 +35,24 @@ namespace Study3D.FpsGame.Weapon.Cards
             hasWorldBounds = true;
         }
 
-        public static void ClearWorldBounds() => hasWorldBounds = false;
+        public static void ClearWorldBounds()
+        {
+            hasWorldBounds = false;
+        }
 
-        public static bool IsOutsideWorld(Vector3 position) => hasWorldBounds && worldBounds.Contains(position) == false;
+        public static bool IsOutsideWorld(Vector3 position)
+        {
+            return hasWorldBounds && worldBounds.Contains(position) == false;
+        }
 
         public static void Register(Projectile projectile)
         {
-            if (projectile.ManagerIndex >= 0) return;
+            if (projectile.ManagerIndex >= 0)
+                return;
 
-            if (instance == null) instance = new GameObject(nameof(ProjectileManager)).AddComponent<ProjectileManager>();
+            if (instance == null)
+                instance = new GameObject(nameof(ProjectileManager)).AddComponent<ProjectileManager>();
+
             projectile.ManagerIndex = instance.projectiles.Count;
             instance.projectiles.Add(projectile);
         }
@@ -49,7 +61,8 @@ namespace Study3D.FpsGame.Weapon.Cards
         public static void Unregister(Projectile projectile)
         {
             int index = projectile.ManagerIndex;
-            if (index < 0 || instance == null) return;
+            if (index < 0 || instance == null)
+                return;
 
             List<Projectile> list = instance.projectiles;
             int lastIndex = list.Count - 1;
@@ -65,11 +78,13 @@ namespace Study3D.FpsGame.Weapon.Cards
         {
             foreach (Projectile projectile in projectiles)
             {
-                if (projectile != null) projectile.ManagerIndex = -1;
+                if (projectile != null)
+                    projectile.ManagerIndex = -1;
             }
             projectiles.Clear();
             hasWorldBounds = false; // 다음 씬의 맵 생성기가 새로 정해줍니다.
-            if (instance == this) instance = null;
+            if (instance == this)
+                instance = null;
         }
 
         // 뒤에서부터 처리합니다. 소멸한 발사체 자리에는 맨 뒤 발사체가 옮겨 오는데,
@@ -79,7 +94,9 @@ namespace Study3D.FpsGame.Weapon.Cards
             float deltaTime = Time.deltaTime;
             for (int i = projectiles.Count - 1; i >= 0; i--)
             {
-                if (i < projectiles.Count) projectiles[i].Tick(deltaTime);
+                // 한 발사체가 처리 중에 여러 발사체를 빼면 목록이 i보다 짧아질 수 있습니다.
+                if (i < projectiles.Count)
+                    projectiles[i].Tick(deltaTime);
             }
         }
     }

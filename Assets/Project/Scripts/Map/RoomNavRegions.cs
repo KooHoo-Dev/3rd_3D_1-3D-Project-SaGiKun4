@@ -44,6 +44,24 @@ namespace Study3D.FpsGame.Map
             public Vector3 b;
         }
 
+        // 합칠 후보: 조각 polyA 와 polyB 가 공유하는 변 (u, v) 와 그 길이의 제곱
+        private struct MergeCandidate
+        {
+            public int polyA;
+            public int polyB;
+            public int u;
+            public int v;
+            public float lengthSq;
+        }
+
+        // 어느 영역의 변인지 + 양 끝 좌표
+        private struct RegionEdge
+        {
+            public int region;
+            public Vector3 a;
+            public Vector3 b;
+        }
+
         private const float WeldPrecision = 100f;   // 0.01 단위로 반올림해서 같으면 같은 꼭짓점
         private const float ConvexEpsilon = 1e-4f;  // 이보다 작은 음수 외적은 일직선으로 보고 허용 (계산 오차)
         private const float MinOverlap = 0.05f;     // 겹친 길이가 이보다 짧으면 모서리끼리 점으로 닿은 것으로 보고 무시
@@ -91,7 +109,17 @@ namespace Study3D.FpsGame.Map
         public int TriangleCount { get; private set; }
         public int RegionCount => regions.Count;
         public int PortalCount => portals.Count / 2; // 방향 두 개 = 연결점 하나
-        public int TableBytes => portalDist == null ? 0 : portalDist.Length * sizeof(float);
+
+        public int TableBytes
+        {
+            get
+            {
+                if (portalDist == null)
+                    return 0;
+
+                return portalDist.Length * sizeof(float);
+            }
+        }
 
         private void Awake()
         {
@@ -101,9 +129,14 @@ namespace Study3D.FpsGame.Map
         // 아직 아무 데이터도 없으면 저장된 지도에서 불러옵니다.
         private void EnsureReady()
         {
-            if (isReady) return;
+            if (isReady)
+                return;
+
             isReady = true;
-            if (navMap != null) Load(navMap);
+            if (navMap != null)
+            {
+                Load(navMap);
+            }
         }
 
         [ContextMenu("영역 생성")]
@@ -111,23 +144,29 @@ namespace Study3D.FpsGame.Map
         {
             isReady = true;
             ResetGoal();
-            var sw = Stopwatch.StartNew();
+            Stopwatch stopwatch = Stopwatch.StartNew();
 
             List<List<int>> polys = CollectTriangles();
             TriangleCount = polys.Count;
             MergePolygons(polys);
 
+            // 합쳐지고 남은 조각(null 이 아닌 것)만 영역으로
             regions.Clear();
             foreach (List<int> poly in polys)
-                if (poly != null) regions.Add(poly);
+            {
+                if (poly != null)
+                {
+                    regions.Add(poly);
+                }
+            }
 
             BuildPlanes();
             BuildPortals();
-            float regionMs = (float)sw.Elapsed.TotalMilliseconds;
+            float regionMs = (float)stopwatch.Elapsed.TotalMilliseconds;
 
-            sw.Restart();
+            stopwatch.Restart();
             BuildNextTable();
-            float tableMs = (float)sw.Elapsed.TotalMilliseconds;
+            float tableMs = (float)stopwatch.Elapsed.TotalMilliseconds;
 
             Debug.Log($"[RoomNavRegions] {name}: 삼각형 {TriangleCount}개 → 영역 {regions.Count}개, " +
                       $"연결점 {PortalCount}개 ({regionMs:F1}ms), 남은 거리 표 {TableBytes}바이트 ({tableMs:F1}ms)");
@@ -153,7 +192,7 @@ namespace Study3D.FpsGame.Map
         private List<List<int>> CollectTriangles()
         {
             points.Clear();
-            var polys = new List<List<int>>();
+            List<List<int>> polys = new List<List<int>>();
 
             if (TryCalculateOwnTriangulation(out NavMeshTriangulation tri) == false || tri.indices.Length == 0)
             {
@@ -164,11 +203,24 @@ namespace Study3D.FpsGame.Map
             Bounds bounds = CalculateRoomBounds();
 
             // 1. 용접: 위치(0.01 단위)가 같으면 같은 번호
-            var weldMap = new Dictionary<Vector3Int, int>();
-            int[] remap = new int[tri.vertices.Length];
-            for (int i = 0; i < tri.vertices.Length; i++)
+            int[] remap = WeldVertices(tri.vertices);
+
+            SnapPointsToGround();
+
+            // 0. 방 범위 안의 삼각형만, 위에서 봤을 때 반시계 순서로
+            AddTrianglesInBounds(tri.indices, remap, bounds, polys);
+
+            return polys;
+        }
+
+        // 네비메시 꼭짓점을 방 로컬로 바꿔 points 에 넣고, 원래 꼭짓점 번호 → 용접된 번호 표를 돌려줍니다.
+        private int[] WeldVertices(Vector3[] vertices)
+        {
+            Dictionary<Vector3Int, int> weldMap = new Dictionary<Vector3Int, int>();
+            int[] remap = new int[vertices.Length];
+            for (int i = 0; i < vertices.Length; i++)
             {
-                Vector3 local = transform.InverseTransformPoint(tri.vertices[i]);
+                Vector3 local = transform.InverseTransformPoint(vertices[i]);
                 Vector3Int key = Vector3Int.RoundToInt(local * WeldPrecision);
                 if (weldMap.TryGetValue(key, out int id) == false)
                 {
@@ -178,26 +230,36 @@ namespace Study3D.FpsGame.Map
                 }
                 remap[i] = id;
             }
+            return remap;
+        }
 
-            SnapPointsToGround();
-
-            // 0. 방 범위 안의 삼각형만, 위에서 봤을 때 반시계 순서로
-            for (int i = 0; i < tri.indices.Length; i += 3)
+        private void AddTrianglesInBounds(int[] indices, int[] remap, Bounds bounds, List<List<int>> polys)
+        {
+            for (int i = 0; i < indices.Length; i += 3)
             {
-                int a = remap[tri.indices[i]];
-                int b = remap[tri.indices[i + 1]];
-                int c = remap[tri.indices[i + 2]];
-                if (a == b || b == c || a == c) continue; // 용접으로 점이 겹쳐 납작해진 삼각형
+                int a = remap[indices[i]];
+                int b = remap[indices[i + 1]];
+                int c = remap[indices[i + 2]];
+                if (a == b || b == c || a == c)
+                    continue; // 용접으로 점이 겹쳐 납작해진 삼각형
 
                 Vector3 centroid = transform.TransformPoint((points[a] + points[b] + points[c]) / 3f);
-                if (bounds.Contains(centroid) == false) continue;
+                if (bounds.Contains(centroid) == false)
+                    continue;
 
                 float cross = Cross(points[b] - points[a], points[c] - points[a]);
-                if (Mathf.Abs(cross) < ConvexEpsilon) continue; // 넓이가 거의 없는 삼각형
-                polys.Add(cross > 0f ? new List<int> { a, b, c } : new List<int> { a, c, b });
-            }
+                if (Mathf.Abs(cross) < ConvexEpsilon)
+                    continue; // 넓이가 거의 없는 삼각형
 
-            return polys;
+                if (cross > 0f)
+                {
+                    polys.Add(new List<int> { a, b, c });
+                }
+                else
+                {
+                    polys.Add(new List<int> { a, c, b });
+                }
+            }
         }
 
         // 꼭짓점 높이를 바닥 콜라이더 표면으로 맞춥니다.
@@ -215,13 +277,19 @@ namespace Study3D.FpsGame.Map
                 Vector3 world = transform.TransformPoint(points[i]);
                 Vector3 origin = world + Vector3.up * groundSnapDistance;
                 if (physics.Raycast(origin, Vector3.down, out RaycastHit hit, groundSnapDistance * 2f, groundMask, QueryTriggerInteraction.Ignore))
+                {
                     points[i] = transform.InverseTransformPoint(new Vector3(world.x, hit.point.y, world.z));
+                }
                 else
+                {
                     missed++;
+                }
             }
 
             if (missed > 0)
+            {
                 Debug.LogWarning($"[RoomNavRegions] {name}: 꼭짓점 {missed}/{points.Count}개는 바닥 콜라이더를 못 찾아 네비메시 높이를 그대로 씁니다.");
+            }
         }
 
         // 이 방의 NavMeshSurface 네비메시만 올라와 있는 상태에서 삼각형을 꺼냅니다.
@@ -232,10 +300,14 @@ namespace Study3D.FpsGame.Map
         {
             tri = default;
             NavMeshSurface surface = GetComponentInChildren<NavMeshSurface>(true);
-            if (surface == null || surface.navMeshData == null) return false;
+            if (surface == null || surface.navMeshData == null)
+                return false;
 
-            var others = new List<NavMeshSurface>(NavMeshSurface.activeSurfaces);
-            foreach (NavMeshSurface other in others) other.RemoveData();
+            List<NavMeshSurface> others = new List<NavMeshSurface>(NavMeshSurface.activeSurfaces);
+            foreach (NavMeshSurface other in others)
+            {
+                other.RemoveData();
+            }
 
             NavMeshDataInstance own = NavMesh.AddNavMeshData(surface.navMeshData, surface.transform.position, surface.transform.rotation);
             try
@@ -245,7 +317,10 @@ namespace Study3D.FpsGame.Map
             finally
             {
                 own.Remove();
-                foreach (NavMeshSurface other in others) other.AddData();
+                foreach (NavMeshSurface other in others)
+                {
+                    other.AddData();
+                }
             }
             return true;
         }
@@ -257,8 +332,14 @@ namespace Study3D.FpsGame.Map
             Bounds bounds = new Bounds(transform.position, Vector3.zero);
             for (int i = 0; i < renderers.Length; i++)
             {
-                if (i == 0) bounds = renderers[i].bounds;
-                else bounds.Encapsulate(renderers[i].bounds);
+                if (i == 0)
+                {
+                    bounds = renderers[i].bounds;
+                }
+                else
+                {
+                    bounds.Encapsulate(renderers[i].bounds);
+                }
             }
             bounds.Expand(boundsMargin * 2f);
             return bounds;
@@ -270,55 +351,85 @@ namespace Study3D.FpsGame.Map
 
         private void MergePolygons(List<List<int>> polys)
         {
-            var edgeOwner = new Dictionary<long, int>(); // 변 → 그 변을 처음 가진 조각 번호
-            var candidates = new List<(int pa, int pb, int u, int v, float len)>();
-            var touched = new HashSet<int>();            // 이번 바퀴에 이미 합쳐진 조각
+            Dictionary<Vector2Int, int> edgeOwner = new Dictionary<Vector2Int, int>(); // 변 → 그 변을 처음 가진 조각 번호
+            List<MergeCandidate> candidates = new List<MergeCandidate>();
+            HashSet<int> touched = new HashSet<int>();            // 이번 바퀴에 이미 합쳐진 조각
 
             // 5. 한 바퀴 동안 하나도 안 합쳐질 때까지 반복
             bool mergedAny = true;
             while (mergedAny)
             {
-                mergedAny = false;
                 edgeOwner.Clear();
                 candidates.Clear();
                 touched.Clear();
 
                 // 2. 같은 변이 두 번째로 나오면 앞의 조각과 공유하는 변
-                for (int p = 0; p < polys.Count; p++)
-                {
-                    List<int> poly = polys[p];
-                    if (poly == null) continue;
-
-                    for (int i = 0; i < poly.Count; i++)
-                    {
-                        int u = poly[i];
-                        int v = poly[(i + 1) % poly.Count];
-                        long key = EdgeKey(u, v);
-                        if (edgeOwner.TryGetValue(key, out int other))
-                            candidates.Add((other, p, u, v, (points[u] - points[v]).sqrMagnitude));
-                        else
-                            edgeOwner[key] = p;
-                    }
-                }
+                FindSharedEdges(polys, edgeOwner, candidates);
 
                 // 3. 긴 변부터 (긴 변을 먼저 지워야 큰 영역이 생김)
-                candidates.Sort((x, y) => y.len.CompareTo(x.len));
+                candidates.Sort(CompareLongerFirst);
 
-                foreach (var c in candidates)
+                mergedAny = MergeCandidates(polys, candidates, touched);
+            }
+        }
+
+        private void FindSharedEdges(List<List<int>> polys, Dictionary<Vector2Int, int> edgeOwner, List<MergeCandidate> candidates)
+        {
+            for (int p = 0; p < polys.Count; p++)
+            {
+                List<int> poly = polys[p];
+                if (poly == null)
+                    continue;
+
+                for (int i = 0; i < poly.Count; i++)
                 {
-                    // 이번 바퀴에 이미 모양이 바뀐 조각은 변 정보가 낡았으므로 다음 바퀴에
-                    if (touched.Contains(c.pa) || touched.Contains(c.pb)) continue;
-
-                    List<int> merged = TryMerge(polys[c.pa], polys[c.pb], c.u, c.v);
-                    if (merged == null) continue;
-
-                    polys[c.pa] = merged;
-                    polys[c.pb] = null;
-                    touched.Add(c.pa);
-                    touched.Add(c.pb);
-                    mergedAny = true;
+                    int u = poly[i];
+                    int v = poly[(i + 1) % poly.Count];
+                    Vector2Int key = EdgeKey(u, v);
+                    if (edgeOwner.TryGetValue(key, out int other))
+                    {
+                        MergeCandidate candidate = new MergeCandidate();
+                        candidate.polyA = other;
+                        candidate.polyB = p;
+                        candidate.u = u;
+                        candidate.v = v;
+                        candidate.lengthSq = (points[u] - points[v]).sqrMagnitude;
+                        candidates.Add(candidate);
+                    }
+                    else
+                    {
+                        edgeOwner[key] = p;
+                    }
                 }
             }
+        }
+
+        private int CompareLongerFirst(MergeCandidate x, MergeCandidate y)
+        {
+            return y.lengthSq.CompareTo(x.lengthSq);
+        }
+
+        // 후보 순서대로 합쳐 봅니다. 하나라도 합쳤으면 true
+        private bool MergeCandidates(List<List<int>> polys, List<MergeCandidate> candidates, HashSet<int> touched)
+        {
+            bool mergedAny = false;
+            foreach (MergeCandidate candidate in candidates)
+            {
+                // 이번 바퀴에 이미 모양이 바뀐 조각은 변 정보가 낡았으므로 다음 바퀴에
+                if (touched.Contains(candidate.polyA) || touched.Contains(candidate.polyB))
+                    continue;
+
+                List<int> merged = TryMerge(polys[candidate.polyA], polys[candidate.polyB], candidate.u, candidate.v);
+                if (merged == null)
+                    continue;
+
+                polys[candidate.polyA] = merged;
+                polys[candidate.polyB] = null;
+                touched.Add(candidate.polyA);
+                touched.Add(candidate.polyB);
+                mergedAny = true;
+            }
+            return mergedAny;
         }
 
         // 공유 변 (u, v) 를 지우고 두 조각을 이어 붙입니다. 볼록하지 않으면 null.
@@ -326,22 +437,35 @@ namespace Study3D.FpsGame.Map
         {
             // 둘 다 반시계라서 공유 변이 a 에서는 x→y, b 에서는 y→x 순서로 나옴
             int ia = FindEdge(a, u, v);
-            if (ia < 0) return null;
+            if (ia < 0)
+                return null;
+
             int x = a[ia];
             int y = a[(ia + 1) % a.Count];
 
             int jb = FindEdge(b, y, x);
-            if (jb < 0 || b[jb] != y) return null;
+            if (jb < 0 || b[jb] != y)
+                return null;
 
             // a 를 y 부터 한 바퀴 돌아 x 까지, 이어서 b 를 x 다음부터 y 앞까지
-            var merged = new List<int>(a.Count + b.Count - 2);
-            for (int k = 0; k < a.Count; k++) merged.Add(a[(ia + 1 + k) % a.Count]);
-            for (int k = 2; k < b.Count; k++) merged.Add(b[(jb + k) % b.Count]);
+            List<int> merged = new List<int>(a.Count + b.Count - 2);
+            for (int k = 0; k < a.Count; k++)
+            {
+                merged.Add(a[(ia + 1 + k) % a.Count]);
+            }
+            for (int k = 2; k < b.Count; k++)
+            {
+                merged.Add(b[(jb + k) % b.Count]);
+            }
 
             // 두 조각이 변을 두 개 이상 공유하면 같은 꼭짓점이 두 번 나옴 → 꼬인 모양이라 합치지 않음
-            if (new HashSet<int>(merged).Count != merged.Count) return null;
+            if (new HashSet<int>(merged).Count != merged.Count)
+                return null;
 
-            return IsConvex(merged) && IsFlat(merged) ? merged : null;
+            if (IsConvex(merged) && IsFlat(merged))
+                return merged;
+
+            return null;
         }
 
         // 평면 검사: 모든 꼭짓점이 다각형 평면에서 PlaneTolerance 높이 안 (평지와 경사로, 기울기가 다른 경사로끼리는 합치지 않음)
@@ -351,8 +475,9 @@ namespace Study3D.FpsGame.Map
             Vector3 plane = CalculatePlane(poly);
             foreach (int idx in poly)
             {
-                Vector3 p = points[idx];
-                if (Mathf.Abs(p.y - PlaneHeight(plane, p)) > PlaneTolerance) return false;
+                Vector3 point = points[idx];
+                if (Mathf.Abs(point.y - PlaneHeight(plane, point)) > PlaneTolerance)
+                    return false;
             }
             return true;
         }
@@ -367,7 +492,8 @@ namespace Study3D.FpsGame.Map
                 Vector3 prev = points[poly[(i + n - 1) % n]];
                 Vector3 cur = points[poly[i]];
                 Vector3 next = points[poly[(i + 1) % n]];
-                if (Cross(cur - prev, next - cur) < -ConvexEpsilon) return false;
+                if (Cross(cur - prev, next - cur) < -ConvexEpsilon)
+                    return false;
             }
             return true;
         }
@@ -378,21 +504,26 @@ namespace Study3D.FpsGame.Map
             {
                 int p = poly[i];
                 int q = poly[(i + 1) % poly.Count];
-                if ((p == u && q == v) || (p == v && q == u)) return i;
+                if ((p == u && q == v) || (p == v && q == u))
+                    return i;
             }
             return -1;
         }
 
         // 방향과 상관없이 같은 변이면 같은 키
-        private static long EdgeKey(int u, int v)
+        // - (작은 번호, 큰 번호) 로 묶음. 영역 번호 두 개(연결점의 영역 쌍)를 묶을 때도 씀
+        private static Vector2Int EdgeKey(int u, int v)
         {
             int min = Mathf.Min(u, v);
             int max = Mathf.Max(u, v);
-            return ((long)min << 32) | (uint)max;
+            return new Vector2Int(min, max);
         }
 
         // 위에서 본(XZ) 2D 외적. 양수면 v 가 u 의 왼쪽 (반시계로 꺾임)
-        private static float Cross(Vector3 u, Vector3 v) => u.x * v.z - u.z * v.x;
+        private static float Cross(Vector3 u, Vector3 v)
+        {
+            return u.x * v.z - u.z * v.x;
+        }
 
         #endregion
 
@@ -401,7 +532,10 @@ namespace Study3D.FpsGame.Map
         private void BuildPlanes()
         {
             regionPlanes.Clear();
-            foreach (List<int> poly in regions) regionPlanes.Add(CalculatePlane(poly));
+            foreach (List<int> poly in regions)
+            {
+                regionPlanes.Add(CalculatePlane(poly));
+            }
         }
 
         // 다각형의 평면 y = a·x + b·z + c 를 (a, b, c) 로 구합니다.
@@ -424,14 +558,18 @@ namespace Study3D.FpsGame.Map
             center /= poly.Count;
 
             // 거의 세로인 면(걸을 수 없음)은 평평한 바닥으로 취급
-            if (Mathf.Abs(normal.y) < 1e-6f) return new Vector3(0f, 0f, center.y);
+            if (Mathf.Abs(normal.y) < 1e-6f)
+                return new Vector3(0f, 0f, center.y);
 
             float a = -normal.x / normal.y;
             float b = -normal.z / normal.y;
             return new Vector3(a, b, center.y - a * center.x - b * center.z);
         }
 
-        private static float PlaneHeight(Vector3 plane, Vector3 p) => plane.x * p.x + plane.y * p.z + plane.z;
+        private static float PlaneHeight(Vector3 plane, Vector3 p)
+        {
+            return plane.x * p.x + plane.y * p.z + plane.z;
+        }
 
         // 영역 바닥에서 p 와 같은 XZ 위치의 높이 (방 로컬)
         public float HeightAt(int region, Vector3 localPos)
@@ -448,28 +586,59 @@ namespace Study3D.FpsGame.Map
         {
             portals.Clear();
             regionPortals.Clear();
-            for (int r = 0; r < regions.Count; r++) regionPortals.Add(new List<int>());
+            for (int r = 0; r < regions.Count; r++)
+            {
+                regionPortals.Add(new List<int>());
+            }
 
             // 1. 모든 변을 "어느 영역의 변인지 + 양 끝 좌표" 로 모으기
-            var edges = new List<(int region, Vector3 a, Vector3 b)>();
+            List<RegionEdge> edges = CollectRegionEdges();
+
+            // 2. 다른 영역의 변 두 개씩 비교해서, 같은 직선 위에서 겹치는 구간을 그 두 영역의 조각으로 모으기
+            Dictionary<Vector2Int, List<Vector3>> pairPieces = new Dictionary<Vector2Int, List<Vector3>>(); // 영역 쌍 → 겹친 구간들의 양 끝 좌표
+            List<Vector2Int> pairOrder = new List<Vector2Int>();                                          // 쌍을 찾은 순서 (결과 순서를 매번 같게)
+            CollectOverlapPieces(edges, pairPieces, pairOrder);
+
+            // 3~4. 같은 쌍의 조각들을 선분 하나로 합치고, 두 방향으로 저장
+            foreach (Vector2Int pair in pairOrder)
+            {
+                int r0 = pair.x;
+                int r1 = pair.y;
+                GetOuterEnds(pairPieces[pair], out Vector3 a, out Vector3 b);
+                AddPortalPair(r0, r1, a, b);
+            }
+        }
+
+        private List<RegionEdge> CollectRegionEdges()
+        {
+            List<RegionEdge> edges = new List<RegionEdge>();
             for (int r = 0; r < regions.Count; r++)
             {
                 List<int> poly = regions[r];
                 for (int i = 0; i < poly.Count; i++)
-                    edges.Add((r, points[poly[i]], points[poly[(i + 1) % poly.Count]]));
+                {
+                    RegionEdge edge = new RegionEdge();
+                    edge.region = r;
+                    edge.a = points[poly[i]];
+                    edge.b = points[poly[(i + 1) % poly.Count]];
+                    edges.Add(edge);
+                }
             }
+            return edges;
+        }
 
-            // 2. 다른 영역의 변 두 개씩 비교해서, 같은 직선 위에서 겹치는 구간을 그 두 영역의 조각으로 모으기
-            var pairPieces = new Dictionary<long, List<Vector3>>();       // 영역 쌍 → 겹친 구간들의 양 끝 좌표
-            var pairOrder = new List<long>();                             // 쌍을 찾은 순서 (결과 순서를 매번 같게)
+        private void CollectOverlapPieces(List<RegionEdge> edges, Dictionary<Vector2Int, List<Vector3>> pairPieces, List<Vector2Int> pairOrder)
+        {
             for (int i = 0; i < edges.Count; i++)
             {
                 for (int j = i + 1; j < edges.Count; j++)
                 {
-                    if (edges[i].region == edges[j].region) continue;
-                    if (TryGetOverlap(edges[i].a, edges[i].b, edges[j].a, edges[j].b, out Vector3 from, out Vector3 to) == false) continue;
+                    if (edges[i].region == edges[j].region)
+                        continue;
+                    if (TryGetOverlap(edges[i].a, edges[i].b, edges[j].a, edges[j].b, out Vector3 from, out Vector3 to) == false)
+                        continue;
 
-                    long pair = EdgeKey(edges[i].region, edges[j].region);
+                    Vector2Int pair = EdgeKey(edges[i].region, edges[j].region);
                     if (pairPieces.TryGetValue(pair, out List<Vector3> pieces) == false)
                     {
                         pieces = new List<Vector3>();
@@ -480,49 +649,53 @@ namespace Study3D.FpsGame.Map
                     pieces.Add(to);
                 }
             }
+        }
 
-            // 3~4. 같은 쌍의 조각들을 선분 하나로 합치고, 두 방향으로 저장
-            foreach (long pair in pairOrder)
-            {
-                int r0 = (int)(pair >> 32);
-                int r1 = (int)(pair & 0xffffffff);
-                GetOuterEnds(pairPieces[pair], out Vector3 a, out Vector3 b);
-
-                regionPortals[r0].Add(portals.Count);
-                portals.Add(new Portal { from = r0, to = r1, a = a, b = b });
-                regionPortals[r1].Add(portals.Count);
-                portals.Add(new Portal { from = r1, to = r0, a = a, b = b });
-            }
+        // A→B 를 짝수 번호에, B→A 를 바로 다음 홀수 번호에 연달아 저장 (GetOppositePortal 이 이 순서를 씀)
+        private void AddPortalPair(int r0, int r1, Vector3 a, Vector3 b)
+        {
+            regionPortals[r0].Add(portals.Count);
+            portals.Add(new Portal { from = r0, to = r1, a = a, b = b });
+            regionPortals[r1].Add(portals.Count);
+            portals.Add(new Portal { from = r1, to = r0, a = a, b = b });
         }
 
         // 2. 변 1(a1~b1) 을 자로 놓고, 변 2(a2~b2) 가 같은 직선 위에서 겹치는 구간을 구합니다. (위에서 본 XZ 기준)
         private bool TryGetOverlap(Vector3 a1, Vector3 b1, Vector3 a2, Vector3 b2, out Vector3 from, out Vector3 to)
         {
-            from = to = Vector3.zero;
+            from = Vector3.zero;
+            to = Vector3.zero;
 
             Vector3 dir = b1 - a1;
             float length = Mathf.Sqrt(DotXZ(dir, dir));
-            if (length < MinOverlap) return false;
+            if (length < MinOverlap)
+                return false;
 
             // 같은 직선 위인지: 변 2의 양 끝이 변 1의 직선에서 떨어진 거리 (외적 / 길이)
-            if (Mathf.Abs(Cross(dir, a2 - a1)) / length > lineTolerance) return false;
-            if (Mathf.Abs(Cross(dir, b2 - a1)) / length > lineTolerance) return false;
+            if (Mathf.Abs(Cross(dir, a2 - a1)) / length > lineTolerance)
+                return false;
+            if (Mathf.Abs(Cross(dir, b2 - a1)) / length > lineTolerance)
+                return false;
 
             // 자의 눈금: 변 1의 시작 = 0, 끝 = length. 변 2의 양 끝이 몇 눈금에 오는지 (내적으로 투영)
-            float ta = DotXZ(a2 - a1, dir) / length;
-            float tb = DotXZ(b2 - a1, dir) / length;
-            float lo = Mathf.Max(0f, Mathf.Min(ta, tb));
-            float hi = Mathf.Min(length, Mathf.Max(ta, tb));
-            if (hi - lo < MinOverlap) return false;
+            float a2OnRuler = DotXZ(a2 - a1, dir) / length;
+            float b2OnRuler = DotXZ(b2 - a1, dir) / length;
+            float overlapMin = Mathf.Max(0f, Mathf.Min(a2OnRuler, b2OnRuler));
+            float overlapMax = Mathf.Min(length, Mathf.Max(a2OnRuler, b2OnRuler));
+            if (overlapMax - overlapMin < MinOverlap)
+                return false;
 
             // 겹친 구간을 변 1 위의 점으로 (높이도 변 1을 따라 보간)
-            from = Vector3.Lerp(a1, b1, lo / length);
-            to = Vector3.Lerp(a1, b1, hi / length);
+            from = Vector3.Lerp(a1, b1, overlapMin / length);
+            to = Vector3.Lerp(a1, b1, overlapMax / length);
 
             // 높이가 같은지: 겹친 구간 양 끝에서 변 1 높이와 변 2 높이 비교 (위에서 보면 겹쳐도 위아래 층이면 연결점 아님)
             // 양 끝이 모두 가까우면 두 변이 직선이라 그 사이도 모두 가까움 (기울어진 변이 엇갈리는 경우도 거름)
-            if (Mathf.Abs(from.y - HeightOnEdge(a2, b2, from)) > portalHeightTolerance) return false;
-            if (Mathf.Abs(to.y - HeightOnEdge(a2, b2, to)) > portalHeightTolerance) return false;
+            if (Mathf.Abs(from.y - HeightOnEdge(a2, b2, from)) > portalHeightTolerance)
+                return false;
+            if (Mathf.Abs(to.y - HeightOnEdge(a2, b2, to)) > portalHeightTolerance)
+                return false;
+
             return true;
         }
 
@@ -531,7 +704,9 @@ namespace Study3D.FpsGame.Map
         {
             Vector3 ab = b - a;
             float lengthSq = DotXZ(ab, ab);
-            if (lengthSq < 1e-8f) return a.y;
+            if (lengthSq < 1e-8f)
+                return a.y;
+
             float t = Mathf.Clamp01(DotXZ(p - a, ab) / lengthSq);
             return Mathf.Lerp(a.y, b.y, t);
         }
@@ -544,26 +719,31 @@ namespace Study3D.FpsGame.Map
             Vector3 dir = pieceEnds[1] - origin;
 
             // 첫 조각의 방향으로 투영했을 때 가장 앞과 가장 뒤에 있는 점
-            float min = 0f, max = 0f;
-            a = b = origin;
-            foreach (Vector3 p in pieceEnds)
+            float min = 0f;
+            float max = 0f;
+            a = origin;
+            b = origin;
+            foreach (Vector3 end in pieceEnds)
             {
-                float t = DotXZ(p - origin, dir);
+                float t = DotXZ(end - origin, dir);
                 if (t < min)
                 {
                     min = t;
-                    a = p;
+                    a = end;
                 }
                 if (t > max)
                 {
                     max = t;
-                    b = p;
+                    b = end;
                 }
             }
         }
 
         // 위에서 본(XZ) 내적
-        private static float DotXZ(Vector3 u, Vector3 v) => u.x * v.x + u.z * v.z;
+        private static float DotXZ(Vector3 u, Vector3 v)
+        {
+            return u.x * v.x + u.z * v.z;
+        }
 
         #endregion
 
@@ -579,47 +759,87 @@ namespace Study3D.FpsGame.Map
             int portalCount = portals.Count;
             portalDist = new float[portalCount * regionCount];
 
-            var dist = new float[portalCount];
-            var done = new bool[portalCount];
+            float[] dist = new float[portalCount];
+            bool[] done = new bool[portalCount];
             for (int target = 0; target < regionCount; target++)
             {
+                FillDistancesToTarget(target, dist, done);
+
                 for (int i = 0; i < portalCount; i++)
                 {
-                    dist[i] = float.MaxValue;
-                    done[i] = false;
+                    portalDist[i * regionCount + target] = dist[i];
                 }
-
-                // 목표로 들어가는 연결점 = 목표에서 나가는 연결점의 반대 방향. 넘으면 바로 목표 안이라 0
-                foreach (int exit in regionPortals[target]) dist[Reverse(exit)] = 0f;
-
-                // 연결점 수가 수백 개 수준이라 우선순위 큐 없이 가장 작은 값을 직접 찾습니다
-                for (int iter = 0; iter < portalCount; iter++)
-                {
-                    int u = -1;
-                    for (int i = 0; i < portalCount; i++)
-                        if (done[i] == false && dist[i] < float.MaxValue && (u < 0 || dist[i] < dist[u])) u = i;
-                    if (u < 0) break; // 남은 연결점은 목표로 갈 길이 없음
-                    done[u] = true;
-
-                    // u 가 목표에서 출발하는 연결점이면, 그 앞은 목표 안이라 더 퍼질 필요가 없음
-                    int x = portals[u].from;
-                    if (x == target) continue;
-
-                    // x 로 들어오는 연결점 p = x 에서 나가는 연결점 e 의 반대 방향
-                    foreach (int e in regionPortals[x])
-                    {
-                        if (e == u) continue; // p 가 u 의 반대(Y→X) 면 넘자마자 되돌아가는 경로라 제외
-                        int p = Reverse(e);
-                        float nd = dist[u] + Vector3.Distance(Mid(portals[p]), Mid(portals[u]));
-                        if (nd < dist[p]) dist[p] = nd;
-                    }
-                }
-
-                for (int i = 0; i < portalCount; i++) portalDist[i * regionCount + target] = dist[i];
             }
         }
 
-        public float RemainDistance(int portal, int target) => portalDist[portal * regions.Count + target];
+        // 목표 영역 하나에 대해 dist[연결점] = 그 연결점을 넘은 뒤 목표까지 남은 거리 를 채웁니다.
+        private void FillDistancesToTarget(int target, float[] dist, bool[] done)
+        {
+            int portalCount = portals.Count;
+            for (int i = 0; i < portalCount; i++)
+            {
+                dist[i] = float.MaxValue;
+                done[i] = false;
+            }
+
+            // 목표로 들어가는 연결점 = 목표에서 나가는 연결점의 반대 방향. 넘으면 바로 목표 안이라 0
+            foreach (int exit in regionPortals[target])
+            {
+                dist[GetOppositePortal(exit)] = 0f;
+            }
+
+            // 연결점 수가 수백 개 수준이라 우선순위 큐 없이 가장 작은 값을 직접 찾습니다
+            for (int iter = 0; iter < portalCount; iter++)
+            {
+                int u = FindSmallestUnfinished(dist, done);
+                if (u < 0)
+                    break; // 남은 연결점은 목표로 갈 길이 없음
+
+                done[u] = true;
+
+                // u 가 목표에서 출발하는 연결점이면, 그 앞은 목표 안이라 더 퍼질 필요가 없음
+                int x = portals[u].from;
+                if (x == target)
+                    continue;
+
+                // x 로 들어오는 연결점 p = x 에서 나가는 연결점 e 의 반대 방향
+                foreach (int e in regionPortals[x])
+                {
+                    if (e == u)
+                        continue; // p 가 u 의 반대(Y→X) 면 넘자마자 되돌아가는 경로라 제외
+
+                    int p = GetOppositePortal(e);
+                    float newDist = dist[u] + Vector3.Distance(Mid(portals[p]), Mid(portals[u]));
+                    if (newDist < dist[p])
+                    {
+                        dist[p] = newDist;
+                    }
+                }
+            }
+        }
+
+        // 아직 확정되지 않은 연결점 중 값이 가장 작은 것 (같으면 번호가 작은 것. 없으면 -1)
+        private static int FindSmallestUnfinished(float[] dist, bool[] done)
+        {
+            int smallest = -1;
+            for (int i = 0; i < dist.Length; i++)
+            {
+                bool reachable = dist[i] < float.MaxValue;
+                if (done[i] || reachable == false)
+                    continue;
+
+                if (smallest < 0 || dist[i] < dist[smallest])
+                {
+                    smallest = i;
+                }
+            }
+            return smallest;
+        }
+
+        public float RemainDistance(int portal, int target)
+        {
+            return portalDist[portal * regions.Count + target];
+        }
 
         // 내 영역(region) 에서 목표 영역으로 가려면 넘어야 할 연결점 번호. 내 영역의 연결점 중
         // "내 위치(방 로컬) → 연결점 위 가장 가까운 점 거리 + 표의 남은 거리" 가 가장 작은 것 (갈 수 없으면 -1)
@@ -627,39 +847,53 @@ namespace Study3D.FpsGame.Map
         //   남은 거리가 넘을 때마다 줄어들게 함 → 되돌아가거나 빙빙 돌 수 없음 (만족하는 출구가 없으면 조건 없이 다시 고름)
         public int ChooseNextPortal(int region, int target, Vector3 localPos, float maxRemain = float.MaxValue)
         {
-            if (portalDist == null || region < 0 || target < 0 || region == target) return -1;
+            if (portalDist == null || region < 0 || target < 0 || region == target)
+                return -1;
 
             int best = -1;
             float bestCost = float.MaxValue;
-            foreach (int p in regionPortals[region])
+            foreach (int portal in regionPortals[region])
             {
-                float remain = RemainDistance(p, target);
-                if (remain == float.MaxValue || remain >= maxRemain) continue;
+                float remain = RemainDistance(portal, target);
+                if (remain == float.MaxValue || remain >= maxRemain)
+                    continue;
 
-                float cost = Vector3.Distance(localPos, ClosestPoint(portals[p], localPos)) + remain;
+                float cost = Vector3.Distance(localPos, ClosestPoint(portals[portal], localPos)) + remain;
                 if (cost < bestCost)
                 {
                     bestCost = cost;
-                    best = p;
+                    best = portal;
                 }
             }
 
-            if (best < 0 && maxRemain < float.MaxValue) return ChooseNextPortal(region, target, localPos);
+            if (best < 0 && maxRemain < float.MaxValue)
+                return ChooseNextPortal(region, target, localPos);
+
             return best;
         }
 
-        public Portal GetPortal(int portal) => portals[portal];
+        public Portal GetPortal(int portal)
+        {
+            return portals[portal];
+        }
 
         // 방향 두 개를 연달아 저장했으므로 (A→B = 짝수, B→A = 그다음 홀수) 마지막 비트만 바꾸면 반대 방향
-        private static int Reverse(int portal) => portal ^ 1;
-
-        private static Vector3 Mid(Portal p) => (p.a + p.b) * 0.5f;
-
-        private static Vector3 ClosestPoint(Portal p, Vector3 pos)
+        // - 짝수면 +1, 홀수면 -1 과 같음 (AddPortalPair 의 저장 순서에 맞춘 규약)
+        private static int GetOppositePortal(int portal)
         {
-            Vector3 ab = p.b - p.a;
-            float t = Vector3.Dot(pos - p.a, ab) / Mathf.Max(ab.sqrMagnitude, 1e-6f);
-            return p.a + ab * Mathf.Clamp01(t);
+            return portal ^ 1;
+        }
+
+        private static Vector3 Mid(Portal portal)
+        {
+            return (portal.a + portal.b) * 0.5f;
+        }
+
+        private static Vector3 ClosestPoint(Portal portal, Vector3 pos)
+        {
+            Vector3 ab = portal.b - portal.a;
+            float t = Vector3.Dot(pos - portal.a, ab) / Mathf.Max(ab.sqrMagnitude, 1e-6f);
+            return portal.a + ab * Mathf.Clamp01(t);
         }
 
         #endregion
@@ -683,7 +917,10 @@ namespace Study3D.FpsGame.Map
 
         private void OnEnable()
         {
-            if (Active.Contains(this) == false) Active.Add(this);
+            if (Active.Contains(this) == false)
+            {
+                Active.Add(this);
+            }
         }
 
         private void OnDisable()
@@ -699,25 +936,59 @@ namespace Study3D.FpsGame.Map
         public int FindRegion(Vector3 localPos, int hint, float heightTolerance)
         {
             EnsureReady();
-            if (hint >= 0 && hint < regions.Count)
-            {
-                if (IsOnRegion(hint, localPos, heightTolerance)) return hint;
-                foreach (int p in regionPortals[hint])
-                    if (IsOnRegion(portals[p].to, localPos, heightTolerance)) return portals[p].to;
-            }
 
+            int nearHint = FindRegionNearHint(localPos, hint, heightTolerance);
+            if (nearHint >= 0)
+                return nearHint;
+
+            return FindClosestFloorRegion(localPos, heightTolerance);
+        }
+
+        // hint 영역과 그 이웃 중 처음 맞는 영역 (없으면 -1)
+        private int FindRegionNearHint(Vector3 localPos, int hint, float heightTolerance)
+        {
+            if (hint < 0 || hint >= regions.Count)
+                return -1;
+
+            if (IsOnRegion(hint, localPos, heightTolerance))
+                return hint;
+
+            foreach (int portal in regionPortals[hint])
+            {
+                if (IsOnRegion(portals[portal].to, localPos, heightTolerance))
+                    return portals[portal].to;
+            }
+            return -1;
+        }
+
+        // 전체 영역 중 발밑 아래에서 가장 가까운 층 (없으면 -1)
+        private int FindClosestFloorRegion(Vector3 localPos, float heightTolerance)
+        {
             int best = -1;
             float bestScore = float.MaxValue;
             for (int r = 0; r < regions.Count; r++)
             {
-                if (IsInsideXZ(r, localPos) == false) continue;
+                if (IsInsideXZ(r, localPos) == false)
+                    continue;
 
                 float above = localPos.y - HeightAt(r, localPos); // 바닥보다 얼마나 위에 있는지 (음수면 바닥 아래)
-                if (Mathf.Abs(above) > heightTolerance) continue;
+                if (Mathf.Abs(above) > heightTolerance)
+                    continue;
 
                 // 발밑 아래 층(above >= 0) 은 가까운 순서, 위쪽 층은 그보다 항상 뒤
-                float score = above >= -InsideEpsilon ? above : heightTolerance - above;
-                if (score >= bestScore) continue;
+                float score;
+                if (above >= -InsideEpsilon)
+                {
+                    score = above;
+                }
+                else
+                {
+                    score = heightTolerance - above;
+                }
+
+                if (score >= bestScore)
+                    continue;
+
                 bestScore = score;
                 best = r;
             }
@@ -737,15 +1008,24 @@ namespace Study3D.FpsGame.Map
             if (hint >= 0 && hint < regions.Count)
             {
                 ConsiderSnap(hint, localPos, heightTolerance, ref best, ref bestSq, ref bestPoint);
-                foreach (int p in regionPortals[hint])
-                    ConsiderSnap(portals[p].to, localPos, heightTolerance, ref best, ref bestSq, ref bestPoint);
+                foreach (int portal in regionPortals[hint])
+                {
+                    ConsiderSnap(portals[portal].to, localPos, heightTolerance, ref best, ref bestSq, ref bestPoint);
+                }
             }
 
             if (best < 0)
+            {
                 for (int r = 0; r < regions.Count; r++)
+                {
                     ConsiderSnap(r, localPos, heightTolerance, ref best, ref bestSq, ref bestPoint);
+                }
+            }
 
-            if (best >= 0) localPos = new Vector3(bestPoint.x, localPos.y, bestPoint.z);
+            if (best >= 0)
+            {
+                localPos = new Vector3(bestPoint.x, localPos.y, bestPoint.z);
+            }
             return best;
         }
 
@@ -753,8 +1033,10 @@ namespace Study3D.FpsGame.Map
         private void ConsiderSnap(int region, Vector3 p, float heightTolerance, ref int best, ref float bestSq, ref Vector3 bestPoint)
         {
             float sq = ClosestOnBoundaryXZ(region, p, out Vector3 closest);
-            if (sq >= bestSq) return;
-            if (Mathf.Abs(p.y - HeightAt(region, closest)) > heightTolerance) return;
+            if (sq >= bestSq)
+                return;
+            if (Mathf.Abs(p.y - HeightAt(region, closest)) > heightTolerance)
+                return;
 
             best = region;
             bestSq = sq;
@@ -772,16 +1054,25 @@ namespace Study3D.FpsGame.Map
                 Vector3 a = points[poly[i]];
                 Vector3 ab = points[poly[(i + 1) % poly.Count]] - a;
                 float lengthSq = DotXZ(ab, ab);
-                float t = lengthSq < 1e-8f ? 0f : Mathf.Clamp01(DotXZ(p - a, ab) / lengthSq);
-                Vector3 c = a + ab * t;
 
-                float dx = p.x - c.x;
-                float dz = p.z - c.z;
+                float t;
+                if (lengthSq < 1e-8f)
+                {
+                    t = 0f;
+                }
+                else
+                {
+                    t = Mathf.Clamp01(DotXZ(p - a, ab) / lengthSq);
+                }
+                Vector3 closestOnEdge = a + ab * t;
+
+                float dx = p.x - closestOnEdge.x;
+                float dz = p.z - closestOnEdge.z;
                 float sq = dx * dx + dz * dz;
                 if (sq < bestSq)
                 {
                     bestSq = sq;
-                    closest = c;
+                    closest = closestOnEdge;
                 }
             }
             return bestSq;
@@ -803,8 +1094,10 @@ namespace Study3D.FpsGame.Map
                 Vector3 b = points[poly[(i + 1) % poly.Count]];
                 Vector3 ab = b - a;
                 float length = Mathf.Sqrt(DotXZ(ab, ab));
-                if (length < 1e-6f) continue;
-                if (Cross(ab, p - a) / length < -InsideEpsilon) return false; // 이 변의 오른쪽(바깥)
+                if (length < 1e-6f)
+                    continue;
+                if (Cross(ab, p - a) / length < -InsideEpsilon)
+                    return false; // 이 변의 오른쪽(바깥)
             }
             return true;
         }
@@ -816,46 +1109,32 @@ namespace Study3D.FpsGame.Map
         // - 네비메시가 몬스터 반지름만큼 깎여 있으므로, 통과하면 몸이 장애물에 닿지 않고 직진할 수 있음
         public bool HasLineOfSight(Vector3 start, int startRegion, Vector3 end, int endRegion)
         {
-            if (startRegion < 0 || endRegion < 0) return false;
+            if (startRegion < 0 || endRegion < 0)
+                return false;
 
             int region = startRegion;
             float tNow = 0f;
             for (int guard = 0; guard <= regions.Count; guard++)
             {
-                if (region == endRegion) return true; // 목표 영역 안은 볼록이라 직진 가능
+                if (region == endRegion)
+                    return true; // 목표 영역 안은 볼록이라 직진 가능
 
                 // 직선 S(t) = start + (end - start) * t 가 이 영역을 빠져나가는 t (가장 먼저 바깥으로 나가는 변)
-                List<int> poly = regions[region];
-                float tExit = float.MaxValue;
-                for (int i = 0; i < poly.Count; i++)
-                {
-                    Vector3 a = points[poly[i]];
-                    Vector3 ab = points[poly[(i + 1) % poly.Count]] - a;
-                    float f0 = Cross(ab, start - a); // 변의 왼쪽(안쪽)이면 양수
-                    float f1 = Cross(ab, end - a);
-                    if (f1 >= 0f) continue;          // 끝점이 이 변 안쪽이면 이 변으로는 나가지 않음
-
-                    float t = f0 / (f0 - f1);         // 직선이 이 변의 연장선과 만나는 지점
-                    if (t < tExit) tExit = t;
-                }
+                float tExit = FindExitT(region, start, end);
 
                 // 끝점이 위에서 봤을 때 이 영역 안 = 목표 영역 경계 근처의 오차일 때만 보임
                 // 위아래 다른 층(2층 플레이어 바로 아래의 1층 영역 등)이면 안 보임 → 표로 경사로를 찾아감
                 // (플레이어 높이가 아니라 두 영역의 바닥 높이를 비교해서, 점프 중이어도 같은 층이면 보임)
                 if (tExit == float.MaxValue)
                     return Mathf.Abs(HeightAt(region, end) - HeightAt(endRegion, end)) <= portalHeightTolerance;
+
                 tExit = Mathf.Max(tExit, tNow);
 
                 // 빠져나가는 지점이 연결점 위인지 (양 끝 모서리를 스치는 경우는 막힌 것으로 봄)
                 Vector3 exitPoint = Vector3.Lerp(start, end, tExit);
-                int next = -1;
-                foreach (int p in regionPortals[region])
-                {
-                    if (IsOnPortal(portals[p], exitPoint) == false) continue;
-                    next = portals[p].to;
-                    break;
-                }
-                if (next < 0) return false; // 벽이나 장애물로 나감
+                int next = FindRegionThroughPortal(region, exitPoint);
+                if (next < 0)
+                    return false; // 벽이나 장애물로 나감
 
                 region = next;
                 tNow = tExit;
@@ -863,13 +1142,50 @@ namespace Study3D.FpsGame.Map
             return false;
         }
 
+        // 직선 start → end 가 영역을 빠져나가는 t. 끝점이 영역 안이라 나가지 않으면 float.MaxValue
+        private float FindExitT(int region, Vector3 start, Vector3 end)
+        {
+            List<int> poly = regions[region];
+            float tExit = float.MaxValue;
+            for (int i = 0; i < poly.Count; i++)
+            {
+                Vector3 a = points[poly[i]];
+                Vector3 ab = points[poly[(i + 1) % poly.Count]] - a;
+                float f0 = Cross(ab, start - a); // 변의 왼쪽(안쪽)이면 양수
+                float f1 = Cross(ab, end - a);
+                if (f1 >= 0f)
+                    continue;          // 끝점이 이 변 안쪽이면 이 변으로는 나가지 않음
+
+                float t = f0 / (f0 - f1);         // 직선이 이 변의 연장선과 만나는 지점
+                if (t < tExit)
+                {
+                    tExit = t;
+                }
+            }
+            return tExit;
+        }
+
+        // 점이 영역의 어느 연결점 위에 있으면 그 너머 영역 번호 (없으면 -1)
+        private int FindRegionThroughPortal(int region, Vector3 point)
+        {
+            foreach (int portal in regionPortals[region])
+            {
+                if (IsOnPortal(portals[portal], point))
+                    return portals[portal].to;
+            }
+            return -1;
+        }
+
         private static bool IsOnPortal(Portal portal, Vector3 point)
         {
             Vector3 ab = portal.b - portal.a;
             float length = Mathf.Sqrt(DotXZ(ab, ab));
-            if (length < 1e-6f) return false;
+            if (length < 1e-6f)
+                return false;
 
-            if (Mathf.Abs(Cross(ab, point - portal.a)) / length > InsideEpsilon) return false;
+            if (Mathf.Abs(Cross(ab, point - portal.a)) / length > InsideEpsilon)
+                return false;
+
             float along = DotXZ(point - portal.a, ab) / length;
             return along >= PortalEndInset && along <= length - PortalEndInset;
         }
@@ -885,24 +1201,34 @@ namespace Study3D.FpsGame.Map
             if (goalFrame != Time.frameCount)
             {
                 goalFrame = Time.frameCount;
-                Player.LocalPlayer player = Player.Player.LocalPlayer;
-                if (player != null && regions.Count > 0)
-                {
-                    Vector3 local = transform.InverseTransformPoint(player.transform.position);
-                    int found = FindRegion(local, goalRegion, PlayerHeightTolerance);
-                    if (found < 0) found = SnapToRegion(ref local, goalRegion, PlayerHeightTolerance, goalSnapDistance);
-                    IsGoalOffMap = found < 0;
-                    if (found >= 0)
-                    {
-                        goalRegion = found;
-                        goalPoint = local;
-                    }
-                }
+                UpdateGoalFromPlayer();
             }
 
             region = goalRegion;
             localPoint = goalPoint;
             return goalRegion >= 0;
+        }
+
+        // 플레이어 위치에서 목표 영역과 지점을 다시 구함 (못 찾으면 이전 목표 유지)
+        private void UpdateGoalFromPlayer()
+        {
+            Player.LocalPlayer player = Player.Player.LocalPlayer;
+            if (player == null || regions.Count == 0)
+                return;
+
+            Vector3 local = transform.InverseTransformPoint(player.transform.position);
+            int found = FindRegion(local, goalRegion, PlayerHeightTolerance);
+            if (found < 0)
+            {
+                found = SnapToRegion(ref local, goalRegion, PlayerHeightTolerance, goalSnapDistance);
+            }
+
+            IsGoalOffMap = found < 0;
+            if (found >= 0)
+            {
+                goalRegion = found;
+                goalPoint = local;
+            }
         }
 
         // 지도가 새로 만들어지거나 불러와지면 이전 목표는 번호가 맞지 않으므로 버림
@@ -933,19 +1259,9 @@ namespace Study3D.FpsGame.Map
             RoomNavMap map = navMap;
             if (map == null)
             {
-                string path = GetNewMapPath();
-                if (path == null)
-                {
-                    Debug.LogWarning($"[RoomNavRegions] {name}: 처음 저장은 방 프리팹을 프리팹 모드로 연 상태에서 해주세요.");
+                map = CreateMapAsset();
+                if (map == null)
                     return;
-                }
-
-                map = ScriptableObject.CreateInstance<RoomNavMap>();
-                AssetDatabase.CreateAsset(map, path);
-
-                Undo.RecordObject(this, "Assign Room Nav Map");
-                navMap = map;
-                EditorUtility.SetDirty(this);
             }
 
             WriteTo(map);
@@ -954,16 +1270,39 @@ namespace Study3D.FpsGame.Map
             Debug.Log($"[RoomNavRegions] {name}: 지도 저장 → {AssetDatabase.GetAssetPath(map)}", map);
         }
 
+        // 새 지도 에셋을 만들고 navMap 에 연결합니다. 프리팹 모드가 아니면 null
+        private RoomNavMap CreateMapAsset()
+        {
+            string path = GetNewMapPath();
+            if (path == null)
+            {
+                Debug.LogWarning($"[RoomNavRegions] {name}: 처음 저장은 방 프리팹을 프리팹 모드로 연 상태에서 해주세요.");
+                return null;
+            }
+
+            RoomNavMap map = ScriptableObject.CreateInstance<RoomNavMap>();
+            AssetDatabase.CreateAsset(map, path);
+
+            Undo.RecordObject(this, "Assign Room Nav Map");
+            navMap = map;
+            EditorUtility.SetDirty(this);
+            return map;
+        }
+
         private string GetNewMapPath()
         {
             PrefabStage stage = PrefabStageUtility.GetPrefabStage(gameObject);
-            if (stage == null) return null;
+            if (stage == null)
+                return null;
 
             string prefabPath = stage.assetPath;
             string dir = Path.GetDirectoryName(prefabPath).Replace('\\', '/');
             string prefabName = Path.GetFileNameWithoutExtension(prefabPath);
             string folder = dir + "/" + prefabName;
-            if (AssetDatabase.IsValidFolder(folder) == false) AssetDatabase.CreateFolder(dir, prefabName);
+            if (AssetDatabase.IsValidFolder(folder) == false)
+            {
+                AssetDatabase.CreateFolder(dir, prefabName);
+            }
             return AssetDatabase.GenerateUniqueAssetPath(folder + "/NavMap-" + prefabName + ".asset");
         }
 #endif
@@ -983,7 +1322,8 @@ namespace Study3D.FpsGame.Map
         private void Load(RoomNavMap map)
         {
             Clear();
-            if (map.points == null || map.regionStarts == null) return;
+            if (map.points == null || map.regionStarts == null)
+                return;
 
             TriangleCount = map.triangleCount;
             points.AddRange(map.points);
@@ -996,7 +1336,7 @@ namespace Study3D.FpsGame.Map
 
         private static void Flatten(List<List<int>> lists, out int[] starts, out int[] values)
         {
-            var flat = new List<int>();
+            List<int> flat = new List<int>();
             starts = new int[lists.Count];
             for (int i = 0; i < lists.Count; i++)
             {
@@ -1011,9 +1351,22 @@ namespace Study3D.FpsGame.Map
             lists.Clear();
             for (int i = 0; i < starts.Length; i++)
             {
-                int end = i + 1 < starts.Length ? starts[i + 1] : values.Length;
-                var list = new List<int>(end - starts[i]);
-                for (int k = starts[i]; k < end; k++) list.Add(values[k]);
+                // 다음 목록이 시작하기 전까지 (마지막 목록은 배열 끝까지)
+                int end;
+                if (i + 1 < starts.Length)
+                {
+                    end = starts[i + 1];
+                }
+                else
+                {
+                    end = values.Length;
+                }
+
+                List<int> list = new List<int>(end - starts[i]);
+                for (int k = starts[i]; k < end; k++)
+                {
+                    list.Add(values[k]);
+                }
                 lists.Add(list);
             }
         }

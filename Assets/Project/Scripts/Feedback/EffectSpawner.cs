@@ -19,7 +19,8 @@ namespace Study3D.FpsGame
         public static void Play(GameObject prefab, Vector3 position, Quaternion rotation, float scale = 1f)
         {
             if (prefab == null) return;
-            if (EffectBudget.TryUse(ObjectPoolManager.Instance != null ? GetPoolKey(prefab) : null) == false) return;
+            if (EffectBudget.TryUse(GetBudgetKey(prefab)) == false)
+                return;
 
             GameObject effect = GetPooledOrNull(prefab);
             if (effect == null)
@@ -51,11 +52,21 @@ namespace Study3D.FpsGame
         // 프리팹마다 하나씩 정해지는 풀 이름
         private static string GetPoolKey(GameObject prefab)
         {
-            if (poolKeys.TryGetValue(prefab, out string key)) return key;
+            if (poolKeys.TryGetValue(prefab, out string key))
+                return key;
 
             key = $"Effect_{prefab.name}_{prefab.GetInstanceID()}";
             poolKeys.Add(prefab, key);
             return key;
+        }
+
+        // 이펙트 예산이 동시 개수를 셀 풀 이름. 풀 매니저가 없으면(Instantiate로 만듦) null
+        private static string GetBudgetKey(GameObject prefab)
+        {
+            if (ObjectPoolManager.Instance == null)
+                return null;
+
+            return GetPoolKey(prefab);
         }
 
         // 풀에 넣을 수 있는 원본을 만듭니다. 이미 IObjectPoolItem이 있으면 프리팹을 그대로 씁니다.

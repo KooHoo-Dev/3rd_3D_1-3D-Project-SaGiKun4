@@ -24,10 +24,29 @@ namespace Study3D.FpsGame.Deck
                 int level = 0;
                 foreach (CardData part in parts)
                 {
-                    if (part == null || part == this) continue;
+                    if (IsUsablePart(part) == false)
+                        continue;
+
                     level += part.EnhanceLevel;
                 }
                 return Mathf.Max(1, level);
+            }
+        }
+
+        // 재료 카드들의 설명을 발동 순서대로 한 줄씩 잇습니다.
+        public override string Description
+        {
+            get
+            {
+                List<string> lines = new List<string>();
+                foreach (CardData part in parts)
+                {
+                    if (IsUsablePart(part) == false)
+                        continue;
+
+                    lines.Add(part.Description);
+                }
+                return string.Join("\n", lines);
             }
         }
 
@@ -35,7 +54,9 @@ namespace Study3D.FpsGame.Deck
         {
             foreach (CardData part in parts)
             {
-                if (part == null || part == this) continue;
+                if (IsUsablePart(part) == false)
+                    continue;
+
                 part.CollectCards(cards);
             }
         }
@@ -44,10 +65,29 @@ namespace Study3D.FpsGame.Deck
         // 나머지 재료는 그대로 공유하고, 조합 카드 자체는 새로 만듭니다.
         public override CardData WithTiming(CardTiming newTiming, string newName)
         {
-            var newParts = new List<CardData>(parts);
-            int first = newParts.FindIndex(part => part != null && part != this);
-            if (first >= 0) newParts[first] = newParts[first].WithTiming(newTiming, newParts[first].CardName);
+            List<CardData> newParts = new List<CardData>(parts);
+            int first = FindFirstUsablePartIndex(newParts);
+            if (first >= 0)
+            {
+                newParts[first] = newParts[first].WithTiming(newTiming, newParts[first].CardName);
+            }
             return Create(newName, newParts.ToArray());
+        }
+
+        // 비어 있거나 자기 자신인 재료는 건너뜁니다.
+        private bool IsUsablePart(CardData part)
+        {
+            return part != null && part != this;
+        }
+
+        private int FindFirstUsablePartIndex(List<CardData> partList)
+        {
+            for (int i = 0; i < partList.Count; i++)
+            {
+                if (IsUsablePart(partList[i]))
+                    return i;
+            }
+            return -1;
         }
 
         // 게임 중 카드를 합칠 때 사용합니다. (에셋이 아니라 런타임에만 존재하는 카드가 만들어집니다)

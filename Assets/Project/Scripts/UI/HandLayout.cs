@@ -30,13 +30,27 @@ public class HandLayoutSettings
     [Range(0.3f, 0.5f)] public float centerSafeRatio = 0.4f;
 
     /// <summary>좌우 여백을 뺀 손패 최대 폭</summary>
-    public float MaxHandWidth => referenceResolution.x * (1f - sideMarginRatio * 2f);
+    public float MaxHandWidth
+    {
+        get { return referenceResolution.x * (1f - sideMarginRatio * 2f); }
+    }
 
     /// <summary>선택 카드가 화면 중앙 안전선을 넘지 않는 최대 배율</summary>
-    public float SafeSelectedScale => (referenceResolution.y * centerSafeRatio - (-cardBottomHang + selectedRaise)) / cardSize.y;
+    public float SafeSelectedScale
+    {
+        get
+        {
+            float safeTopY = referenceResolution.y * centerSafeRatio;
+            float selectedBottomY = -cardBottomHang + selectedRaise;
+            return (safeTopY - selectedBottomY) / cardSize.y;
+        }
+    }
 
     /// <summary>실제로 적용될 선택 배율 (안전선 기준으로 제한)</summary>
-    public float EffectiveSelectedScale => Mathf.Min(selectedScale, SafeSelectedScale);
+    public float EffectiveSelectedScale
+    {
+        get { return Mathf.Min(selectedScale, SafeSelectedScale); }
+    }
 }
 
 /// <summary>카드 한 장의 목표 자세 (HandArea 기준 anchoredPosition, z 회전, 균일 배율)</summary>
@@ -57,15 +71,17 @@ public static class HandLayout
     {
         float half = (count - 1) * 0.5f;
         float t = index - half;                       // 중앙 기준 칸 위치
-        float n = count > 1 ? t / half : 0f;          // -1 ~ 1 정규화
+
+        float n = 0f;                                 // -1 ~ 1 정규화
+        if (count > 1)
+        {
+            n = t / half;
+        }
 
         // 카드 수가 적으면 덜 기울이고, 많을수록 최대 각도까지
         float edgeAngle = s.maxEdgeAngle * Mathf.Clamp01((count - 1) / 4f);
 
-        // 간격: 기본 간격을 쓰되, 기울어진 가장자리 카드까지 최대 폭 안에 들어오도록 축소
-        float edgeOverhang = s.cardSize.y * Mathf.Sin(edgeAngle * Mathf.Deg2Rad);
-        float usable = Mathf.Max(0f, s.MaxHandWidth - s.cardSize.x - edgeOverhang * 2f);
-        float spacing = count > 1 ? Mathf.Min(s.cardSize.x * s.preferredSpacingRatio, usable / (count - 1)) : 0f;
+        float spacing = CalculateSpacing(count, edgeAngle, s);
 
         float baseY = -s.cardBottomHang;
         CardPose pose;
@@ -81,6 +97,18 @@ public static class HandLayout
         }
 
         return pose;
+    }
+
+    // 간격: 기본 간격을 쓰되, 기울어진 가장자리 카드까지 최대 폭 안에 들어오도록 축소
+    private static float CalculateSpacing(int count, float edgeAngle, HandLayoutSettings s)
+    {
+        if (count <= 1)
+            return 0f;
+
+        float edgeOverhang = s.cardSize.y * Mathf.Sin(edgeAngle * Mathf.Deg2Rad);
+        float usable = Mathf.Max(0f, s.MaxHandWidth - s.cardSize.x - edgeOverhang * 2f);
+        float preferredSpacing = s.cardSize.x * s.preferredSpacingRatio;
+        return Mathf.Min(preferredSpacing, usable / (count - 1));
     }
 
     /// <summary>계산된 자세를 즉시 적용한다. (애니메이션 없이)</summary>

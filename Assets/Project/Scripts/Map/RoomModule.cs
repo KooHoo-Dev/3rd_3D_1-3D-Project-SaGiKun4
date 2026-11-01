@@ -74,25 +74,41 @@ namespace Study3D.FpsGame.Map
             State = RoomState.Idle;
             SetBarriers(false, true);
 
-            if (enterPoint != null) enterPoint.Entered += OnPlayerEntered;
-            else Debug.LogWarning($"[RoomModule] {name}: EnterPoint 가 없어서 전투가 시작되지 않습니다.", this);
+            if (enterPoint != null)
+            {
+                enterPoint.Entered += OnPlayerEntered;
+            }
+            else
+            {
+                Debug.LogWarning($"[RoomModule] {name}: EnterPoint 가 없어서 전투가 시작되지 않습니다.", this);
+            }
         }
 
         private void OnDestroy()
         {
-            if (enterPoint != null) enterPoint.Entered -= OnPlayerEntered;
+            if (enterPoint != null)
+            {
+                enterPoint.Entered -= OnPlayerEntered;
+            }
         }
 
         // 비어 있는 문을 태그로 찾아 채움 (꺼진 오브젝트 포함)
         public void FindGates()
         {
-            if (entry.door == null) entry.door = FindTagged(transform, EntryTag);
-            if (exit.door == null) exit.door = FindTagged(transform, ExitTag);
+            if (entry.door == null)
+            {
+                entry.door = FindTagged(transform, EntryTag);
+            }
+            if (exit.door == null)
+            {
+                exit.door = FindTagged(transform, ExitTag);
+            }
         }
 
         private void OnPlayerEntered()
         {
-            if (State != RoomState.Idle) return;
+            if (State != RoomState.Idle)
+                return;
 
             State = RoomState.Combat;
             SetBarriers(true, false);
@@ -102,7 +118,8 @@ namespace Study3D.FpsGame.Map
         // 전투 종료. 전투 시스템(웨이브 등)이 방의 적을 다 처리했을 때 호출
         public void Clear()
         {
-            if (State != RoomState.Combat) return;
+            if (State != RoomState.Combat)
+                return;
 
             State = RoomState.Cleared;
             SetBarriers(false, false);
@@ -112,15 +129,24 @@ namespace Study3D.FpsGame.Map
         // closeAll: true 면 모두 닫음, false 면 연결된 통로만 엶
         private void SetBarriers(bool closeAll, bool immediate)
         {
-            foreach (var gate in new[] { entry, exit })
-                if (gate.barrier != null) gate.barrier.SetClosed(closeAll || !gate.connected, immediate);
+            SetBarrier(entry, closeAll, immediate);
+            SetBarrier(exit, closeAll, immediate);
+        }
+
+        private static void SetBarrier(Gate gate, bool closeAll, bool immediate)
+        {
+            if (gate.barrier != null)
+            {
+                gate.barrier.SetClosed(closeAll || !gate.connected, immediate);
+            }
         }
 
         private void CreateBarrier(Gate gate, RoomLayout.GateInfo info)
         {
-            if (gate.barrier != null || gate.door == null) return;
+            if (gate.barrier != null || gate.door == null)
+                return;
 
-            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cube.name = "Barrier_" + gate.door.tag;
             // 문 오브젝트는 스케일이 있어서 방 루트 바로 아래에 두고, 회전만 문과 맞춤 (폭 = 문 벽 방향)
             cube.transform.SetParent(transform, false);
@@ -136,21 +162,34 @@ namespace Study3D.FpsGame.Map
         // - needsEntry 가 false 면 입구 문이 없어도 됨 (시작방은 출구만 있으면 됨)
         public static RoomLayout CalculateLayout(GameObject root, bool needsEntry = true)
         {
-            var module = root.GetComponent<RoomModule>();
-            var layout = new RoomLayout { bounds = MeshBounds(root.transform, root.transform, true) };
-            layout.entry = CalculateGate(root.transform, module != null ? module.entry.door : null, EntryTag, needsEntry);
-            layout.exit = CalculateGate(root.transform, module != null ? module.exit.door : null, ExitTag, true);
+            RoomModule module = root.GetComponent<RoomModule>();
+            Transform entryDoor = null;
+            Transform exitDoor = null;
+            if (module != null)
+            {
+                entryDoor = module.entry.door;
+                exitDoor = module.exit.door;
+            }
+
+            RoomLayout layout = new RoomLayout { bounds = MeshBounds(root.transform, root.transform, true) };
+            layout.entry = CalculateGate(root.transform, entryDoor, EntryTag, needsEntry);
+            layout.exit = CalculateGate(root.transform, exitDoor, ExitTag, true);
             return layout;
         }
 
         private static RoomLayout.GateInfo CalculateGate(Transform root, Transform door, string tag, bool required)
         {
             // 프리팹 에셋을 건드리지 않도록 여기서는 찾기만 함 (저장은 FindGates 에서)
-            if (door == null) door = FindTagged(root, tag);
-            if (door == null && required == false) return new RoomLayout.GateInfo { rotation = Quaternion.identity };
-            if (door == null) throw new InvalidOperationException($"{root.name}: 태그 '{tag}' 인 통로 문을 찾을 수 없습니다.");
+            if (door == null)
+            {
+                door = FindTagged(root, tag);
+            }
+            if (door == null && required == false)
+                return new RoomLayout.GateInfo { rotation = Quaternion.identity };
+            if (door == null)
+                throw new InvalidOperationException($"{root.name}: 태그 '{tag}' 인 통로 문을 찾을 수 없습니다.");
 
-            var info = new RoomLayout.GateInfo
+            RoomLayout.GateInfo info = new RoomLayout.GateInfo
             {
                 position = root.InverseTransformPoint(door.position),
                 rotation = Quaternion.Inverse(root.rotation) * door.rotation,
@@ -158,7 +197,14 @@ namespace Study3D.FpsGame.Map
 
             // 문 피벗은 벽 끝에 있으므로 통로 중앙은 문 메시 범위의 중앙
             Bounds doorBounds = MeshBounds(root, door, false);
-            info.center = doorBounds.size == Vector3.zero ? info.position : doorBounds.center;
+            if (doorBounds.size == Vector3.zero)
+            {
+                info.center = info.position;
+            }
+            else
+            {
+                info.center = doorBounds.center;
+            }
             info.center.y = info.position.y;
             return info;
         }
@@ -169,22 +215,26 @@ namespace Study3D.FpsGame.Map
             Matrix4x4 toRoot = root.worldToLocalMatrix;
             Bounds bounds = default;
             bool hasBounds = false;
-            foreach (var mf in target.GetComponentsInChildren<MeshFilter>(true))
+            foreach (MeshFilter meshFilter in target.GetComponentsInChildren<MeshFilter>(true))
             {
-                if (mf.sharedMesh == null) continue;
-                if (skipBarriers && mf.GetComponent<RoomBarrier>() != null) continue;
+                if (meshFilter.sharedMesh == null)
+                    continue;
+                if (skipBarriers && meshFilter.GetComponent<RoomBarrier>() != null)
+                    continue;
 
-                Bounds mb = mf.sharedMesh.bounds;
-                Matrix4x4 m = toRoot * mf.transform.localToWorldMatrix;
+                Bounds meshBounds = meshFilter.sharedMesh.bounds;
+                Matrix4x4 meshToRoot = toRoot * meshFilter.transform.localToWorldMatrix;
                 for (int i = 0; i < 8; i++)
                 {
-                    Vector3 corner = mb.center + Vector3.Scale(mb.extents, new Vector3(
-                        (i & 1) == 0 ? -1f : 1f, (i & 2) == 0 ? -1f : 1f, (i & 4) == 0 ? -1f : 1f));
-                    Vector3 p = m.MultiplyPoint3x4(corner);
-                    if (hasBounds) bounds.Encapsulate(p);
+                    Vector3 corner = meshBounds.center + Vector3.Scale(meshBounds.extents, CornerDirection(i));
+                    Vector3 rootPoint = meshToRoot.MultiplyPoint3x4(corner);
+                    if (hasBounds)
+                    {
+                        bounds.Encapsulate(rootPoint);
+                    }
                     else
                     {
-                        bounds = new Bounds(p, Vector3.zero);
+                        bounds = new Bounds(rootPoint, Vector3.zero);
                         hasBounds = true;
                     }
                 }
@@ -192,13 +242,36 @@ namespace Study3D.FpsGame.Map
             return bounds;
         }
 
+        // 상자 꼭짓점 8개 중 index(0~7) 번째로 가는 방향 (각 축 -1 또는 1)
+        // - index 를 2진수로 보면 1의 자리 = x, 2의 자리 = y, 4의 자리 = z 가 + 쪽인지
+        private static Vector3 CornerDirection(int index)
+        {
+            Vector3 direction = new Vector3(-1f, -1f, -1f);
+            if (index % 2 == 1)
+            {
+                direction.x = 1f;
+            }
+            if ((index / 2) % 2 == 1)
+            {
+                direction.y = 1f;
+            }
+            if ((index / 4) % 2 == 1)
+            {
+                direction.z = 1f;
+            }
+            return direction;
+        }
+
         public static Transform FindTagged(Transform parent, string tag)
         {
             foreach (Transform child in parent)
             {
-                if (child.CompareTag(tag)) return child;
+                if (child.CompareTag(tag))
+                    return child;
+
                 Transform found = FindTagged(child, tag);
-                if (found != null) return found;
+                if (found != null)
+                    return found;
             }
             return null;
         }

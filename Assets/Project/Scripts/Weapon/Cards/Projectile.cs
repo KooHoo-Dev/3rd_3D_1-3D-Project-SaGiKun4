@@ -27,7 +27,10 @@ namespace Study3D.FpsGame.Weapon.Cards
         // 화력 배율: 발사체 상한 때문에 만들지 못한 분열 자식들의 몫을 부모가 대신 가집니다. (자식 n장 → ×(1 + n))
         // 피해와 폭발 피해에 곱해지고, 크기는 세제곱근만큼 커집니다(maxPowerScale까지).
         public float Power { get; private set; } = 1f;
-        public int Damage => (int)Mathf.Min(baseDamage * Power, MaxDamage);
+        public int Damage
+        {
+            get { return (int)Mathf.Min(baseDamage * Power, MaxDamage); }
+        }
         public CardMultiplier Multiplier { get; private set; }
 
         private int baseDamage; // 화력 배율을 곱하기 전 피해
@@ -160,7 +163,8 @@ namespace Study3D.FpsGame.Weapon.Cards
             {
                 for (int i = 0; i < cards.Count; i++)
                 {
-                    if (cards[i].Role == role) timingSlots[(int)cards[i].Timing].Add(i);
+                    if (cards[i].Role == role)
+                        timingSlots[(int)cards[i].Timing].Add(i);
                 }
             }
         }
@@ -180,7 +184,8 @@ namespace Study3D.FpsGame.Weapon.Cards
             RunTiming(CardTiming.Flying, FlightContext(), 0);
             Move(deltaTime);
 
-            if (isDead == false && ProjectileManager.IsOutsideWorld(transform.position)) Recall();
+            if (isDead == false && ProjectileManager.IsOutsideWorld(transform.position))
+                Recall();
         }
 
         // 회수: 맵 밖으로 나간 발사체를 소멸 시점 카드 없이 조용히 풀로 돌려보냅니다.
@@ -298,7 +303,9 @@ namespace Study3D.FpsGame.Weapon.Cards
         // 가져가면 이번 충돌 뒤에도 소멸하지 않고 계속 날아갑니다.
         public bool TryClaimResponse()
         {
-            if (responseClaimed) return false;
+            if (responseClaimed)
+                return false;
+
             responseClaimed = true;
             keepFlying = true;
             return true;
@@ -310,13 +317,16 @@ namespace Study3D.FpsGame.Weapon.Cards
         //   (겹친 채로 출발하면 BoxCast가 그 벽을 감지하지 못해 뚫고 나가기 때문입니다)
         public void Steer(CardContext context, Vector3 direction)
         {
-            if (direction.sqrMagnitude < 0.0001f) return;
+            if (direction.sqrMagnitude < 0.0001f)
+                return;
 
             transform.rotation = Quaternion.LookRotation(direction);
-            if (context.Target == null) return; // 비행 중 조향
+            if (context.Target == null)
+                return; // 비행 중 조향
 
             keepFlying = true;
-            if (context.IsEnemy == false) PushOutOfSurface(context.Point, context.Normal);
+            if (context.IsEnemy == false)
+                PushOutOfSurface(context.Point, context.Normal);
         }
 
         // 닿은 위치에서 살짝 안쪽으로 들어가 둡니다.
@@ -354,7 +364,8 @@ namespace Study3D.FpsGame.Weapon.Cards
         // 발사체 상한에 닿아 만들지 못했으면 false를 반환합니다. (호출한 쪽이 AbsorbSplits로 화력을 넘겨받습니다)
         public bool SpawnSplit(CardContext context, Quaternion rotation)
         {
-            if (ProjectileManager.IsFull) return false;
+            if (ProjectileManager.IsFull)
+                return false;
 
             // 부모 상자의 중심에서 생성합니다. 적이면 안쪽으로 살짝 들여보내고, 벽이면 LaunchSplit에서 면 바깥으로 밀어냅니다.
             Vector3 position = context.Center;
@@ -376,11 +387,13 @@ namespace Study3D.FpsGame.Weapon.Cards
         // 벽에서 커졌으면 커진 상자가 벽과 겹치지 않도록 다시 면 바깥으로 밀어냅니다.
         public void AbsorbSplits(CardContext context, int count)
         {
-            if (count <= 0) return;
+            if (count <= 0)
+                return;
 
             Power = Mathf.Min(Power * (1 + count), MaxPower);
             ApplyPowerScale();
-            if (context.Target != null && context.IsEnemy == false) PushOutOfSurface(context.Point, context.Normal);
+            if (context.Target != null && context.IsEnemy == false)
+                PushOutOfSurface(context.Point, context.Normal);
         }
 
         // 화력 배율의 세제곱근만큼 키웁니다. (부피가 화력에 비례하도록, maxPowerScale까지)

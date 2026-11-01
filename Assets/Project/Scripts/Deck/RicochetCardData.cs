@@ -14,15 +14,21 @@ namespace Study3D.FpsGame.Deck
 
         protected override ContactTarget DefaultTarget => ContactTarget.World;
 
-        public override int CreateCount(CardMultiplier multiplier) => CeilMultiply(bounceCount, multiplier.Effect);
+        public override int CreateCount(CardMultiplier multiplier)
+        {
+            return CeilMultiply(bounceCount, multiplier.Effect);
+        }
 
         protected override void OnHit(CardContext context)
         {
-            if (context.Count <= 0) return;
-            if (TryRespond(context) == false) return;
+            if (context.Count <= 0)
+                return;
+            if (TryRespond(context) == false)
+                return;
 
             context.Count--;
-            context.Projectile.Redirect(context.Point, context.Normal, Vector3.Reflect(context.Forward, context.Normal));
+            Vector3 reflected = Vector3.Reflect(context.Forward, context.Normal);
+            context.Projectile.Redirect(context.Point, context.Normal, reflected);
         }
     }
 }

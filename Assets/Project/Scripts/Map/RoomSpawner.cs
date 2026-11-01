@@ -49,9 +49,17 @@ namespace Study3D.FpsGame.Map
 
         private void OnDestroy()
         {
-            if (room != null) room.OnCombatStart.RemoveListener(Spawn);
+            if (room != null)
+            {
+                room.OnCombatStart.RemoveListener(Spawn);
+            }
             foreach (Enemy.Enemy enemy in alive)
-                if (enemy != null) enemy.Despawned -= OnEnemyDespawned;
+            {
+                if (enemy != null)
+                {
+                    enemy.Despawned -= OnEnemyDespawned;
+                }
+            }
         }
 
         private void Spawn()
@@ -67,11 +75,15 @@ namespace Study3D.FpsGame.Map
             int pointIndex = 0;
             foreach (EnemyEntry entry in enemies)
             {
-                if (entry.prefab == null || entry.count <= 0) continue;
+                if (entry.prefab == null || entry.count <= 0)
+                    continue;
 
                 string key = entry.prefab.name;
                 if (pool.HasPool(key) == false)
-                    pool.CreatePool(new ObjectPoolManager.ObjectPoolData(key, entry.prefab.gameObject, (byte)Mathf.Clamp(entry.count, 1, 255)));
+                {
+                    byte poolSize = (byte)Mathf.Clamp(entry.count, 1, 255);
+                    pool.CreatePool(new ObjectPoolManager.ObjectPoolData(key, entry.prefab.gameObject, poolSize));
+                }
 
                 for (int i = 0; i < entry.count; i++)
                 {
@@ -82,7 +94,10 @@ namespace Study3D.FpsGame.Map
             }
 
             // 꺼낸 적이 없으면 바로 클리어 (막힌 채로 갇히지 않도록)
-            if (alive.Count == 0) room.Clear();
+            if (alive.Count == 0)
+            {
+                room.Clear();
+            }
         }
 
         private void SpawnOne(ObjectPoolManager pool, string key, SpawnPoint spawnPoint)
@@ -93,14 +108,27 @@ namespace Study3D.FpsGame.Map
                 return;
             }
 
-            if (pool.GetObjectOrNull(key) is not Enemy.Enemy enemy) return;
+            IObjectPoolItem item = pool.GetObjectOrNull(key);
+            if (!(item is Enemy.Enemy))
+                return;
+
+            Enemy.Enemy enemy = (Enemy.Enemy)item;
 
             // EndPoint 쪽을 바라보며 등장
             Vector3 start = spawnPoint.start.position;
             Vector3 end = spawnPoint.end.position;
             Vector3 toEnd = end - start;
             toEnd.y = 0f;
-            Quaternion rotation = toEnd.sqrMagnitude > 0.0001f ? Quaternion.LookRotation(toEnd) : spawnPoint.start.rotation;
+
+            Quaternion rotation;
+            if (toEnd.sqrMagnitude > 0.0001f)
+            {
+                rotation = Quaternion.LookRotation(toEnd);
+            }
+            else
+            {
+                rotation = spawnPoint.start.rotation;
+            }
 
             enemy.transform.SetPositionAndRotation(start, rotation);
             enemy.SetEntrance(end);
@@ -113,7 +141,10 @@ namespace Study3D.FpsGame.Map
         {
             enemy.Despawned -= OnEnemyDespawned;
             alive.Remove(enemy);
-            if (alive.Count == 0) room.Clear();
+            if (alive.Count == 0)
+            {
+                room.Clear();
+            }
         }
     }
 }

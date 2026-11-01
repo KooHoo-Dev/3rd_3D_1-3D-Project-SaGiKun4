@@ -17,7 +17,8 @@ namespace Study3D.FpsGame.Enemy.States
         {
             KeepAnim(Enemy.RunAnim);
 
-            if (Enemy.MoveToEntrance(deltaTime) == false) return;
+            if (Enemy.MoveToEntrance(deltaTime) == false)
+                return;
 
             Enemy.FinishEntrance();
             Enemy.ChangeState<EnemyChaseState>();

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -26,104 +27,234 @@ namespace Study3D.FpsGame.Map
             public MaterialPropertyBlock properties;
         }
 
+        // 한 번에 같이 그릴 수 있는 렌더러 묶음의 조건 (메시, 머티리얼, 칸, 렌더 설정이 모두 같아야 함)
+        private struct GroupKey : IEquatable<GroupKey>
+        {
+            public Mesh mesh;
+            public Material material;
+            public Vector3Int cell;
+            public int layer;
+            public ShadowCastingMode shadowCastingMode;
+            public bool receiveShadows;
+            public uint renderingLayerMask;
+            public ReflectionProbeUsage reflectionProbeUsage;
+            public LightProbeUsage lightProbeUsage;
+            public MotionVectorGenerationMode motionVectorGenerationMode;
+
+            public bool Equals(GroupKey other)
+            {
+                return mesh == other.mesh
+                    && material == other.material
+                    && cell == other.cell
+                    && layer == other.layer
+                    && shadowCastingMode == other.shadowCastingMode
+                    && receiveShadows == other.receiveShadows
+                    && renderingLayerMask == other.renderingLayerMask
+                    && reflectionProbeUsage == other.reflectionProbeUsage
+                    && lightProbeUsage == other.lightProbeUsage
+                    && motionVectorGenerationMode == other.motionVectorGenerationMode;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj is GroupKey)
+                    return Equals((GroupKey)obj);
+
+                return false;
+            }
+
+            public override int GetHashCode()
+            {
+                int hash = 17;
+                hash = hash * 31 + mesh.GetHashCode();
+                hash = hash * 31 + material.GetHashCode();
+                hash = hash * 31 + cell.GetHashCode();
+                hash = hash * 31 + layer;
+                hash = hash * 31 + (int)shadowCastingMode;
+                hash = hash * 31 + (receiveShadows ? 1 : 0);
+                hash = hash * 31 + (int)renderingLayerMask;
+                hash = hash * 31 + (int)reflectionProbeUsage;
+                hash = hash * 31 + (int)lightProbeUsage;
+                hash = hash * 31 + (int)motionVectorGenerationMode;
+                return hash;
+            }
+        }
+
         private readonly List<Batch> batches = new List<Batch>();
         private readonly List<MeshRenderer> hiddenRenderers = new List<MeshRenderer>();
         private Matrix4x4 rootMatrix;
         private bool initialized;
 
-        private void OnEnable() { initialized = false; }
+        private void OnEnable()
+        {
+            initialized = false;
+        }
 
         private void LateUpdate()
         {
             // Map generation can position a room after Instantiate/Awake. Initialize afterwards.
-            if (!initialized) Rebuild();
-            if (rootMatrix != transform.localToWorldMatrix) RefreshMatrices();
-            foreach (var batch in batches)
+            if (!initialized)
+            {
+                Rebuild();
+            }
+            if (rootMatrix != transform.localToWorldMatrix)
+            {
+                RefreshMatrices();
+            }
+            foreach (Batch batch in batches)
+            {
                 Graphics.RenderMeshInstanced(batch.parameters, batch.mesh, 0, batch.matrices);
+            }
         }
 
         public void Rebuild()
         {
             RestoreRenderers();
             initialized = true;
-            if (!Application.isPlaying || !isActiveAndEnabled || !SystemInfo.supportsInstancing) return;
+            if (!Application.isPlaying || !isActiveAndEnabled || !SystemInfo.supportsInstancing)
+                return;
 
-            // Keep unsupported, lightmapped, LOD-controlled or customized renderers on their usual path.
-            var groups = new Dictionary<(Mesh, Material, Vector3Int, int, ShadowCastingMode,
-                bool, uint, ReflectionProbeUsage, LightProbeUsage, MotionVectorGenerationMode), List<MeshRenderer>>();
-            foreach (var renderer in GetComponentsInChildren<MeshRenderer>())
+            Dictionary<GroupKey, List<MeshRenderer>> groups = GroupRenderers();
+
+            foreach (KeyValuePair<GroupKey, List<MeshRenderer>> pair in groups)
             {
-                if (!renderer.enabled || renderer.forceRenderingOff || renderer.isPartOfStaticBatch ||
-                    renderer.HasPropertyBlock() || renderer.GetComponentInParent<LODGroup>() != null ||
-                    renderer.lightProbeProxyVolumeOverride != null || renderer.probeAnchor != null ||
-                    (renderer.lightmapIndex >= 0 && renderer.lightmapIndex < 65534)) continue;
-                var filter = renderer.GetComponent<MeshFilter>();
-                var mesh = filter != null ? filter.sharedMesh : null;
-                var materials = renderer.sharedMaterials;
-                if (mesh == null || mesh.subMeshCount != 1 || materials.Length != 1) continue;
-                var material = materials[0];
-                if (material == null || !material.enableInstancing || material.renderQueue >= 2500) continue;
+                List<MeshRenderer> list = pair.Value;
+                if (list.Count < 2)
+                    continue;
 
-                var position = transform.InverseTransformPoint(renderer.bounds.center) / Mathf.Max(1f, cellSize);
-                var cell = new Vector3Int(Mathf.FloorToInt(position.x), Mathf.FloorToInt(position.y), Mathf.FloorToInt(position.z));
-                var key = (mesh, material, cell, renderer.gameObject.layer, renderer.shadowCastingMode,
-                    renderer.receiveShadows, renderer.renderingLayerMask, renderer.reflectionProbeUsage,
-                    renderer.lightProbeUsage, renderer.motionVectorGenerationMode);
-                if (!groups.TryGetValue(key, out var list)) groups.Add(key, list = new List<MeshRenderer>());
-                list.Add(renderer);
-            }
-
-            foreach (var pair in groups)
-            {
-                var list = pair.Value;
-                if (list.Count < 2) continue;
                 for (int start = 0; start < list.Count; start += MaxInstances)
                 {
                     int count = Mathf.Min(MaxInstances, list.Count - start);
-                    var sample = list[start];
-                    var batch = new Batch
-                    {
-                        mesh = sample.GetComponent<MeshFilter>().sharedMesh,
-                        sources = list.GetRange(start, count).ToArray(),
-                        matrices = new Matrix4x4[count],
-                        properties = new MaterialPropertyBlock(),
-                        parameters = new RenderParams(sample.sharedMaterial)
-                        {
-                            layer = sample.gameObject.layer,
-                            shadowCastingMode = sample.shadowCastingMode,
-                            receiveShadows = sample.receiveShadows,
-                            renderingLayerMask = sample.renderingLayerMask,
-                            reflectionProbeUsage = sample.reflectionProbeUsage,
-                            lightProbeUsage = sample.lightProbeUsage == LightProbeUsage.BlendProbes
-                                ? LightProbeUsage.CustomProvided : sample.lightProbeUsage,
-                            motionVectorMode = sample.motionVectorGenerationMode
-                        }
-                    };
-                    batch.parameters.matProps = batch.properties;
-                    batches.Add(batch);
+                    batches.Add(CreateBatch(list, start, count));
                 }
             }
 
             RefreshMatrices();
-            foreach (var batch in batches)
-                foreach (var renderer in batch.sources)
+            HideSourceRenderers();
+            SourceRendererCount = hiddenRenderers.Count;
+        }
+
+        // 인스턴싱할 수 있는 렌더러를 같은 조건끼리 묶음
+        private Dictionary<GroupKey, List<MeshRenderer>> GroupRenderers()
+        {
+            Dictionary<GroupKey, List<MeshRenderer>> groups = new Dictionary<GroupKey, List<MeshRenderer>>();
+            foreach (MeshRenderer renderer in GetComponentsInChildren<MeshRenderer>())
+            {
+                if (CanInstance(renderer, out Mesh mesh, out Material material) == false)
+                    continue;
+
+                Vector3 position = transform.InverseTransformPoint(renderer.bounds.center) / Mathf.Max(1f, cellSize);
+                Vector3Int cell = new Vector3Int(Mathf.FloorToInt(position.x), Mathf.FloorToInt(position.y), Mathf.FloorToInt(position.z));
+
+                GroupKey key = new GroupKey
+                {
+                    mesh = mesh,
+                    material = material,
+                    cell = cell,
+                    layer = renderer.gameObject.layer,
+                    shadowCastingMode = renderer.shadowCastingMode,
+                    receiveShadows = renderer.receiveShadows,
+                    renderingLayerMask = renderer.renderingLayerMask,
+                    reflectionProbeUsage = renderer.reflectionProbeUsage,
+                    lightProbeUsage = renderer.lightProbeUsage,
+                    motionVectorGenerationMode = renderer.motionVectorGenerationMode,
+                };
+
+                if (groups.TryGetValue(key, out List<MeshRenderer> list) == false)
+                {
+                    list = new List<MeshRenderer>();
+                    groups.Add(key, list);
+                }
+                list.Add(renderer);
+            }
+            return groups;
+        }
+
+        private static bool CanInstance(MeshRenderer renderer, out Mesh mesh, out Material material)
+        {
+            mesh = null;
+            material = null;
+
+            // Keep unsupported, lightmapped, LOD-controlled or customized renderers on their usual path.
+            if (!renderer.enabled || renderer.forceRenderingOff || renderer.isPartOfStaticBatch)
+                return false;
+            if (renderer.HasPropertyBlock() || renderer.GetComponentInParent<LODGroup>() != null)
+                return false;
+            if (renderer.lightProbeProxyVolumeOverride != null || renderer.probeAnchor != null)
+                return false;
+            if (renderer.lightmapIndex >= 0 && renderer.lightmapIndex < 65534)
+                return false;
+
+            MeshFilter filter = renderer.GetComponent<MeshFilter>();
+            if (filter != null)
+            {
+                mesh = filter.sharedMesh;
+            }
+            Material[] materials = renderer.sharedMaterials;
+            if (mesh == null || mesh.subMeshCount != 1 || materials.Length != 1)
+                return false;
+
+            material = materials[0];
+            if (material == null || !material.enableInstancing || material.renderQueue >= 2500)
+                return false;
+
+            return true;
+        }
+
+        private static Batch CreateBatch(List<MeshRenderer> list, int start, int count)
+        {
+            MeshRenderer sample = list[start];
+
+            // 라이트 프로브 섞기는 직접 계산해서 넘김 (RefreshMatrices 참고)
+            LightProbeUsage lightProbeUsage = sample.lightProbeUsage;
+            if (lightProbeUsage == LightProbeUsage.BlendProbes)
+            {
+                lightProbeUsage = LightProbeUsage.CustomProvided;
+            }
+
+            Batch batch = new Batch
+            {
+                mesh = sample.GetComponent<MeshFilter>().sharedMesh,
+                sources = list.GetRange(start, count).ToArray(),
+                matrices = new Matrix4x4[count],
+                properties = new MaterialPropertyBlock(),
+                parameters = new RenderParams(sample.sharedMaterial)
+                {
+                    layer = sample.gameObject.layer,
+                    shadowCastingMode = sample.shadowCastingMode,
+                    receiveShadows = sample.receiveShadows,
+                    renderingLayerMask = sample.renderingLayerMask,
+                    reflectionProbeUsage = sample.reflectionProbeUsage,
+                    lightProbeUsage = lightProbeUsage,
+                    motionVectorMode = sample.motionVectorGenerationMode
+                }
+            };
+            batch.parameters.matProps = batch.properties;
+            return batch;
+        }
+
+        private void HideSourceRenderers()
+        {
+            foreach (Batch batch in batches)
+            {
+                foreach (MeshRenderer renderer in batch.sources)
                 {
                     renderer.forceRenderingOff = true;
                     hiddenRenderers.Add(renderer);
                 }
-            SourceRendererCount = hiddenRenderers.Count;
+            }
         }
 
         private void RefreshMatrices()
         {
             rootMatrix = transform.localToWorldMatrix;
-            foreach (var batch in batches)
+            foreach (Batch batch in batches)
             {
-                var bounds = batch.sources[0].bounds;
-                var positions = new Vector3[batch.sources.Length];
+                Bounds bounds = batch.sources[0].bounds;
+                Vector3[] positions = new Vector3[batch.sources.Length];
                 for (int i = 0; i < batch.sources.Length; i++)
                 {
-                    var renderer = batch.sources[i];
+                    MeshRenderer renderer = batch.sources[i];
                     batch.matrices[i] = renderer.localToWorldMatrix;
                     bounds.Encapsulate(renderer.bounds);
                     positions[i] = renderer.bounds.center;
@@ -131,8 +262,8 @@ namespace Study3D.FpsGame.Map
                 batch.parameters.worldBounds = bounds;
                 if (batch.parameters.lightProbeUsage == LightProbeUsage.CustomProvided)
                 {
-                    var probes = new SphericalHarmonicsL2[positions.Length];
-                    var occlusion = new Vector4[positions.Length];
+                    SphericalHarmonicsL2[] probes = new SphericalHarmonicsL2[positions.Length];
+                    Vector4[] occlusion = new Vector4[positions.Length];
                     LightProbes.CalculateInterpolatedLightAndOcclusionProbes(positions, probes, occlusion);
                     batch.properties.CopySHCoefficientArraysFrom(probes);
                     batch.properties.CopyProbeOcclusionArrayFrom(occlusion);
@@ -140,12 +271,20 @@ namespace Study3D.FpsGame.Map
             }
         }
 
-        private void OnDisable() { RestoreRenderers(); }
+        private void OnDisable()
+        {
+            RestoreRenderers();
+        }
 
         private void RestoreRenderers()
         {
-            foreach (var renderer in hiddenRenderers)
-                if (renderer != null) renderer.forceRenderingOff = false;
+            foreach (MeshRenderer renderer in hiddenRenderers)
+            {
+                if (renderer != null)
+                {
+                    renderer.forceRenderingOff = false;
+                }
+            }
             hiddenRenderers.Clear();
             batches.Clear();
             SourceRendererCount = 0;

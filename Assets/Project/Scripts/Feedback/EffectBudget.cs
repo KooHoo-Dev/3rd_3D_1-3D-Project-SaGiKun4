@@ -20,19 +20,35 @@ namespace Study3D.FpsGame
         // poolKey가 없으면(풀 없이 Instantiate 하는 경우) 동시 개수는 세지 않고 프레임당 생성 수만 봅니다.
         public static bool TryUse(string poolKey)
         {
-            if (countedFrame != Time.frameCount)
-            {
-                countedFrame = Time.frameCount;
-                spawnedThisFrame = 0;
-            }
-            if (spawnedThisFrame >= MaxSpawnsPerFrame) return false;
+            ResetCountIfNewFrame();
+            if (spawnedThisFrame >= MaxSpawnsPerFrame)
+                return false;
 
-            ObjectPoolManager pool = ObjectPoolManager.Instance;
-            if (pool != null && string.IsNullOrEmpty(poolKey) == false &&
-                pool.GetActiveCount(poolKey) >= MaxActivePerKind) return false;
+            if (IsKindFull(poolKey))
+                return false;
 
             spawnedThisFrame++;
             return true;
+        }
+
+        // 프레임이 바뀌었으면 이번 프레임 생성 수를 0부터 다시 셉니다.
+        private static void ResetCountIfNewFrame()
+        {
+            if (countedFrame == Time.frameCount)
+                return;
+
+            countedFrame = Time.frameCount;
+            spawnedThisFrame = 0;
+        }
+
+        // poolKey 풀에서 꺼낸 이펙트가 동시 개수 상한만큼 살아 있는지
+        private static bool IsKindFull(string poolKey)
+        {
+            ObjectPoolManager pool = ObjectPoolManager.Instance;
+            if (pool == null || string.IsNullOrEmpty(poolKey))
+                return false;
+
+            return pool.GetActiveCount(poolKey) >= MaxActivePerKind;
         }
     }
 }

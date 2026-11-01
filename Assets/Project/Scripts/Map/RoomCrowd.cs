@@ -46,12 +46,13 @@ namespace Study3D.FpsGame.Map
         // 마지막 몬스터를 빈자리로 옮겨서 지움
         public void Remove(RoomNavAgent agent)
         {
-            int i = agent.CrowdIndex;
-            if (i < 0 || i >= agents.Count || agents[i] != agent) return;
+            int index = agent.CrowdIndex;
+            if (index < 0 || index >= agents.Count || agents[index] != agent)
+                return;
 
             int last = agents.Count - 1;
-            agents[i] = agents[last];
-            agents[i].CrowdIndex = i;
+            agents[index] = agents[last];
+            agents[index].CrowdIndex = index;
             agents.RemoveAt(last);
             agent.CrowdIndex = -1;
             builtFrame = -1;
@@ -60,13 +61,16 @@ namespace Study3D.FpsGame.Map
         // 이웃에게서 멀어지는 방향 (월드, XZ). 이웃마다 겹친 정도(0 = 닿기만 함 ~ 1 = 완전히 겹침)만큼 더함
         public Vector3 GetSeparation(RoomNavAgent agent)
         {
-            if (builtFrame != Time.frameCount) Rebuild();
+            if (builtFrame != Time.frameCount)
+            {
+                Rebuild();
+            }
 
             int self = agent.CrowdIndex;
-            Vector3 p = agent.transform.position;
-            float r = agent.Radius;
-            int cx = Cell(p.x);
-            int cz = Cell(p.z);
+            Vector3 position = agent.transform.position;
+            float radius = agent.Radius;
+            int cellX = Cell(position.x);
+            int cellZ = Cell(position.z);
 
             Vector3 push = Vector3.zero;
             int visitedCount = 0;
@@ -75,38 +79,50 @@ namespace Study3D.FpsGame.Map
                 for (int dx = -1; dx <= 1; dx++)
                 {
                     // 주변 칸 두 개가 같은 해시 번호면 한 번만 봄
-                    int h = Hash(cx + dx, cz + dz);
-                    if (Array.IndexOf(visited, h, 0, visitedCount) >= 0) continue;
-                    visited[visitedCount++] = h;
+                    int hash = Hash(cellX + dx, cellZ + dz);
+                    if (Array.IndexOf(visited, hash, 0, visitedCount) >= 0)
+                        continue;
 
-                    for (int k = cellStart[h]; k < cellStart[h + 1]; k++)
-                    {
-                        int j = sorted[k];
-                        if (j == self || radii[j] <= 0f) continue;
+                    visited[visitedCount] = hash;
+                    visitedCount++;
 
-                        Vector3 d = p - positions[j];
-                        if (Mathf.Abs(d.y) > HeightLimit) continue;
-                        d.y = 0f;
-
-                        float minDist = r + radii[j];
-                        float sq = d.sqrMagnitude;
-                        if (sq >= minDist * minDist) continue;
-
-                        float dist = Mathf.Sqrt(sq);
-                        if (dist < 1e-4f)
-                        {
-                            // 완전히 같은 자리: 번호마다 다른 방향으로 갈라짐
-                            float angle = self * GoldenAngle;
-                            push += new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle));
-                        }
-                        else
-                        {
-                            push += d / dist * (1f - dist / minDist);
-                        }
-                    }
+                    AddPushFromCell(hash, self, position, radius, ref push);
                 }
             }
             return push;
+        }
+
+        // 해시 칸 하나에 담긴 이웃들에게서 멀어지는 방향을 push 에 더함
+        private void AddPushFromCell(int hash, int self, Vector3 position, float radius, ref Vector3 push)
+        {
+            for (int k = cellStart[hash]; k < cellStart[hash + 1]; k++)
+            {
+                int other = sorted[k];
+                if (other == self || radii[other] <= 0f)
+                    continue;
+
+                Vector3 offset = position - positions[other];
+                if (Mathf.Abs(offset.y) > HeightLimit)
+                    continue;
+                offset.y = 0f;
+
+                float minDist = radius + radii[other];
+                float sq = offset.sqrMagnitude;
+                if (sq >= minDist * minDist)
+                    continue;
+
+                float dist = Mathf.Sqrt(sq);
+                if (dist < 1e-4f)
+                {
+                    // 완전히 같은 자리: 번호마다 다른 방향으로 갈라짐
+                    float angle = self * GoldenAngle;
+                    push += new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle));
+                }
+                else
+                {
+                    push += offset / dist * (1f - dist / minDist);
+                }
+            }
         }
 
         // 모든 몬스터 위치를 찍고 칸 번호 순으로 정렬 (칸마다 개수 세기 → 시작 위치 → 채우기)
@@ -116,31 +132,62 @@ namespace Study3D.FpsGame.Map
             int count = agents.Count;
             EnsureCapacity(count);
 
+            TakeSnapshot(count);
+            SortByCell(count);
+        }
+
+        // 위치와 반경을 찍어 두고, 가장 큰 반경으로 칸 크기를 정함
+        private void TakeSnapshot(int count)
+        {
             float maxRadius = 0.01f;
             for (int i = 0; i < count; i++)
             {
-                RoomNavAgent a = agents[i];
-                positions[i] = a.transform.position;
-                radii[i] = a.IsSolid ? a.Radius : 0f;
+                RoomNavAgent agent = agents[i];
+                positions[i] = agent.transform.position;
+                if (agent.IsSolid)
+                {
+                    radii[i] = agent.Radius;
+                }
+                else
+                {
+                    radii[i] = 0f;
+                }
                 maxRadius = Mathf.Max(maxRadius, radii[i]);
             }
             cellSize = maxRadius * 2f;
+        }
 
+        private void SortByCell(int count)
+        {
+            // 칸마다 개수 세기 (cellStart[c + 1] 에 칸 c 의 개수)
             Array.Clear(cellStart, 0, cellStart.Length);
             for (int i = 0; i < count; i++)
             {
                 cellOf[i] = Hash(Cell(positions[i].x), Cell(positions[i].z));
                 cellStart[cellOf[i] + 1]++;
             }
-            for (int c = 0; c < TableSize; c++) cellStart[c + 1] += cellStart[c];
 
+            // 앞 칸들의 개수를 누적하면 칸마다 시작 위치
+            for (int c = 0; c < TableSize; c++)
+            {
+                cellStart[c + 1] += cellStart[c];
+            }
+
+            // 칸의 시작 위치부터 차례로 채우기
             Array.Copy(cellStart, cellCursor, TableSize);
-            for (int i = 0; i < count; i++) sorted[cellCursor[cellOf[i]]++] = i;
+            for (int i = 0; i < count; i++)
+            {
+                int cell = cellOf[i];
+                sorted[cellCursor[cell]] = i;
+                cellCursor[cell]++;
+            }
         }
 
         private void EnsureCapacity(int count)
         {
-            if (positions.Length >= count) return;
+            if (positions.Length >= count)
+                return;
+
             int size = Mathf.NextPowerOfTwo(count);
             positions = new Vector3[size];
             radii = new float[size];
@@ -148,8 +195,15 @@ namespace Study3D.FpsGame.Map
             sorted = new int[size];
         }
 
-        private int Cell(float v) => Mathf.FloorToInt(v / cellSize);
+        private int Cell(float v)
+        {
+            return Mathf.FloorToInt(v / cellSize);
+        }
 
-        private static int Hash(int x, int z) => ((x * 73856093) ^ (z * 19349663)) & (TableSize - 1);
+        // 칸 좌표 (x, z) 를 큰 소수와 섞어 0 ~ TableSize-1 번호로 (& (TableSize - 1) = TableSize 로 나눈 나머지, 2의 거듭제곱이라 가능)
+        private static int Hash(int x, int z)
+        {
+            return ((x * 73856093) ^ (z * 19349663)) & (TableSize - 1);
+        }
     }
 }
