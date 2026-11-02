@@ -52,7 +52,10 @@ public class UpgradeUIBuilder : MonoBehaviour
     [Header("왼쪽 선택 칸")]
     [Tooltip("목록 카드 대비 선택 칸 카드 배율 (왼쪽 절반에 안 들어가면 자동으로 줄임)")]
     [SerializeField, Range(2f, 3f)] private float slotScale = 2.5f;
+    [Tooltip("인벤토리 가로 목록의 카드 사이 간격")]
     [SerializeField] private float slotGap = 60f;
+    [Tooltip("선택 칸: 앞 칸 카드의 강화 태그와 다음 칸 카드 사이 간격 (태그는 카드 오른쪽 바깥에 붙으므로 칸 사이는 태그 폭 + 이 값)")]
+    [SerializeField] private float tagGap = 20f;
 
     [Header("카드 보상 화면")]
     [Tooltip("기준 카드(200x280) 대비 보상 카드 배율 (화면 1/3 폭에 안 들어가면 자동으로 줄임)")]
@@ -95,6 +98,16 @@ public class UpgradeUIBuilder : MonoBehaviour
     private static readonly Color DropdownItemColor = new Color(0.20f, 0.22f, 0.21f);
     private static readonly Color DropdownItemHighlightColor = new Color(0.35f, 0.38f, 0.36f);
     private static readonly Color ClearColor = new Color(0.45f, 0.45f, 0.48f);
+    private static readonly Color TagColor = new Color(0.85f, 0.65f, 0.25f);
+    private static readonly Color TagTextColor = new Color(0.12f, 0.10f, 0.06f);
+
+    // 강화 태그 (카드 기준 크기 200x280 안의 단위. 카드 스케일을 같이 받음)
+    // 태그는 카드 영역을 덮지 않도록 카드 오른쪽 가장자리 바깥에 딱 붙인다
+    private const float TagWidth = 56f;
+    private const float TagHeight = 24f;
+    private const float TagSpacing = 4f;
+    private const float TagFontSize = 14f;
+    private const float TagTop = 50f;      // 카드 위에서 첫 태그까지 (이름 배너 아래)
 
     [ContextMenu("1. Build UI")]
     private void BuildUI()
@@ -225,11 +238,13 @@ public class UpgradeUIBuilder : MonoBehaviour
     }
 
     // 폭은 목록 카드의 slotScale 배, 높이는 파티클 실루엣 비율에 맞춘다.
-    // 왼쪽 절반(두 장 + 간격)이나 화면 높이(확인 버튼 자리 제외)를 넘으면 줄인다
+    // 왼쪽 절반(두 장 + 카드마다 오른쪽 태그 폭 + 간격)이나 화면 높이(확인 버튼 자리 제외)를 넘으면 줄인다
     private Vector2 CalcSlotCardSize(Vector2 listCardSize)
     {
         float slotHeightPerWidth = 1f / SheetSilhouetteAspect;
-        float maxByWidth = (referenceResolution.x * 0.5f - AreaPadding * 2f - slotGap) / (listCardSize.x * SlotCount);
+        // 태그 폭은 카드 폭에 비례 (카드 내부 기준 폭 DesignCardSize.x 당 TagWidth)
+        float widthWithTag = 1f + TagWidth / DesignCardSize.x;
+        float maxByWidth = (referenceResolution.x * 0.5f - AreaPadding * 2f - tagGap) / (listCardSize.x * SlotCount * widthWithTag);
         float maxByHeight = (referenceResolution.y - 320f) / (listCardSize.x * slotHeightPerWidth);
         float scale = Mathf.Min(slotScale, maxByWidth, maxByHeight);
         if (scale < slotScale)
@@ -339,10 +354,13 @@ public class UpgradeUIBuilder : MonoBehaviour
     private List<UpgradePanel.SlotView> CreateSlotRow(RectTransform area, Vector2 slotCardSize)
     {
         // 칸 두 개를 가로로 나란히 (확인 버튼 자리만큼 위로 올림)
+        // 칸 사이는 앞 칸 태그 폭 + tagGap. 마지막 칸의 태그까지 합쳐 가운데에 오도록 태그 폭 절반만큼 왼쪽으로 민다.
+        float tagWidth = CalcSlotTagWidth(slotCardSize);
+        float spacing = tagWidth + tagGap;
         RectTransform row = NewUI("SlotRow", area).GetComponent<RectTransform>();
-        Place(row, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 60f),
-            new Vector2(slotCardSize.x * SlotCount + slotGap * (SlotCount - 1), slotCardSize.y));
-        AddCenteredHorizontalLayout(row.gameObject);
+        Place(row, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-tagWidth * 0.5f, 60f),
+            new Vector2(slotCardSize.x * SlotCount + spacing * (SlotCount - 1), slotCardSize.y));
+        AddCenteredHorizontalLayout(row.gameObject, spacing);
 
         List<UpgradePanel.SlotView> slots = new List<UpgradePanel.SlotView>();
         for (int i = 0; i < SlotCount; i++)
@@ -392,16 +410,23 @@ public class UpgradeUIBuilder : MonoBehaviour
 
         // 선택된 카드 (처음엔 꺼 둠, 글자/그림은 UpgradePanel이 목록 카드에서 복사)
         CardView card = CreateCard("Card", slot.transform, size, false, false, CalcTallDesignSize(size));
+        AddCardTags(card);
         card.card.SetActive(false);
 
         return new UpgradePanel.SlotView { button = button, emptyBox = empty, card = card };
     }
 
-    // 자식을 slotGap 간격으로 가로로 나란히, 가운데 정렬 (자식 크기는 건드리지 않음)
-    private void AddCenteredHorizontalLayout(GameObject go)
+    // 선택 칸 카드 옆에 붙는 태그의 실제 폭 (카드와 같은 스케일을 받음)
+    private float CalcSlotTagWidth(Vector2 slotCardSize)
+    {
+        return TagWidth * slotCardSize.x / DesignCardSize.x;
+    }
+
+    // 자식을 spacing 간격으로 가로로 나란히, 가운데 정렬 (자식 크기는 건드리지 않음)
+    private void AddCenteredHorizontalLayout(GameObject go, float spacing)
     {
         HorizontalLayoutGroup layout = go.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing = slotGap;
+        layout.spacing = spacing;
         layout.childAlignment = TextAnchor.MiddleCenter;
         layout.childControlWidth = false;
         layout.childControlHeight = false;
@@ -469,7 +494,7 @@ public class UpgradeUIBuilder : MonoBehaviour
         content.pivot = new Vector2(0.5f, 0.5f);
         content.anchoredPosition = Vector2.zero;
         content.sizeDelta = Vector2.zero;
-        AddCenteredHorizontalLayout(content.gameObject);
+        AddCenteredHorizontalLayout(content.gameObject, slotGap);
         ContentSizeFitter fitter = content.gameObject.AddComponent<ContentSizeFitter>();
         fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
         fitter.verticalFit = ContentSizeFitter.FitMode.Unconstrained;
@@ -776,6 +801,7 @@ public class UpgradeUIBuilder : MonoBehaviour
         column.sizeDelta = Vector2.zero;
 
         CardView card = CreateCard("Card", column, cardSize, false, false, DesignCardSize);
+        AddCardTags(card);
         Button button = AddDropCardButton(card);
 
         // 카드 아래 숫자키 번호
@@ -874,6 +900,59 @@ public class UpgradeUIBuilder : MonoBehaviour
             typeText = typeText,
             descText = descText,
         };
+    }
+
+    /// <summary>
+    /// 강화 태그 목록 (카드 오른쪽 가장자리 바깥에 딱 붙고, 위에서 아래로 쌓임). 강화 칸과 보상 카드에만 붙인다.
+    /// 오른쪽 목록 카드와 인벤토리 카드는 태그 없이 이름에 +만 붙인다.
+    /// </summary>
+    private void AddCardTags(CardView card)
+    {
+        RectTransform list = NewUI("TagList", card.card.transform).GetComponent<RectTransform>();
+        list.anchorMin = new Vector2(1f, 1f);
+        list.anchorMax = new Vector2(1f, 1f);
+        list.pivot = new Vector2(0f, 1f);
+        list.anchoredPosition = new Vector2(0f, -TagTop);
+        list.sizeDelta = new Vector2(TagWidth, 0f);
+
+        VerticalLayoutGroup layout = list.gameObject.AddComponent<VerticalLayoutGroup>();
+        layout.spacing = TagSpacing;
+        layout.childAlignment = TextAnchor.UpperLeft;
+        layout.childControlWidth = false;
+        layout.childControlHeight = false;
+        layout.childForceExpandWidth = false;
+        layout.childForceExpandHeight = false;
+
+        CardTag template = CreateTagTemplate(list);
+        CardTagList tagList = list.gameObject.AddComponent<CardTagList>();
+        tagList.EditorSetup(template);
+        EditorUtility.SetDirty(tagList);
+
+        // 강화된 카드를 그릴 때만 CardTagList가 켠다
+        list.gameObject.SetActive(false);
+        card.tags = tagList;
+    }
+
+    // 복제해서 쓸 태그 한 개 (꺼 둠). 머리 태그("강화")와 이름 태그가 같은 모양을 쓴다.
+    private CardTag CreateTagTemplate(RectTransform list)
+    {
+        GameObject go = NewPanel("Tag", list, new Vector2(TagWidth, TagHeight));
+        go.GetComponent<Image>().color = TagColor;
+
+        TMP_Text label = NewText("Label", go.transform, "강화", TagFontSize, TextAlignmentOptions.Center);
+        label.color = TagTextColor;
+        // 이름이 길면 글자를 줄여서 태그 안에 넣는다
+        label.enableAutoSizing = true;
+        label.fontSizeMin = TagFontSize * 0.5f;
+        label.fontSizeMax = TagFontSize;
+        Stretch(label.rectTransform, 2f);
+
+        CardTag tag = go.AddComponent<CardTag>();
+        tag.EditorSetup(label);
+        EditorUtility.SetDirty(tag);
+
+        go.SetActive(false);
+        return tag;
     }
 
     // 시안용 카드 이름 (강화되면 뒤에 +)

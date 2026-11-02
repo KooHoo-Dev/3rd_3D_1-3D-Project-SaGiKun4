@@ -71,6 +71,10 @@ namespace Study3D.FpsGame.Weapon.Cards
             last.ManagerIndex = index;
             list.RemoveAt(lastIndex);
             projectile.ManagerIndex = -1;
+
+            // 실제로 빠진 경우에만 여기까지 옵니다. (이미 빠진 발사체는 위에서 돌아감)
+            // 그래서 소멸, 맵 밖 회수, 강제로 꺼짐 중 어느 경로든 공격의 살아 있는 수가 한 번만 줄어듭니다.
+            AttackTracker.RemoveProjectile(projectile.AttackId);
         }
 
         // 씬이 바뀌어 매니저가 사라질 때, 남은 발사체(풀에 살아남는 경우 등)가 다음에 다시 등록될 수 있게 위치를 지웁니다.

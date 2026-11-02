@@ -21,6 +21,12 @@ namespace Study3D.FpsGame.Weapon
         [Tooltip("동시에 존재할 수 있는 발사체 수. 넘으면 분열은 새 발사체 대신 부모의 피해와 크기를 키웁니다")]
         [SerializeField] private int maxProjectiles = 500;
 
+        // 마지막으로 쓴 공격 번호 입니다.
+        // - 발사할 때마다 1씩 늘려서 발사체에 붙입니다.
+        // - 0은 "공격 번호 없음"이라서 1부터 씁니다.
+        // - static이라서 무기가 여러 개여도 번호가 겹치지 않습니다.
+        private static int lastAttackId;
+
         public float CurrentFireRate { get; protected set; }
 
         public CardMultiplier Multiplier
@@ -126,7 +132,11 @@ namespace Study3D.FpsGame.Weapon
             }
 
             Projectile projectile = Projectile.Spawn(projectilePoolKey, cardPrefab, spawnPosition, cardRotation);
-            projectile.Launch(BuildLaunchCards(card), Damage, multiplier);
+
+            // 이번 발사에 새 공격 번호를 붙입니다.
+            lastAttackId++;
+            int attackId = lastAttackId;
+            projectile.Launch(BuildLaunchCards(card), Damage, multiplier, attackId);
         }
 
         // 받은 카드의 종류에 따라 이번 발사에 실을 카드 목록을 만듭니다. 발사체는 이 순서대로 카드를 실행합니다.

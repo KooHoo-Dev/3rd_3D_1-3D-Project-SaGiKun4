@@ -17,8 +17,20 @@ namespace Study3D.FpsGame.Enemy
     {
         [SerializeField] private int maxHp = 30;
         [SerializeField] private Collider mainCollider;
-        [Tooltip("죽을 때 카드 보상을 떨어뜨릴 표 (비워두면 떨어뜨리지 않음)")]
+
+        [Header("드랍 - 카드")]
+        [Tooltip("카드 보상의 선택지를 정하는 표 (비워두면 떨어뜨리지 않음)")]
         [SerializeField] private CardDropTable dropTable;
+        [Range(0f, 1f)]
+        [SerializeField] private float cardDropChance = 1f;
+
+        [Header("드랍 - 골드")]
+        [Tooltip("흩뿌릴 골드 프리팹. 개당 값과 흩뿌림·흡수 값은 프리팹이 정합니다 (비워두면 떨어뜨리지 않음)")]
+        [SerializeField] private CurrencyPickup goldPrefab;
+        [Range(0f, 1f)]
+        [SerializeField] private float goldDropChance = 0.5f;
+        [SerializeField] private int goldMinCount = 1; // 당첨되면 이 범위에서 랜덤 개수
+        [SerializeField] private int goldMaxCount = 5;
 
         public Collider MainCollider => mainCollider;
         public GameObject GameObject => gameObject;
@@ -152,6 +164,8 @@ namespace Study3D.FpsGame.Enemy
 
             if (Health.IsDead)
             {
+                // 킬을 알립니다. 이미 죽은 적은 맨 위에서 걸러지므로 적 하나당 한 번만 알립니다.
+                CombatSystem.Instance.ReportKill(combatEvent.AttackId);
                 stateMachine.ChangeState<EnemyDieState>();
                 return;
             }
@@ -170,14 +184,40 @@ namespace Study3D.FpsGame.Enemy
             Health.Heal(healEvent.Heal);
         }
 
-        // 죽는 순간 호출됩니다. 더 이상 카드에 맞지 않게 하고, 카드 보상을 떨어뜨립니다.
+        // 죽는 순간 호출됩니다. 더 이상 카드에 맞지 않게 하고, 카드 보상과 골드를 각자 확률로 떨어뜨립니다.
         // (칼 판정은 Die 애니메이션으로 넘어가면 애니메이션이 꺼줍니다)
+        // - 카드 보상은 발밑에 1개, 골드는 몸 중앙에서 흩뿌립니다.
+        // - 꺼진 Collider는 bounds가 비어 있으므로 몸 중앙은 끄기 전에 읽어 둡니다.
         public void OnDeath()
         {
+            Vector3 bodyCenter = mainCollider.bounds.center;
             mainCollider.enabled = false;
             Unregister();
-            if (dropTable != null)
-                dropTable.TryDrop(transform.position);
+            DropCard();
+            DropGold(bodyCenter);
+        }
+
+        private void DropCard()
+        {
+            if (dropTable == null || Roll(cardDropChance) == false)
+                return;
+
+            dropTable.Drop(transform.position);
+        }
+
+        // 당첨되면 개수 범위에서 랜덤 개수를 몸 중앙에서 흩뿌립니다.
+        private void DropGold(Vector3 bodyCenter)
+        {
+            if (goldPrefab == null || Roll(goldDropChance) == false)
+                return;
+
+            int count = UnityEngine.Random.Range(goldMinCount, Mathf.Max(goldMinCount, goldMaxCount) + 1);
+            CurrencyPickup.Scatter(goldPrefab, count, bodyCenter, transform.position.y);
+        }
+
+        private static bool Roll(float chance)
+        {
+            return chance > 0f && UnityEngine.Random.value <= chance;
         }
 
         // 사망 애니메이션이 끝나면 호출됩니다.

@@ -222,7 +222,10 @@ namespace Study3D.FpsGame.UI
             view.card.card.SetActive(filled);
             if (filled)
             {
+                // 그림 색은 목록 카드에서 옮기고, 글자와 강화 태그는 카드 데이터로 다시 그립니다.
+                // (목록 카드는 태그 없이 "이름+"로 보이지만 칸에서는 본체 이름 + 태그로 보여 줌)
                 view.card.CopyFrom(cardList.GetCardView(deckIndex));
+                view.card.Show(cardList.GetCard(deckIndex));
             }
 
             UpdateDim();

@@ -35,6 +35,12 @@ namespace Study3D.FpsGame.Weapon.Cards
 
         private int baseDamage; // 화력 배율을 곱하기 전 피해
 
+        // 이 발사체가 속한 공격의 번호 입니다.
+        // - 발사할 때 Weapon이 정해줍니다.
+        // - 분열된 자식은 부모의 번호를 그대로 받습니다.
+        // - 피해(충돌, 폭발)를 줄 때 함께 보내서, 적이 죽으면 어느 공격의 킬인지 알 수 있습니다.
+        public int AttackId { get; private set; }
+
         // 풀에서 꺼낸 발사체는 풀이 Key를 넣어줍니다. Instantiate로 만든 발사체는 null 입니다.
         public string Key { get; set; }
         public GameObject GameObject => gameObject;
@@ -95,10 +101,13 @@ namespace Study3D.FpsGame.Weapon.Cards
         }
 
         // Spawn 직후 Weapon이 호출합니다. 실을 카드를 받고 발사 시점 카드를 실행합니다.
-        public void Launch(IReadOnlyList<CardData> launchCards, int baseDamage, CardMultiplier multiplier)
+        public void Launch(IReadOnlyList<CardData> launchCards, int baseDamage, CardMultiplier multiplier, int attackId)
         {
             ResetState(multiplier);
             this.baseDamage = Mathf.CeilToInt(baseDamage * multiplier.Damage);
+            AttackId = attackId;
+            // 발사 시점 카드보다 먼저 세어 둡니다.
+            AttackTracker.AddProjectile(AttackId);
 
             for (int i = 0; i < launchCards.Count; i++)
             {
@@ -119,6 +128,10 @@ namespace Study3D.FpsGame.Weapon.Cards
             baseScale = parent.baseScale;
             ResetState(parent.Multiplier);
             baseDamage = parent.baseDamage;
+            // 분열을 몇 번 거쳐도 처음 발사한 공격으로 셉니다.
+            AttackId = parent.AttackId;
+            // 부모가 아직 살아 있을 때 자식을 먼저 세므로, 분열 중에 살아 있는 수가 0이 되지 않습니다.
+            AttackTracker.AddProjectile(AttackId);
             Power = parent.Power;
             ApplyPowerScale();
             if (splitContext.Target != null && splitContext.IsEnemy == false)
@@ -244,7 +257,7 @@ namespace Study3D.FpsGame.Weapon.Cards
                 }
 
                 lastHitTarget = target;
-                CombatSystem.Instance.SendDamage(Player.Player.LocalPlayer, hit.collider, Damage, hit.point);
+                CombatSystem.Instance.SendDamage(Player.Player.LocalPlayer, hit.collider, Damage, hit.point, AttackId);
             }
             else
             {

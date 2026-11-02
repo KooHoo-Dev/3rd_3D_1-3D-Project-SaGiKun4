@@ -93,7 +93,7 @@ namespace Study3D.FpsGame.Drop
         {
             if (table == null)
             {
-                Debug.LogWarning("[CardDrop] 드랍 표가 없어 선택지를 만들 수 없습니다. (CardDropTable.TryDrop으로 만들어야 합니다)");
+                Debug.LogWarning("[CardDrop] 드랍 표가 없어 선택지를 만들 수 없습니다. (CardDropTable.Drop으로 만들어야 합니다)");
                 return;
             }
 

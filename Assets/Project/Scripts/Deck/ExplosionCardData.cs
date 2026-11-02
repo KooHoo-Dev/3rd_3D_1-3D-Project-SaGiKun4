@@ -57,7 +57,9 @@ namespace Study3D.FpsGame.Deck
                 if (damaged.Add(target) == false)
                     continue;
 
-                CombatSystem.Instance.SendDamage(Player.Player.LocalPlayer, collider, finalDamage, context.Point);
+                // 폭발한 발사체의 공격 번호를 함께 보냅니다. (폭발로 죽은 적도 그 공격의 킬로 셉니다)
+                int attackId = context.Projectile.AttackId;
+                CombatSystem.Instance.SendDamage(Player.Player.LocalPlayer, collider, finalDamage, context.Point, attackId);
             }
 
             // 이펙트의 원이 실제 폭발 범위와 같은 크기로 보이도록 맞춥니다.

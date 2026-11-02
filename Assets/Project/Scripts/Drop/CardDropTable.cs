@@ -7,8 +7,9 @@ using Random = UnityEngine.Random;
 namespace Study3D.FpsGame.Drop
 {
     // CardDropTable
-    // : 몬스터가 죽을 때 카드 보상을 떨어뜨릴지, 떨어뜨린 보상에 어떤 선택지를 담을지 정하는 표 입니다.
+    // : 몬스터가 죽을 때 떨어뜨리는 카드 보상에 어떤 선택지를 담을지 정하는 표 입니다.
     // - 몬스터 프리팹이 인스펙터로 참조합니다. 몬스터마다 다른 표를 줄 수 있습니다.
+    // - 떨어뜨릴 확률은 몬스터(Enemy)가 정합니다.
     // - 선택지는 칸마다 이렇게 정합니다.
     //   1. enhancedChance 확률로 강화 카드: 강화 카드(Enhance) N장을 랜덤으로 합친 조합 카드. N(차수)은 2 ~ 덱 평균 차수(반올림) 사이 랜덤
     //      (덱 평균이 2 미만이면 나오지 않습니다)
@@ -20,8 +21,6 @@ namespace Study3D.FpsGame.Drop
     {
         [Header("드랍")]
         [SerializeField] private CardDrop dropPrefab;
-        [Range(0f, 1f)]
-        [SerializeField] private float dropChance = 1f;   // 몬스터가 죽을 때 보상을 떨어뜨릴 확률
         [SerializeField] private float dropHeight = 0.5f; // 죽은 위치(발밑)에서 띄우는 높이
 
         [Header("선택지")]
@@ -37,10 +36,10 @@ namespace Study3D.FpsGame.Drop
         [Tooltip("후보가 되는 기본 카드 (조합 카드는 넣어도 무시)")]
         [SerializeField] private List<CardData> cards = new List<CardData>();
 
-        // 확률에 당첨되면 position에 보상을 떨어뜨립니다.
-        public void TryDrop(Vector3 position)
+        // position에 보상을 떨어뜨립니다. (확률은 몬스터가 굴린 뒤 부릅니다)
+        public void Drop(Vector3 position)
         {
-            if (dropPrefab == null || Roll(dropChance) == false)
+            if (dropPrefab == null)
                 return;
 
             CardDrop drop = Instantiate(dropPrefab, position + Vector3.up * dropHeight, Quaternion.identity);

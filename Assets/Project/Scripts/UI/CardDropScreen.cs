@@ -31,7 +31,6 @@ namespace Study3D.FpsGame.UI
         public bool IsOpen { get; private set; }
 
         private Action<int> onChosen;
-        private readonly List<CardData> parts = new List<CardData>();
 
 #if UNITY_EDITOR
         // UpgradeUIBuilder가 조립 직후 호출합니다.
@@ -78,7 +77,7 @@ namespace Study3D.FpsGame.UI
             }
         }
 
-        // cards를 칸마다 한 장씩 그립니다. 칸보다 카드가 적으면 남는 칸은 끕니다. 카드를 누르면 chosen(번호)을 부릅니다.
+        // cards를 칸마다 한 장씩 그립니다. (이름/종류/설명은 CardView가 카드 데이터에서 그대로 가져옴) 칸보다 카드가 적으면 남는 칸은 끕니다. 카드를 누르면 chosen(번호)을 부릅니다.
         public void Open(IReadOnlyList<CardData> cards, Action<int> chosen)
         {
             if (cards.Count > options.Count)
@@ -94,7 +93,7 @@ namespace Study3D.FpsGame.UI
 
                 if (active)
                 {
-                    Show(options[i].card, cards[i]);
+                    options[i].card.Show(cards[i]);
                 }
             }
 
@@ -114,38 +113,6 @@ namespace Study3D.FpsGame.UI
             content.SetActive(false);
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
-        }
-
-        // 이름/종류는 CardView가 그리고, 설명 자리에 차수와 (조합 카드면) 재료 카드를 적습니다. 같은 이름의 강화 카드를 구분하기 위함입니다.
-        private void Show(CardView view, CardData card)
-        {
-            view.Show(card);
-            if (view.descText == null)
-                return;
-
-            string desc = $"Lv.{card.EnhanceLevel}";
-            if (card is CompositeCardData)
-            {
-                parts.Clear();
-                card.CollectCards(parts);
-                desc += "\n" + JoinPartNames();
-            }
-            view.descText.text = desc;
-        }
-
-        // 재료 카드 이름을 " + "로 이어 붙입니다.
-        private string JoinPartNames()
-        {
-            string names = "";
-            for (int i = 0; i < parts.Count; i++)
-            {
-                if (i > 0)
-                {
-                    names += " + ";
-                }
-                names += parts[i].CardName;
-            }
-            return names;
         }
     }
 }

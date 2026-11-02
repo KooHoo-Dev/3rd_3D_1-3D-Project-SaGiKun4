@@ -30,6 +30,10 @@ namespace Study3D.FpsGame
         public int Damage { get; set; }
         public Vector3 HitPosition { get; set; }
         public Collider Collider { get; set; }
+        // 이 피해를 준 공격의 번호 입니다. (적의 무기처럼 공격에 속하지 않는 피해는 0)
+        // - 피해는 큐에 들어갔다가 나중에 처리됩니다.
+        // - 그 사이에 발사체가 풀로 돌아가 다른 공격에 다시 쓰일 수 있어서, 번호를 여기에 적어 둡니다.
+        public int AttackId { get; set; }
         public override EventType Type => EventType.Combat;
     }
 

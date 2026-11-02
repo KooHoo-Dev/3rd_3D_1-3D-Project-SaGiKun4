@@ -21,6 +21,8 @@ namespace Study3D.FpsGame
 
         public event Action<CombatEvent> OnCombatEvent;
         public event Action<HealEvent> OnHealEvent;
+        // 적이 죽으면 그 적을 죽인 공격의 번호를 알립니다. (킬 그래프가 공격마다 킬 수를 셀 때 사용)
+        public event Action<int> OnEnemyKilled;
 
         private readonly Dictionary<Collider, IDamageable> monsterDic = new Dictionary<Collider, IDamageable>();
         private readonly Queue<InGameEvent> inGameEventQueue = new Queue<InGameEvent>();
@@ -91,7 +93,8 @@ namespace Study3D.FpsGame
 
         // 판정 방식(Ray, 충돌, 폭발 범위)과 상관없이 "누가, 무엇을, 어디서, 얼마만큼" 맞혔는지만 넘기면
         // CombatEvent를 만들어 큐에 넣습니다. 등록된 몬스터가 아니면 피해를 주지 않고 false를 반환합니다.
-        public bool SendDamage(IDamageable sender, Collider target, int damage, Vector3 hitPosition)
+        // attackId : 이 피해를 준 공격의 번호 입니다. 이 피해로 적이 죽으면 이 번호의 킬이 됩니다.
+        public bool SendDamage(IDamageable sender, Collider target, int damage, Vector3 hitPosition, int attackId)
         {
             IDamageable receiver = GetMonsterOrNull(target);
             if (receiver == null) return false;
@@ -102,9 +105,18 @@ namespace Study3D.FpsGame
             combatEvent.Damage = damage;
             combatEvent.HitPosition = hitPosition;
             combatEvent.Collider = target;
+            combatEvent.AttackId = attackId;
 
             AddInGameEvent(combatEvent);
             return true;
+        }
+
+        // 적이 죽는 순간 적이 호출합니다.
+        // attackId : 마지막 피해를 준 공격의 번호 입니다.
+        public void ReportKill(int attackId)
+        {
+            if (OnEnemyKilled != null)
+                OnEnemyKilled.Invoke(attackId);
         }
 
         public void RegisterMonster(IDamageable monster)

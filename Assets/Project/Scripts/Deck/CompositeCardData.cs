@@ -33,20 +33,17 @@ namespace Study3D.FpsGame.Deck
             }
         }
 
-        // 재료 카드들의 설명을 발동 순서대로 한 줄씩 잇습니다.
+        // 본체(펼친 첫 카드)의 설명만 씁니다. 강화가 늘어도 설명칸이 넘치지 않도록, 나머지 강화 카드는 메뉴 화면에서 태그로 보여 줍니다.
         public override string Description
         {
             get
             {
-                List<string> lines = new List<string>();
-                foreach (CardData part in parts)
-                {
-                    if (IsUsablePart(part) == false)
-                        continue;
+                List<CardData> cards = new List<CardData>();
+                CollectCards(cards);
+                if (cards.Count == 0)
+                    return string.Empty;
 
-                    lines.Add(part.Description);
-                }
-                return string.Join("\n", lines);
+                return cards[0].Description;
             }
         }
 
