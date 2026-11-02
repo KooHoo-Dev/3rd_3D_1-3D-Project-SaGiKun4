@@ -11,7 +11,7 @@ namespace Study3D.FpsGame.Deck
     // - 강화된 카드를 다시 재료로 쓸 수 있습니다. (CompositeCardData 안쪽 재료까지 순서대로 펼쳐집니다)
     // - 강화 카드끼리만 합칠 수 있습니다. 공격 카드는 재료로 쓸 수 없습니다.
     // - 한쪽이 강화 전용 카드면 합치지 않고, 다른 쪽 카드의 값을 바꾼 카드로 교체합니다. (칸 순서 상관없음)
-    //   시점 변경: 맨 첫 재료 카드의 시점 / 대상 변경: 첫 반응 카드의 반응 대상
+    //   시점 변경: 맨 첫 재료 카드의 시점 / 대상 변경: 첫 반응 카드의 반응 대상 / 스펙 강화: 맨 첫 재료 카드의 스펙 레벨
     //   강화 전용 카드는 쓰고 나면 사라집니다.
     // - 강화 1회에 ENHANCE_COST만큼 재화가 듭니다. 재화를 내는 것은 강화하는 쪽(UpgradePanel)이 맡습니다. (여기는 덱만 다룸)
     public static class CardEnhancer
@@ -48,6 +48,14 @@ namespace Study3D.FpsGame.Deck
             TargetCardData secondTarget = second as TargetCardData;
             if (secondTarget != null)
                 return TryChangeTarget(deck, firstIndex, secondIndex, secondTarget);
+
+            SpecCardData firstSpec = first as SpecCardData;
+            if (firstSpec != null)
+                return TrySpecLevelUp(deck, secondIndex, firstIndex, firstSpec);
+
+            SpecCardData secondSpec = second as SpecCardData;
+            if (secondSpec != null)
+                return TrySpecLevelUp(deck, firstIndex, secondIndex, secondSpec);
 
             Combine(deck, firstIndex, secondIndex, first, second);
             return true;
@@ -162,7 +170,27 @@ namespace Study3D.FpsGame.Deck
             return true;
         }
 
-        // 한쪽이 강화 전용 카드(시점 변경, 대상 변경)이고, 다른 쪽에 쓸 수 없는 카드인지. (칸 순서 상관없음)
+        // 스펙 강화: targetIndex 카드의 스펙 레벨을 1 올린 카드로 교체하고, 스펙 강화 카드는 덱에서 없앱니다.
+        // 조합 카드는 맨 첫 재료 카드만 오릅니다. 최대 레벨(스펙 표의 줄 수)이면 거부합니다.
+        private static bool TrySpecLevelUp(CardDeck deck, int targetIndex, int modifierIndex, SpecCardData modifier)
+        {
+            CardData target = deck.GetCard(targetIndex);
+            CardData head = GetFirstCard(target);
+            if (head == null || head.CanSpecLevelUp() == false)
+            {
+                Debug.Log($"[Enhance] {target.CardName}은(는) 더 이상 스펙을 올릴 수 없습니다. (최대 레벨)");
+                return false;
+            }
+
+            CardData changed = target.WithSpecLevelUp(target.CardName + ENHANCED_MARK);
+            // 바꾸기를 먼저 해야 스펙 강화 카드를 뺄 때 당겨지는 번호를 신경 쓰지 않아도 됩니다.
+            deck.Replace(targetIndex, changed);
+            deck.Remove(modifierIndex);
+            Debug.Log($"[Enhance] {target.CardName}(스펙 Lv.{head.SpecLevel}) + {modifier.CardName} → {changed.CardName}(스펙 Lv.{head.SpecLevel + 1})");
+            return true;
+        }
+
+        // 한쪽이 강화 전용 카드(시점 변경, 대상 변경, 스펙 강화)이고, 다른 쪽에 쓸 수 없는 카드인지. (칸 순서 상관없음)
         // 강화 화면이 고를 수 없는 카드를 흐리게 표시할 때 씁니다. 실제 강화 판단은 TryEnhance가 합니다.
         public static bool IsModifierBlocked(CardData a, CardData b)
         {
@@ -185,7 +213,19 @@ namespace Study3D.FpsGame.Deck
             if (bTarget != null)
                 return IsTargetBlockedFor(a, bTarget.NewTarget);
 
+            if (a is SpecCardData)
+                return IsSpecBlockedFor(b);
+            if (b is SpecCardData)
+                return IsSpecBlockedFor(a);
+
             return false;
+        }
+
+        // 맨 첫 카드가 더 이상 스펙을 올릴 수 없으면 true (최대 레벨이거나 스펙 표가 없는 카드)
+        private static bool IsSpecBlockedFor(CardData target)
+        {
+            CardData head = GetFirstCard(target);
+            return head == null || head.CanSpecLevelUp() == false;
         }
 
         // 반응 카드가 없거나, 바꿀 대상을 하나도 받을 수 없으면 true

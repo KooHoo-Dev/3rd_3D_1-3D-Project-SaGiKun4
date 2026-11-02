@@ -60,12 +60,7 @@ namespace Study3D.FpsGame.Player
         {
             Player.LocalPlayer = this;
             Health = new Health(maxHp);
-            Deck = new CardDeck(startDeck, handLimit);
-            // 강화 전용 카드는 강화 전용 보관함으로 들어갑니다.
-            foreach (CardData card in startModifiers)
-            {
-                Deck.Acquire(card);
-            }
+            CreateDeck();
         }
 
         private void Start()

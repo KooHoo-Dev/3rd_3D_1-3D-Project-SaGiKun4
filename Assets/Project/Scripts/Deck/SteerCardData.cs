@@ -1,3 +1,4 @@
+using Study3D.FpsGame.Data;
 using Study3D.FpsGame.Weapon.Cards;
 using UnityEngine;
 
@@ -8,6 +9,10 @@ namespace Study3D.FpsGame.Deck
     // - 방향을 바꿀 때는 Projectile.Steer를 씁니다. 충돌 중에 조향하면 반응 결과가 소멸이어도 계속 날아갑니다.
     public abstract class SteerCardData : CardData
     {
+        protected SteerCardData(CardDef def) : base(def)
+        {
+        }
+
         // 한 번에 검사할 Collider 수. 넘치는 적은 후보에서 빠집니다.
         private static readonly Collider[] SearchBuffer = new Collider[32];
 

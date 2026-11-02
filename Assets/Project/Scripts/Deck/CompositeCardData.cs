@@ -8,10 +8,16 @@ namespace Study3D.FpsGame.Deck
     // - 강화 스택에는 한 장(1칸)으로 쌓이지만, 발사체에는 재료 카드들이 순서대로 실립니다.
     // - 재료 카드는 각자 자기 Timing에 발동하므로, 이 카드 자체의 Timing은 쓰지 않습니다.
     // - 조합 카드를 재료로 넣어도 됩니다. (안쪽 재료까지 순서대로 펼쳐집니다)
-    [CreateAssetMenu(menuName = "Card/Composite Card", fileName = "CompositeCard")]
+    // - 표에 없는 카드라 정의(Def)가 없습니다. 이름은 만들 때 정하고, 시점·스펙은 재료 카드가 각자 가집니다.
     public class CompositeCardData : CardData
     {
-        [SerializeField] private List<CardData> parts = new List<CardData>();
+        private readonly List<CardData> parts = new List<CardData>();
+
+        private CompositeCardData(string cardName, CardData[] parts) : base(null)
+        {
+            CardName = cardName;
+            this.parts.AddRange(parts);
+        }
 
         public override CardType Type => CardType.Enhance;
         public IReadOnlyList<CardData> Parts => parts;
@@ -71,6 +77,18 @@ namespace Study3D.FpsGame.Deck
             return Create(newName, newParts.ToArray());
         }
 
+        // 스펙 강화는 맨 첫 재료 카드에만 적용합니다. (첫 재료가 조합 카드면 그 안의 첫 재료까지 내려갑니다)
+        public override CardData WithSpecLevelUp(string newName)
+        {
+            List<CardData> newParts = new List<CardData>(parts);
+            int first = FindFirstUsablePartIndex(newParts);
+            if (first >= 0)
+            {
+                newParts[first] = newParts[first].WithSpecLevelUp(newParts[first].CardName);
+            }
+            return Create(newName, newParts.ToArray());
+        }
+
         // 대상 변경은 발동 순서상 첫 반응 카드에만 적용합니다. (재료가 조합 카드면 그 안까지 찾아 내려갑니다)
         // 반응 카드가 없으면 null 입니다. 나머지 재료는 그대로 공유하고, 조합 카드 자체는 새로 만듭니다.
         public override CardData WithTarget(ContactTarget newTarget, string newName)
@@ -107,14 +125,10 @@ namespace Study3D.FpsGame.Deck
             return -1;
         }
 
-        // 게임 중 카드를 합칠 때 사용합니다. (에셋이 아니라 런타임에만 존재하는 카드가 만들어집니다)
+        // 게임 중 카드를 합칠 때 사용합니다.
         public static CompositeCardData Create(string cardName, params CardData[] parts)
         {
-            CompositeCardData card = CreateInstance<CompositeCardData>();
-            card.name = cardName;
-            card.CardName = cardName;
-            card.parts.AddRange(parts);
-            return card;
+            return new CompositeCardData(cardName, parts);
         }
     }
 }

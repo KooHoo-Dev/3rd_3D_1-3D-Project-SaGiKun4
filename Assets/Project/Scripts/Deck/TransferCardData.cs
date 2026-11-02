@@ -1,3 +1,4 @@
+using Study3D.FpsGame.Data;
 using Study3D.FpsGame.Weapon.Cards;
 using UnityEngine;
 
@@ -9,15 +10,27 @@ namespace Study3D.FpsGame.Deck
     //   (직전 적만 제외하므로 적 둘 사이를 오갈 수 있고, 횟수가 이를 끝냅니다)
     // - 다음 적을 못 찾으면 횟수를 쓰지 않습니다. 관통이 있으면 직진하고, 없으면 소멸합니다.
     // - 횟수는 Effect 배율을 받습니다.
-    [CreateAssetMenu(menuName = "Card/Transfer Card", fileName = "TransferCard")]
     public class TransferCardData : SteerCardData
     {
-        [SerializeField] private int transferCount = 1; // 이 카드 한 장으로 옮겨갈 수 있는 횟수
-        [SerializeField] private float radius = 8.0f;   // 다음 적을 찾는 반경
+        public TransferCardData(CardDef def) : base(def)
+        {
+        }
+
+        // 이 카드 한 장으로 옮겨갈 수 있는 횟수 (스펙 표의 Count)
+        private int TransferCount
+        {
+            get { return Spec.Count; }
+        }
+
+        // 다음 적을 찾는 반경 (스펙 표의 Radius)
+        private float Radius
+        {
+            get { return Spec.Radius; }
+        }
 
         public override int CreateCount(CardMultiplier multiplier)
         {
-            return CeilMultiply(transferCount, multiplier.Effect);
+            return CeilMultiply(TransferCount, multiplier.Effect);
         }
 
         protected override void OnHit(CardContext context)
@@ -25,7 +38,7 @@ namespace Study3D.FpsGame.Deck
             if (context.IsEnemy == false || context.Count <= 0)
                 return;
 
-            Collider next = FindNearestEnemy(context.Center, radius, context.Projectile.LastHitTarget);
+            Collider next = FindNearestEnemy(context.Center, Radius,context.Projectile.LastHitTarget);
             if (next == null)
                 return;
 

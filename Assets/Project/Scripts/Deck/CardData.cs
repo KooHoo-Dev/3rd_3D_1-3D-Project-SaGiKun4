@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using Study3D.FpsGame.Data;
 using Study3D.FpsGame.Weapon.Cards;
 using UnityEngine;
 
@@ -13,30 +13,89 @@ namespace Study3D.FpsGame.Deck
     }
 
     // CardData
-    // : 덱에 들어가는 카드 한 장의 정의 입니다. (날아가는 발사체 Projectile과는 다른 개념)
-    // - 발사체에 실리면 정해진 시점(Timing)에 그 시점의 함수가 실행됩니다.
-    // - 4개 시점 함수 중 필요한 것만 재정의하고, 어느 시점에 발동할지는 에셋의 Timing으로 고릅니다.
-    // - ScriptableObject는 모든 발사체가 공유하므로 런타임 상태를 두지 않습니다. 상태는 CardContext.Count에 둡니다.
-    public abstract class CardData : ScriptableObject
+    // : 덱에 들어가는 카드 한 장 입니다. (날아가는 발사체 Projectile과는 다른 개념)
+    // - 발사체에 실리면 정해진 시점(Timing)에 그 시점의 함수가 실행됩니다. 4개 시점 함수 중 필요한 것만 재정의합니다.
+    // - 일반 C# 클래스입니다. 카드 표의 한 줄(CardDef)을 받아 CardFactory가 Kind에 맞는 카드로 만듭니다.
+    //   이름, 기본 시점, 막힌 시점, 이펙트는 정의(Def)에서, 레벨별 수치는 스펙 표(Spec)에서 읽습니다.
+    // - 강화하면 복제본(Clone)을 만들어 바뀐 값(이름, 시점, 스펙 레벨 등)만 덮어씁니다. 표의 정의는 모든 카드가 공유하므로 바꾸지 않습니다.
+    // - 한 카드 객체를 여러 발사체가 함께 쓰므로 발사 중 상태를 두지 않습니다. 상태는 CardContext.Count에 둡니다.
+    public abstract class CardData
     {
-        [SerializeField] private string cardName;
-        [SerializeField] private CardTiming timing;
-        [Tooltip("시점 변경 강화로 바꿀 수 없는 시점 (그 시점에선 의미가 없거나 밸런스를 해치는 경우. 예: 반사의 소멸, 폭발의 진행 중)")]
-        [SerializeField] private List<CardTiming> blockedTimings = new List<CardTiming>();
-        [Tooltip("카드가 실제로 발동했을 때 재생할 이펙트 프리팹 (비워두면 재생하지 않음)")]
-        [SerializeField] private GameObject activateEffect;
+        // 표의 카드 정의 (조합 카드처럼 표에 없는 카드는 null)
+        private readonly CardDef def;
 
-        // 시점 변경 등으로 이 복제본이 거친 강화 횟수. 에셋에는 저장하지 않습니다. (런타임 복제본에만 생김)
-        [NonSerialized] private int addedLevel;
+        // 강화를 거친 횟수
+        private int addedLevel;
+        // 스펙 강화로 오른 레벨 수
+        private int addedSpecLevel;
+        // 강화로 바뀐 이름, 시점 (비어 있으면 표의 값)
+        private string nameOverride;
+        private bool hasTimingOverride;
+        private CardTiming timingOverride;
+        // 현재 스펙 레벨의 수치 (처음 쓸 때 표에서 찾아 둡니다. 레벨이 바뀐 복제본은 다시 찾습니다)
+        private CardSpecDef cachedSpec;
+
+        protected CardData(CardDef def)
+        {
+            this.def = def;
+        }
+
+        // 표의 ID (표에 없는 카드는 -1)
+        public int CardId
+        {
+            get
+            {
+                if (def == null)
+                    return -1;
+
+                return def.ID;
+            }
+        }
 
         public string CardName
         {
-            get => cardName;
-            protected set => cardName = value;
+            get
+            {
+                if (nameOverride != null)
+                    return nameOverride;
+                if (def == null)
+                    return string.Empty;
+
+                return def.Name;
+            }
+            protected set { nameOverride = value; }
         }
 
-        public CardTiming Timing => timing;
+        public CardTiming Timing
+        {
+            get
+            {
+                if (hasTimingOverride)
+                    return timingOverride;
+                if (def == null)
+                    return CardTiming.Shoot;
+
+                return def.Timing;
+            }
+        }
+
         public abstract CardType Type { get; }
+
+        // 표의 카드 정의 (조합 카드는 null)
+        protected CardDef Def => def;
+
+        // 현재 스펙 레벨의 수치 (스펙 줄이 없는 카드면 null)
+        protected CardSpecDef Spec
+        {
+            get
+            {
+                if (cachedSpec == null)
+                {
+                    cachedSpec = DataManager.Instance.Cards.GetSpec(CardId, SpecLevel);
+                }
+                return cachedSpec;
+            }
+        }
 
         // 같은 시점 안에서의 실행 순서를 정합니다. 반응, 조향 카드만 재정의합니다.
         public virtual CardRole Role => CardRole.Effect;
@@ -49,22 +108,52 @@ namespace Study3D.FpsGame.Deck
             get { return 1 + addedLevel; }
         }
 
+        // 스펙 레벨: 카드 자체 수치(분열 수, 폭발 반경 등)의 단계. 기본 1이고 스펙 강화 카드로 1씩 오릅니다.
+        // - 강화 차수(EnhanceLevel)와는 따로 셉니다. (시점, 대상 변경으로는 수치가 오르지 않도록)
+        public int SpecLevel
+        {
+            get { return 1 + addedSpecLevel; }
+        }
+
+        // 오를 수 있는 최대 스펙 레벨 = 스펙 표에서 이 카드의 줄 수 (줄이 없으면 1 = 스펙 강화 불가)
+        public int MaxSpecLevel
+        {
+            get { return DataManager.Instance.Cards.GetMaxLevel(CardId); }
+        }
+
+        public bool CanSpecLevelUp()
+        {
+            return SpecLevel < MaxSpecLevel;
+        }
+
+        // 스펙 레벨을 1 올린 복제 카드를 만듭니다. 조합 카드는 맨 첫 재료 카드만 오릅니다.
+        public virtual CardData WithSpecLevelUp(string newName)
+        {
+            CardData copy = CreateEnhancedCopy(newName);
+            copy.addedSpecLevel = addedSpecLevel + 1;
+            copy.cachedSpec = null; // 레벨이 바뀌었으므로 다시 찾습니다
+            return copy;
+        }
+
         // 시점 변경 강화를 받을 수 있는지. 시점 변경 카드 자신처럼 아예 대상이 아닌 카드만 false 입니다.
-        // 카드마다 막을 시점은 에셋의 blockedTimings에서 고릅니다. (IsTimingBlocked)
+        // 카드마다 막을 시점은 카드 표의 BlockedTimings 칸에서 정합니다. (IsTimingBlocked)
         public virtual bool CanChangeTiming => true;
 
         // 시점 변경 강화로 이 시점이 될 수 없는지
         public bool IsTimingBlocked(CardTiming newTiming)
         {
-            return blockedTimings.Contains(newTiming);
+            if (def == null)
+                return false;
+
+            return def.BlockedTimings.Contains(newTiming);
         }
 
-        // 시점만 newTiming으로 바꾼 복제 카드를 만듭니다. (원본 에셋은 모든 덱이 공유하므로 직접 바꾸지 않습니다)
-        // 런타임에만 존재하는 카드가 만들어집니다.
+        // 시점만 newTiming으로 바꾼 복제 카드를 만듭니다. (원래 카드는 다른 곳에서도 쓸 수 있으므로 직접 바꾸지 않습니다)
         public virtual CardData WithTiming(CardTiming newTiming, string newName)
         {
             CardData copy = CreateEnhancedCopy(newName);
-            copy.timing = newTiming;
+            copy.hasTimingOverride = true;
+            copy.timingOverride = newTiming;
             return copy;
         }
 
@@ -76,11 +165,11 @@ namespace Study3D.FpsGame.Deck
         }
 
         // 강화로 값을 바꿀 복제본을 만듭니다. 이름을 바꾸고 강화 차수를 1 올립니다.
+        // MemberwiseClone은 필드를 그대로 복사하므로 이전 강화로 바뀐 값(시점, 대상, 스펙 레벨)도 함께 옮겨집니다.
         protected CardData CreateEnhancedCopy(string newName)
         {
-            CardData copy = Instantiate(this);
-            copy.name = newName;
-            copy.cardName = newName;
+            CardData copy = (CardData)MemberwiseClone();
+            copy.nameOverride = newName;
             copy.addedLevel = addedLevel + 1;
             return copy;
         }
@@ -90,7 +179,7 @@ namespace Study3D.FpsGame.Deck
         // 강화나 배율로 바뀔 수 있는 값(수치, 대상 등)은 ValueText로 감싸 파란색으로 보여 줍니다. (TimingText는 이미 감싸져 있음)
         public virtual string Description
         {
-            get { return $"{TimingText(timing)}, 효과를 발동합니다."; }
+            get { return $"{TimingText(Timing)}, 효과를 발동합니다."; }
         }
 
         // 설명에서 바뀔 수 있는 값의 색 (TextMeshPro 리치 텍스트 색 태그)
@@ -140,7 +229,7 @@ namespace Study3D.FpsGame.Deck
         // 발사체가 Timing에 맞춰 호출합니다.
         public void Activate(CardContext context)
         {
-            switch (timing)
+            switch (Timing)
             {
                 case CardTiming.Shoot:
                     OnShoot(context);
@@ -169,10 +258,13 @@ namespace Study3D.FpsGame.Deck
             PlayEffect(context, context.Multiplier.Effect);
         }
 
-        // 크기를 직접 정해서 재생합니다. (폭발 반경에 맞추는 경우 등)
+        // 크기를 직접 정해서 재생합니다. (폭발 반경에 맞추는 경우 등) 이펙트는 카드 표의 EffectKey로 찾아 둔 프리팹입니다.
         protected void PlayEffect(CardContext context, float scale)
         {
-            EffectSpawner.Play(activateEffect, context.Point, Quaternion.identity, scale);
+            if (def == null || def.EffectPrefab == null)
+                return;
+
+            EffectSpawner.Play(def.EffectPrefab, context.Point, Quaternion.identity, scale);
         }
 
         // 실수 수치에 배율을 곱한 정수 값. 올림 처리합니다.

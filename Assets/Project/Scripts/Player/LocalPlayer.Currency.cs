@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace Study3D.FpsGame.Player
 {
     // LocalPlayer - 재화
@@ -34,6 +36,15 @@ namespace Study3D.FpsGame.Player
             if (OnCurrencyChanged != null)
                 OnCurrencyChanged.Invoke(-amount, Currency);
             return true;
+        }
+
+        // (프로토타입) 소지 재화를 9999999로 채웁니다. 플레이 중 LocalPlayer 컴포넌트 우클릭 메뉴에서 실행합니다.
+        [ContextMenu("Debug/Gold 9999999")]
+        private void DebugFillCurrency()
+        {
+            const int DebugCurrency = 9999999;
+            AddCurrency(DebugCurrency - Currency);
+            Debug.Log($"[Debug] 재화를 {Currency}로 채웠습니다.");
         }
     }
 }

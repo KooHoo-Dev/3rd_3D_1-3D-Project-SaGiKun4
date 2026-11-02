@@ -15,7 +15,7 @@ namespace Study3D.FpsGame.Drop
     //      (덱 평균이 2 미만이면 나오지 않습니다)
     //   2. 아니면 기본 카드: 종류별 가중치(공격 / 강화 / 강화 전용)로 종류를 고르고, 그 종류 안에서 랜덤으로 한 장
     //      같은 기본 카드는 한 선택지에 두 번 나오지 않습니다. 남은 카드가 없는 종류는 가중치 계산에서 빠집니다.
-    // - cards에 조합 카드를 넣으면 무시합니다. (기본 카드만 후보)
+    // - 후보는 카드 표의 ID로 적습니다. 선택지를 만들 때마다 CardFactory가 새 카드로 만듭니다.
     [CreateAssetMenu(menuName = "Card/Card Drop Table", fileName = "CardDropTable")]
     public class CardDropTable : ScriptableObject
     {
@@ -33,8 +33,8 @@ namespace Study3D.FpsGame.Drop
         [SerializeField] private float enhanceWeight = 50f;
         [SerializeField] private float modifierWeight = 20f; // 강화 전용 카드 (시점 변경 등)
 
-        [Tooltip("후보가 되는 기본 카드 (조합 카드는 넣어도 무시)")]
-        [SerializeField] private List<CardData> cards = new List<CardData>();
+        [Tooltip("후보가 되는 기본 카드 (카드 표의 ID). 같은 ID는 한 번만 후보가 됩니다")]
+        [SerializeField] private List<int> cardIds = new List<int>();
 
         // position에 보상을 떨어뜨립니다. (확률은 몬스터가 굴린 뒤 부릅니다)
         public void Drop(Vector3 position)
@@ -73,12 +73,18 @@ namespace Study3D.FpsGame.Drop
             return options;
         }
 
-        // cards에서 기본 카드만 중복 없이 remaining에 담고, 그중 강화 카드는 enhanceCards에도 담습니다.
+        // cardIds의 카드를 ID마다 한 장씩 만들어 remaining에 담고, 그중 강화 카드는 enhanceCards에도 담습니다.
+        // (선택지마다 새로 만든 카드라, 고른 카드를 덱에 넣어도 다른 카드와 객체를 나눠 쓰지 않습니다)
         private void CollectBaseCards(List<CardData> remaining, List<CardData> enhanceCards)
         {
-            foreach (CardData card in cards)
+            HashSet<int> added = new HashSet<int>();
+            foreach (int cardId in cardIds)
             {
-                if (card == null || card is CompositeCardData || remaining.Contains(card))
+                if (added.Add(cardId) == false)
+                    continue;
+
+                CardData card = CardFactory.Create(cardId);
+                if (card == null)
                     continue;
 
                 remaining.Add(card);
@@ -88,12 +94,14 @@ namespace Study3D.FpsGame.Drop
         }
 
         // 강화 카드 level장을 랜덤으로 골라 합친 조합 카드. 기본 카드는 1차라서 차수가 정확히 level이 됩니다.
+        // 같은 카드가 여러 번 뽑혀도 재료마다 새 카드로 만듭니다.
         private static CardData CreateEnhancedCard(List<CardData> enhanceCards, int level)
         {
             CardData[] parts = new CardData[level];
             for (int i = 0; i < level; i++)
             {
-                parts[i] = enhanceCards[Random.Range(0, enhanceCards.Count)];
+                CardData picked = enhanceCards[Random.Range(0, enhanceCards.Count)];
+                parts[i] = CardFactory.Create(picked.CardId);
             }
             return CompositeCardData.Create(parts[0].CardName + "+", parts);
         }

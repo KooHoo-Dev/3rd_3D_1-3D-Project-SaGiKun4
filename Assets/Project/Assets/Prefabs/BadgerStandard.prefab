@@ -4283,25 +4283,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f73e4ca28d324b4283db4dfc54fe587b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Study3D.FpsGame.Player.LocalPlayer
-  startDeck:
-  - {fileID: 11400000, guid: 7ec1daddb86690043af7d3a0d8c83c11, type: 2}
-  - {fileID: 11400000, guid: 7ec1daddb86690043af7d3a0d8c83c11, type: 2}
-  - {fileID: 11400000, guid: 50733f49ea6fa1a448c70e43e630f740, type: 2}
-  - {fileID: 11400000, guid: 50733f49ea6fa1a448c70e43e630f740, type: 2}
-  - {fileID: 11400000, guid: 317afad263e0be64e9c4061f42959c2d, type: 2}
-  - {fileID: 11400000, guid: 317afad263e0be64e9c4061f42959c2d, type: 2}
-  - {fileID: 11400000, guid: 8301f9fb0f6734c4e836562d4637f861, type: 2}
-  - {fileID: 11400000, guid: 73d7794dfb544836903ec0a6342b293a, type: 2}
-  - {fileID: 11400000, guid: 2ce81fdff7454a0c9d9164222b3b7892, type: 2}
-  - {fileID: 11400000, guid: 01b1d86a28f04f14abbb570bfe022621, type: 2}
-  startModifiers:
-  - {fileID: 11400000, guid: 255f5d9122fe45c499998a3d94184c49, type: 2}
-  - {fileID: 11400000, guid: 056f48c29e994da7810046bf2baa0356, type: 2}
-  - {fileID: 11400000, guid: 0252a14a8cef4b69b714cf2e832ea0c6, type: 2}
-  - {fileID: 11400000, guid: ed13c5f7a9d04cd9acb15cf0ce26b281, type: 2}
-  - {fileID: 11400000, guid: 1ff4ffc00d057344badc4f5b7faacd0d, type: 2}
-  - {fileID: 11400000, guid: 7173be9b565a31e49bbf0dc6e044312b, type: 2}
-  - {fileID: 11400000, guid: 5769efd75e170ea4c88d8a705de5d5a0, type: 2}
+  startDeckIds: 0000000000000000640000006400000067000000670000006600000065000000
+  startModifierIds: c8000000c9000000ca000000cb000000d2000000d3000000d4000000dc000000
   handLimit: 6
   maxHp: 100
   weapon: {fileID: 680842510505307335}
