@@ -25,12 +25,12 @@ namespace Study3D.FpsGame.UI
         [Tooltip("호를 나누는 간격 (도). 작을수록 매끄럽고 정점이 늘어납니다")]
         [SerializeField] private float stepAngle = 6f;
 
-        public void SetShape(float newStartAngle, float newArcAngle, float newRadius, float newThickness)
+        // 두께는 바꾸지 않습니다. (세그먼트마다 인스펙터에서 정함)
+        public void SetShape(float newStartAngle, float newArcAngle, float newRadius)
         {
             startAngle = newStartAngle;
             arcAngle = newArcAngle;
             radius = newRadius;
-            thickness = newThickness;
             SetVerticesDirty();
         }
 
