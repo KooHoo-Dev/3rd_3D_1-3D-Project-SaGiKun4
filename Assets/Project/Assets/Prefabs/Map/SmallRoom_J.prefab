@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 9026546840077704054}
   - component: {fileID: 7615041557064790125}
   - component: {fileID: 5395425857851778549}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Crystal3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 8976940621996194800}
   - component: {fileID: 7529680591461404907}
   - component: {fileID: 5418011027942704499}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Crystal3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -240,7 +240,7 @@ GameObject:
   - component: {fileID: 1643390144399505611}
   - component: {fileID: 7062649801607292909}
   - component: {fileID: 9185231409972371869}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Candlestick (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -354,7 +354,7 @@ GameObject:
   - component: {fileID: 1665977581697341517}
   - component: {fileID: 7193183166261348203}
   - component: {fileID: 9126751511893967131}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Candlestick (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -539,13 +539,6 @@ Transform:
   - {fileID: 7020480992926039813}
   - {fileID: 2206518375720329519}
   - {fileID: 2148642642589216268}
-  - {fileID: 6847245614253461875}
-  - {fileID: 3063188580415753889}
-  - {fileID: 1028406934954986970}
-  - {fileID: 2723029612021304441}
-  - {fileID: 7447201672076231509}
-  - {fileID: 8672583227368727377}
-  - {fileID: 1243421715774123748}
   - {fileID: 1378270107469593921}
   - {fileID: 3426781800175965992}
   - {fileID: 3174876742330988387}
@@ -653,7 +646,7 @@ GameObject:
   - component: {fileID: 6722718530439845709}
   - component: {fileID: 7123512368373080204}
   - component: {fileID: 2292551567091257595}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Point Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -780,7 +773,7 @@ GameObject:
   - component: {fileID: 6672970751829047243}
   - component: {fileID: 7136815250831065098}
   - component: {fileID: 2161733221139067005}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Point Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1326,6 +1319,13 @@ Transform:
   - {fileID: 988150864723542159}
   - {fileID: 5723470388162740862}
   - {fileID: 2332819959506762535}
+  - {fileID: 6847245614253461875}
+  - {fileID: 3063188580415753889}
+  - {fileID: 1028406934954986970}
+  - {fileID: 2723029612021304441}
+  - {fileID: 7447201672076231509}
+  - {fileID: 8672583227368727377}
+  - {fileID: 1243421715774123748}
   m_Father: {fileID: 2092987240334377055}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &419029002146810784
@@ -1371,7 +1371,7 @@ GameObject:
   - component: {fileID: 3516159595244601972}
   - component: {fileID: 1106689954896278965}
   - component: {fileID: 8237307914450240962}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Point Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1499,7 +1499,7 @@ GameObject:
   - component: {fileID: 3270612765533128299}
   - component: {fileID: 4145914814421233008}
   - component: {fileID: 1929606926413478120}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Crystal3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1613,7 +1613,7 @@ GameObject:
   - component: {fileID: 5483749158376571064}
   - component: {fileID: 4095985361071923102}
   - component: {fileID: 2714598699593669102}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Candlestick (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1727,7 +1727,7 @@ GameObject:
   - component: {fileID: 5109701963062912470}
   - component: {fileID: 3613191947868273392}
   - component: {fileID: 3413534112883784832}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Candlestick (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1841,7 +1841,7 @@ GameObject:
   - component: {fileID: 2851045648972440325}
   - component: {fileID: 3709349381774919710}
   - component: {fileID: 1167603646080949638}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Crystal3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1955,7 +1955,7 @@ GameObject:
   - component: {fileID: 8885165310980664818}
   - component: {fileID: 1117911905443672788}
   - component: {fileID: 1366969111145788580}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Candlestick (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2122,7 +2122,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 988150864723542159}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Pillar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2302,7 +2302,7 @@ GameObject:
   - component: {fileID: 1208285084561362511}
   - component: {fileID: 301182160969164116}
   - component: {fileID: 2837385808373690572}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Crystal3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2413,7 +2413,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5723470388162740862}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Objects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2451,7 +2451,7 @@ GameObject:
   - component: {fileID: 967381801020017232}
   - component: {fileID: 3674089281045855633}
   - component: {fileID: 5762346914536820198}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Point Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2644,7 +2644,7 @@ GameObject:
   - component: {fileID: 549345205315235646}
   - component: {fileID: 4039591078835771647}
   - component: {fileID: 4973251551596390536}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Point Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3200,7 +3200,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 8398260666424389059}
+    m_TransformParent: {fileID: 3651934689688130630}
     m_Modifications:
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalScale.x
@@ -3216,7 +3216,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.000000010813323
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalPosition.z
@@ -3253,6 +3253,10 @@ PrefabInstance:
     - target: {fileID: 7987422734320011234, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_Name
       value: Wall_Brick_7p5x9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7987422734320011234, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3406,7 +3410,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 8398260666424389059}
+    m_TransformParent: {fileID: 3651934689688130630}
     m_Modifications:
     - target: {fileID: 74230292508913529, guid: 8317c7ecbd879d74bbd996553e71c781, type: 3}
       propertyPath: m_LocalScale.x
@@ -3438,11 +3442,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 74230292508913529, guid: 8317c7ecbd879d74bbd996553e71c781, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 74230292508913529, guid: 8317c7ecbd879d74bbd996553e71c781, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 74230292508913529, guid: 8317c7ecbd879d74bbd996553e71c781, type: 3}
       propertyPath: m_LocalRotation.z
@@ -3463,6 +3467,10 @@ PrefabInstance:
     - target: {fileID: 2072286586598679221, guid: 8317c7ecbd879d74bbd996553e71c781, type: 3}
       propertyPath: m_Name
       value: Wall_PrecisionEdge
+      objectReference: {fileID: 0}
+    - target: {fileID: 2072286586598679221, guid: 8317c7ecbd879d74bbd996553e71c781, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3845,6 +3853,10 @@ PrefabInstance:
     - target: {fileID: 3257992444709182939, guid: c2dd9530c9d74a84e9cb77c703d82fbd, type: 3}
       propertyPath: m_Name
       value: ShelfPattern_01
+      objectReference: {fileID: 0}
+    - target: {fileID: 3257992444709182939, guid: c2dd9530c9d74a84e9cb77c703d82fbd, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 4951338659002066618, guid: c2dd9530c9d74a84e9cb77c703d82fbd, type: 3}
       propertyPath: m_LocalScale.x
@@ -4682,15 +4694,19 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 8398260666424389059}
+    m_TransformParent: {fileID: 3651934689688130630}
     m_Modifications:
+    - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalPosition.x
       value: 5.29
       objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.000000010813323
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalPosition.z
@@ -4702,11 +4718,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalRotation.z
@@ -4727,6 +4743,10 @@ PrefabInstance:
     - target: {fileID: 7987422734320011234, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_Name
       value: Wall_Brick_7p5x9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7987422734320011234, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5360,15 +5380,19 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 8398260666424389059}
+    m_TransformParent: {fileID: 3651934689688130630}
     m_Modifications:
+    - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalPosition.x
       value: -3.75
       objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.000000010813323
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalPosition.z
@@ -5380,11 +5404,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalRotation.z
@@ -5405,6 +5429,10 @@ PrefabInstance:
     - target: {fileID: 7987422734320011234, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_Name
       value: Wall_Brick_7p5x9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7987422734320011234, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5987,6 +6015,10 @@ PrefabInstance:
     - target: {fileID: 8556370840631541086, guid: 21b39686b0699324a85c72433506bf41, type: 3}
       propertyPath: m_Name
       value: ShelfPattern_03
+      objectReference: {fileID: 0}
+    - target: {fileID: 8556370840631541086, guid: 21b39686b0699324a85c72433506bf41, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -7706,7 +7738,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 8398260666424389059}
+    m_TransformParent: {fileID: 3651934689688130630}
     m_Modifications:
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalScale.x
@@ -7722,7 +7754,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.000000010813323
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalPosition.z
@@ -7759,6 +7791,10 @@ PrefabInstance:
     - target: {fileID: 7987422734320011234, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_Name
       value: Wall_Brick_7p5x9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7987422734320011234, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -8968,15 +9004,19 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 8398260666424389059}
+    m_TransformParent: {fileID: 3651934689688130630}
     m_Modifications:
+    - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalPosition.x
       value: -11.25
       objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.000000010813323
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalPosition.z
@@ -8988,11 +9028,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalRotation.z
@@ -9013,6 +9053,10 @@ PrefabInstance:
     - target: {fileID: 7987422734320011234, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_Name
       value: Wall_Brick_7p5x9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7987422734320011234, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -9087,6 +9131,10 @@ PrefabInstance:
     - target: {fileID: 2178523732560661671, guid: b4baeab6fb19bd74986154d80617d411, type: 3}
       propertyPath: m_Name
       value: ShelfPattern_02
+      objectReference: {fileID: 0}
+    - target: {fileID: 2178523732560661671, guid: b4baeab6fb19bd74986154d80617d411, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 2532777111634163587, guid: b4baeab6fb19bd74986154d80617d411, type: 3}
       propertyPath: m_Layer
@@ -9863,7 +9911,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 8398260666424389059}
+    m_TransformParent: {fileID: 3651934689688130630}
     m_Modifications:
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalScale.x
@@ -9879,7 +9927,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.000000010813323
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6146583881786480600, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_LocalPosition.z
@@ -9916,6 +9964,10 @@ PrefabInstance:
     - target: {fileID: 7987422734320011234, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
       propertyPath: m_Name
       value: Wall_Brick_7p5x9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7987422734320011234, guid: 95fc12834e123f848950cc0cb7399098, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

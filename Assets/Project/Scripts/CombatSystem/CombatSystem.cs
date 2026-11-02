@@ -11,12 +11,17 @@ namespace Study3D.FpsGame
         [SerializeField] private string enemyLayerName = "Enemy";
 
         [Header("환경 판정")]
-        [Tooltip("맵(벽, 바닥)과 프롭처럼 카드를 막거나 튕겨내는 레이어 이름들 (관통, 반사 판정에 사용)")]
-        [SerializeField] private string[] environmentLayerNames = { "World", "Prop" };
+        [Tooltip("맵의 벽, 바닥 레이어 이름. 카드가 튕길 수는 있지만 관통할 수는 없습니다 (뚫으면 맵 밖으로 나감)")]
+        [SerializeField] private string worldLayerName = "World";
+        [Tooltip("맵 안의 구조물(상자, 기둥 등) 레이어 이름. 카드가 튕기거나 관통할 수 있습니다")]
+        [SerializeField] private string propLayerName = "Prop";
 
         public static CombatSystem Instance { get; private set; }
 
         public int EnemyMask { get; private set; }
+        public int WorldMask { get; private set; }
+        public int PropMask { get; private set; }
+        // 맵 + 구조물. 카드를 막는 모든 환경 (벽 가림 판정, 바닥 판정 등은 이 값을 씁니다)
         public int EnvironmentMask { get; private set; }
 
         public event Action<CombatEvent> OnCombatEvent;
@@ -39,13 +44,20 @@ namespace Study3D.FpsGame
             Instance = this;
             EnemyMask = LayerMask.GetMask(enemyLayerName);
             if (EnemyMask == 0) Debug.LogWarning($"{enemyLayerName} 레이어가 없어 카드가 아무것도 맞히지 못합니다");
-            EnvironmentMask = LayerMask.GetMask(environmentLayerNames);
-            // GetMask는 없는 이름을 조용히 무시하므로, 오타나 미등록 레이어를 여기서 알려줍니다.
-            foreach (string layerName in environmentLayerNames)
+            WorldMask = GetLayerMask(worldLayerName);
+            PropMask = GetLayerMask(propLayerName);
+            EnvironmentMask = WorldMask | PropMask;
+        }
+
+        // GetMask는 없는 이름을 조용히 무시하므로, 오타나 미등록 레이어를 여기서 알려줍니다.
+        private int GetLayerMask(string layerName)
+        {
+            if (LayerMask.NameToLayer(layerName) < 0)
             {
-                if (LayerMask.NameToLayer(layerName) < 0)
-                    Debug.LogWarning($"{layerName} 레이어가 없어 카드가 해당 사물을 맞히지 못합니다");
+                Debug.LogWarning($"{layerName} 레이어가 없어 카드가 해당 사물을 맞히지 못합니다");
+                return 0;
             }
+            return LayerMask.GetMask(layerName);
         }
 
         private void OnDestroy()
@@ -87,7 +99,8 @@ namespace Study3D.FpsGame
         {
             int layerBit = 1 << collider.gameObject.layer;
             if ((EnemyMask & layerBit) != 0) return ContactKind.Enemy;
-            if ((EnvironmentMask & layerBit) != 0) return ContactKind.World;
+            if ((WorldMask & layerBit) != 0) return ContactKind.World;
+            if ((PropMask & layerBit) != 0) return ContactKind.Prop;
             return ContactKind.Ignore;
         }
 

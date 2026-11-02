@@ -8,6 +8,6 @@ namespace Study3D.FpsGame.Player
         public event Action OnEndedReload;
         public event Action<int, int, int> OnTakenDamage; // (데미지, 현재 HP, 최대 HP)
         public event Action OnDied;
-        public event Action<int, int> OnCurrencyChanged; // (늘어난 양, 현재 재화)
+        public event Action<int, int> OnCurrencyChanged; // (바뀐 양: 얻으면 +, 쓰면 -, 현재 재화)
     }
 }

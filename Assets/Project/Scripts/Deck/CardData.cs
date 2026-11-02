@@ -63,23 +63,52 @@ namespace Study3D.FpsGame.Deck
         // 런타임에만 존재하는 카드가 만들어집니다.
         public virtual CardData WithTiming(CardTiming newTiming, string newName)
         {
+            CardData copy = CreateEnhancedCopy(newName);
+            copy.timing = newTiming;
+            return copy;
+        }
+
+        // 반응 대상만 newTarget으로 바꾼 복제 카드를 만듭니다. 대상을 바꿀 카드(반응 카드)가 아니면 null 입니다.
+        // - 반응 카드는 자기를 복제하고, 조합 카드는 안쪽 첫 반응 카드만 바꾼 조합 카드를 새로 만듭니다.
+        public virtual CardData WithTarget(ContactTarget newTarget, string newName)
+        {
+            return null;
+        }
+
+        // 강화로 값을 바꿀 복제본을 만듭니다. 이름을 바꾸고 강화 차수를 1 올립니다.
+        protected CardData CreateEnhancedCopy(string newName)
+        {
             CardData copy = Instantiate(this);
             copy.name = newName;
             copy.cardName = newName;
-            copy.timing = newTiming;
             copy.addedLevel = addedLevel + 1;
             return copy;
         }
 
         // 카드 UI(손패, 메뉴 목록)의 설명 글자 입니다. 카드마다 재정의해서 효과를 적습니다.
         // 시점 문구는 TimingText로 붙이면 시점 변경 강화로 바뀐 시점이 그대로 반영됩니다.
+        // 강화나 배율로 바뀔 수 있는 값(수치, 대상 등)은 ValueText로 감싸 파란색으로 보여 줍니다. (TimingText는 이미 감싸져 있음)
         public virtual string Description
         {
             get { return $"{TimingText(timing)}, 효과를 발동합니다."; }
         }
 
-        // 시점을 설명 문구로 바꿉니다. (예: Destroy → "소멸할 때")
+        // 설명에서 바뀔 수 있는 값의 색 (TextMeshPro 리치 텍스트 색 태그)
+        private const string VALUE_COLOR = "#5AB4FF";
+
+        // 바뀔 수 있는 값을 파란색으로 감쌉니다. 나머지 고정 문구는 글자 기본색 그대로입니다.
+        protected static string ValueText(object value)
+        {
+            return $"<color={VALUE_COLOR}>{value}</color>";
+        }
+
+        // 시점을 설명 문구로 바꿉니다. (예: Destroy → "소멸할 때") 시점은 강화로 바뀌는 값이라 파란색으로 감쌉니다.
         protected static string TimingText(CardTiming cardTiming)
+        {
+            return ValueText(TimingName(cardTiming));
+        }
+
+        private static string TimingName(CardTiming cardTiming)
         {
             switch (cardTiming)
             {

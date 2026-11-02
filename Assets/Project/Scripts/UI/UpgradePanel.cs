@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Study3D.FpsGame.Deck;
+using Study3D.FpsGame.Player;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,8 +16,9 @@ namespace Study3D.FpsGame.UI
     // - 이미 다른 칸에 들어 있는 카드를 고르면 그 칸에서 빼고 선택된 칸으로 옮깁니다. (같은 카드가 두 칸에 들어가지 않음)
     // - 비우기 버튼은 모든 칸을 비우고 첫 번째 칸을 선택합니다.
     // - 반대쪽 칸(선택되지 않은 칸)에 카드가 있으면, 그 카드와 시점 변경이 안 되는 목록 카드를 흐리게 표시합니다.
-    //   (예: 반사 카드가 있으면 소멸 시점 변경 카드가 흐려짐. 판단은 CardEnhancer.IsTimingBlocked)
-    // - 강화 버튼: 두 칸이 모두 찼고 강화에 성공하면 OnEnhanced를 알립니다. (화면을 닫는 것은 MenuScreen)
+    //   (예: 반사 카드가 있으면 소멸 시점 변경 카드가, 폭발 카드가 있으면 대상 변경 카드가 흐려짐. 판단은 CardEnhancer.IsModifierBlocked)
+    // - 강화 버튼: 두 칸이 모두 찼고 강화에 성공하면 재화를 내고 OnEnhanced를 알립니다. (화면을 닫는 것은 MenuScreen)
+    //   재화가 강화 비용(CardEnhancer.ENHANCE_COST)보다 적으면 버튼을 비활성화합니다.
     // - 선택된 칸 연출(파티클)은 OnSelectedSlotChanged / SelectedSlotIndex / GetSlotRect 로 붙이면 됩니다.
     public class UpgradePanel : MonoBehaviour
     {
@@ -84,12 +86,25 @@ namespace Study3D.FpsGame.UI
             cardList.OnCardClicked += OnCardClicked;
             cardList.OnCardsRefreshed += ClearSlots;
             ClearSlots();
+
+            LocalPlayer player = Player.Player.LocalPlayer;
+            if (player != null)
+            {
+                player.OnCurrencyChanged += OnCurrencyChanged;
+            }
+            UpdateConfirmButton();
         }
 
         private void OnDisable()
         {
             cardList.OnCardClicked -= OnCardClicked;
             cardList.OnCardsRefreshed -= ClearSlots;
+
+            LocalPlayer player = Player.Player.LocalPlayer;
+            if (player != null)
+            {
+                player.OnCurrencyChanged -= OnCurrencyChanged;
+            }
             // 목록은 다른 패널(인벤토리 등)도 같이 쓰므로 흐림을 풀어 둡니다
             cardList.SetDimFilter(null);
         }
@@ -173,7 +188,7 @@ namespace Study3D.FpsGame.UI
         // 목록 카드가 반대쪽 칸의 카드와 시점 변경이 안 되면 true (흐리게 표시)
         private bool IsBlockedWithOtherSlot(CardData card)
         {
-            return CardEnhancer.IsTimingBlocked(card, otherSlotCard);
+            return CardEnhancer.IsModifierBlocked(card, otherSlotCard);
         }
 
         private void OnCardClicked(int deckIndex)
@@ -247,11 +262,41 @@ namespace Study3D.FpsGame.UI
                 return;
             }
 
-            bool enhanced = CardEnhancer.TryEnhance(Player.Player.LocalPlayer.Deck, firstIndex, secondIndex);
-            if (enhanced && OnEnhanced != null)
+            LocalPlayer player = Player.Player.LocalPlayer;
+            if (player.HasCurrency(CardEnhancer.ENHANCE_COST) == false)
+            {
+                Debug.Log($"[Enhance] 재화가 부족합니다. ({player.Currency} / {CardEnhancer.ENHANCE_COST})");
+                return;
+            }
+
+            // 강화에 성공했을 때만 재화를 냅니다. (같은 카드, 공격 카드 등으로 거부되면 그대로)
+            bool enhanced = CardEnhancer.TryEnhance(player.Deck, firstIndex, secondIndex);
+            if (enhanced == false)
+                return;
+
+            player.TrySpendCurrency(CardEnhancer.ENHANCE_COST);
+            if (OnEnhanced != null)
             {
                 OnEnhanced.Invoke();
             }
+        }
+
+        // 재화가 강화 비용보다 적으면 강화 버튼을 비활성화합니다.
+        private void UpdateConfirmButton()
+        {
+            LocalPlayer player = Player.Player.LocalPlayer;
+            if (player == null)
+            {
+                confirmButton.interactable = false;
+                return;
+            }
+            confirmButton.interactable = player.HasCurrency(CardEnhancer.ENHANCE_COST);
+        }
+
+        // 화면이 열려 있는 동안 재화가 바뀌면 버튼 상태를 다시 정합니다.
+        private void OnCurrencyChanged(int amount, int currency)
+        {
+            UpdateConfirmButton();
         }
     }
 }

@@ -72,5 +72,9 @@ namespace Study3D.FpsGame.Deck
             float maxRange = radius * loseRange;
             return (target.bounds.center - origin).sqrMagnitude <= maxRange * maxRange;
         }
+        
+        public override string Description {
+            get { return $"{TimingText(Timing)}, \n{ValueText(radius)}m 반경의 적을 추적합니다."; }
+        }
     }
 }

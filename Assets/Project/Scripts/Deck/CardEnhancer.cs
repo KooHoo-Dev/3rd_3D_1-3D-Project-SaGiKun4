@@ -10,10 +10,13 @@ namespace Study3D.FpsGame.Deck
     // - 합쳐진 카드는 첫 번째 카드 자리에 들어가고, 두 번째 카드는 덱에서 완전히 사라집니다.
     // - 강화된 카드를 다시 재료로 쓸 수 있습니다. (CompositeCardData 안쪽 재료까지 순서대로 펼쳐집니다)
     // - 강화 카드끼리만 합칠 수 있습니다. 공격 카드는 재료로 쓸 수 없습니다.
-    // - 한쪽이 강화 전용 카드(시점 변경)면 합치지 않고, 다른 쪽 카드의 시점을 바꾼 카드로 교체합니다. (칸 순서 상관없음)
+    // - 한쪽이 강화 전용 카드면 합치지 않고, 다른 쪽 카드의 값을 바꾼 카드로 교체합니다. (칸 순서 상관없음)
+    //   시점 변경: 맨 첫 재료 카드의 시점 / 대상 변경: 첫 반응 카드의 반응 대상
     //   강화 전용 카드는 쓰고 나면 사라집니다.
+    // - 강화 1회에 ENHANCE_COST만큼 재화가 듭니다. 재화를 내는 것은 강화하는 쪽(UpgradePanel)이 맡습니다. (여기는 덱만 다룸)
     public static class CardEnhancer
     {
+        public const int ENHANCE_COST = 200;          // 강화 1회 비용 (재화)
         private const string ENHANCED_MARK = "+"; // 강화된 카드 표시 (프로토타입: 이름 뒤에 붙임)
 
         // 강화하지 못했으면 이유를 로그로 남기고 false를 반환합니다.
@@ -37,6 +40,14 @@ namespace Study3D.FpsGame.Deck
             TimingCardData secondTiming = second as TimingCardData;
             if (secondTiming != null)
                 return TryChangeTiming(deck, firstIndex, secondIndex, secondTiming);
+
+            TargetCardData firstTarget = first as TargetCardData;
+            if (firstTarget != null)
+                return TryChangeTarget(deck, secondIndex, firstIndex, firstTarget);
+
+            TargetCardData secondTarget = second as TargetCardData;
+            if (secondTarget != null)
+                return TryChangeTarget(deck, firstIndex, secondIndex, secondTarget);
 
             Combine(deck, firstIndex, secondIndex, first, second);
             return true;
@@ -111,9 +122,49 @@ namespace Study3D.FpsGame.Deck
             return true;
         }
 
-        // 한쪽이 시점 변경 카드이고, 다른 쪽이 그 시점으로 바뀔 수 없는 카드인지. (칸 순서 상관없음)
+        // 대상 변경: targetIndex 카드의 반응 대상을 바꾼 카드로 교체하고, 대상 변경 카드는 덱에서 없앱니다.
+        // 조합 카드는 발동 순서상 첫 반응 카드의 대상만 바뀝니다.
+        private static bool TryChangeTarget(CardDeck deck, int targetIndex, int modifierIndex, TargetCardData modifier)
+        {
+            CardData target = deck.GetCard(targetIndex);
+            ResponseCardData response = GetFirstResponseCard(target);
+            if (CanChangeTargetTo(target, response, modifier.NewTarget) == false)
+                return false;
+
+            CardData changed = target.WithTarget(modifier.NewTarget, target.CardName + ENHANCED_MARK);
+            // 바꾸기를 먼저 해야 대상 변경 카드를 뺄 때 당겨지는 번호를 신경 쓰지 않아도 됩니다.
+            deck.Replace(targetIndex, changed);
+            deck.Remove(modifierIndex);
+            Debug.Log($"[Enhance] {target.CardName}({response.Target}, Lv.{target.EnhanceLevel}) + {modifier.CardName} → {changed.CardName}({response.GetAppliedTarget(modifier.NewTarget)}, Lv.{changed.EnhanceLevel})");
+            return true;
+        }
+
+        // target(안의 첫 반응 카드는 response)의 대상을 newTarget으로 바꿀 수 있는지. 바꿀 수 없으면 이유를 로그로 남깁니다.
+        private static bool CanChangeTargetTo(CardData target, ResponseCardData response, ContactTarget newTarget)
+        {
+            if (response == null)
+            {
+                Debug.Log($"[Enhance] {target.CardName}에는 대상을 바꿀 수 있는 카드(반응 카드)가 없습니다.");
+                return false;
+            }
+
+            ContactTarget applied = response.GetAppliedTarget(newTarget);
+            if (applied == 0)
+            {
+                Debug.Log($"[Enhance] {target.CardName}은(는) {newTarget}을(를) 대상으로 할 수 없습니다.");
+                return false;
+            }
+            if (applied == response.Target)
+            {
+                Debug.Log($"[Enhance] {target.CardName}은(는) 이미 {applied}이(가) 대상입니다.");
+                return false;
+            }
+            return true;
+        }
+
+        // 한쪽이 강화 전용 카드(시점 변경, 대상 변경)이고, 다른 쪽에 쓸 수 없는 카드인지. (칸 순서 상관없음)
         // 강화 화면이 고를 수 없는 카드를 흐리게 표시할 때 씁니다. 실제 강화 판단은 TryEnhance가 합니다.
-        public static bool IsTimingBlocked(CardData a, CardData b)
+        public static bool IsModifierBlocked(CardData a, CardData b)
         {
             if (a == null || b == null)
                 return false;
@@ -126,7 +177,39 @@ namespace Study3D.FpsGame.Deck
             if (bTiming != null)
                 return IsTimingBlockedFor(a, bTiming.Timing);
 
+            TargetCardData aTarget = a as TargetCardData;
+            if (aTarget != null)
+                return IsTargetBlockedFor(b, aTarget.NewTarget);
+
+            TargetCardData bTarget = b as TargetCardData;
+            if (bTarget != null)
+                return IsTargetBlockedFor(a, bTarget.NewTarget);
+
             return false;
+        }
+
+        // 반응 카드가 없거나, 바꿀 대상을 하나도 받을 수 없으면 true
+        private static bool IsTargetBlockedFor(CardData target, ContactTarget newTarget)
+        {
+            ResponseCardData response = GetFirstResponseCard(target);
+            if (response == null)
+                return true;
+
+            return response.GetAppliedTarget(newTarget) == 0;
+        }
+
+        // 발동 순서상 첫 반응 카드 (조합 카드면 펼친 뒤 찾음). 없으면 null
+        private static ResponseCardData GetFirstResponseCard(CardData card)
+        {
+            List<CardData> cards = new List<CardData>();
+            card.CollectCards(cards);
+            foreach (CardData part in cards)
+            {
+                ResponseCardData response = part as ResponseCardData;
+                if (response != null)
+                    return response;
+            }
+            return null;
         }
 
         private static bool IsTimingBlockedFor(CardData target, CardTiming timing)

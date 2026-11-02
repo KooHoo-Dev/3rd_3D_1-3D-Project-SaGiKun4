@@ -14,7 +14,7 @@ namespace Study3D.FpsGame.Deck
         // 자기가 발동하지 않으므로 바꿔 줄 시점을 설명합니다.
         public override string Description
         {
-            get { return $"다른 카드가 {TimingText(Timing)} 발동하도록 바꿉니다."; }
+            get { return $"다른 카드가 {TimingText(Timing)} 타이밍에 발동하도록 바꿉니다."; }
         }
     }
 }

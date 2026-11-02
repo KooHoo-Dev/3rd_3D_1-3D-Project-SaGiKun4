@@ -12,7 +12,7 @@ namespace Study3D.FpsGame.Deck
     [CreateAssetMenu(menuName = "Card/Explosion Card", fileName = "ExplosionCard")]
     public class ExplosionCardData : CardData
     {
-        [SerializeField] private float radius = 2.5f;
+        [SerializeField] private float radius = 5f;
         [Tooltip("발사체 피해에 곱하는 비율 (0.8 = 발사체 피해의 80%)")]
         [SerializeField, Min(0f)] private float damageRatio = 0.8f;
         [Tooltip("발동 이펙트를 크기 1로 재생했을 때 기준 파티클이 가장 커진 원의 반경(m). 이 원이 폭발 반경과 같아지도록 이펙트 전체를 같은 비율로 키우거나 줄입니다")]
@@ -65,6 +65,10 @@ namespace Study3D.FpsGame.Deck
             // 이펙트의 원이 실제 폭발 범위와 같은 크기로 보이도록 맞춥니다.
             float effectScale = finalRadius / effectRadius;
             PlayEffect(context, effectScale);
+        }
+
+        public override string Description {
+            get { return $"{TimingText(Timing)}, \n{ValueText(radius)}m 반경에 {ValueText(damageRatio)}배의 피해를 줍니다."; }
         }
     }
 }

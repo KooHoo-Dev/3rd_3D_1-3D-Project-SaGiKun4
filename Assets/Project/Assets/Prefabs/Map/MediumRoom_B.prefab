@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1727743675082648913}
   - component: {fileID: 7949885440035546061}
   - component: {fileID: 4327817010193501265}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Feather7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -214,7 +214,7 @@ GameObject:
   - component: {fileID: 4103446614930646997}
   - component: {fileID: 8446111169532330589}
   - component: {fileID: 6035076912823969048}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Feather7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -641,7 +641,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 694761261734525854}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -791,7 +791,7 @@ GameObject:
   - component: {fileID: 1582835902053496887}
   - component: {fileID: 1792147718602021412}
   - component: {fileID: 8607052082049947933}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Feather7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1219,7 +1219,7 @@ GameObject:
   - component: {fileID: 2978760486506828849}
   - component: {fileID: 83421333263906131}
   - component: {fileID: 3125468355163220398}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: CandleFlame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1309,7 +1309,7 @@ GameObject:
   - component: {fileID: 4230924041540562700}
   - component: {fileID: 9103202604250475711}
   - component: {fileID: 2946097299536314109}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Catfigurine_Collar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1850,7 +1850,7 @@ GameObject:
   - component: {fileID: 5760983822572113877}
   - component: {fileID: 5749482886296654317}
   - component: {fileID: 4738238066426820064}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Catfigurine_Collar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2165,7 +2165,7 @@ GameObject:
   - component: {fileID: 3752254603742034773}
   - component: {fileID: 4249185877338114950}
   - component: {fileID: 8257035027127826440}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: PaperScrollOpen2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2481,7 +2481,7 @@ GameObject:
   - component: {fileID: 4269611791332080186}
   - component: {fileID: 3332178267799676813}
   - component: {fileID: 7074534420581324487}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: EnvelopeWaxSealed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2572,7 +2572,7 @@ GameObject:
   - component: {fileID: 510590007129243671}
   - component: {fileID: 1778373554114146858}
   - component: {fileID: 7639866544673503818}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: DeskWithDrawers (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3027,7 +3027,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6093979098208542436}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3402,7 +3402,7 @@ GameObject:
   - component: {fileID: 8454207928448748772}
   - component: {fileID: 4171967507463533577}
   - component: {fileID: 9106919099874404399}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3606,7 +3606,7 @@ GameObject:
   - component: {fileID: 762266937038875878}
   - component: {fileID: 7921218789032952640}
   - component: {fileID: 479081984253778856}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: DeskWithDrawers (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3949,7 +3949,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7051631818434021859}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4099,7 +4099,7 @@ GameObject:
   - component: {fileID: 7991954116276672557}
   - component: {fileID: 8500063732227975929}
   - component: {fileID: 8759880186551816881}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: InkwellAndFeather
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4416,7 +4416,7 @@ GameObject:
   - component: {fileID: 4974982609212426315}
   - component: {fileID: 3819024960501703240}
   - component: {fileID: 4581664757468022907}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: PaperScrollOpen2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4506,7 +4506,7 @@ GameObject:
   - component: {fileID: 8811301710236257769}
   - component: {fileID: 5723610205886461866}
   - component: {fileID: 8654368236900624160}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4594,7 +4594,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6427726243930466687}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4629,7 +4629,7 @@ GameObject:
   - component: {fileID: 6754432909306014019}
   - component: {fileID: 4852648003400116284}
   - component: {fileID: 3976126517623096087}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4831,7 +4831,7 @@ GameObject:
   - component: {fileID: 1360014811605455549}
   - component: {fileID: 6792254042124028452}
   - component: {fileID: 1315348380225511470}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5145,7 +5145,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5717661454773206850}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Vine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5515,7 +5515,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7708096421263477177}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5554,7 +5554,7 @@ GameObject:
   - component: {fileID: 3442922931516798868}
   - component: {fileID: 5493182757610542340}
   - component: {fileID: 4267652074381662295}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: InkwellAndFeather
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6661,7 +6661,7 @@ GameObject:
   - component: {fileID: 5767383138348925200}
   - component: {fileID: 3257974142918679399}
   - component: {fileID: 3091504613591022172}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Catfigurine_Collar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7459,7 +7459,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2557213380317189298}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Objects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7497,7 +7497,7 @@ GameObject:
   - component: {fileID: 3264525411867818364}
   - component: {fileID: 3767953607939940862}
   - component: {fileID: 649148846339089194}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Wand6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7701,7 +7701,7 @@ GameObject:
   - component: {fileID: 6290985542153854258}
   - component: {fileID: 1811168356168421508}
   - component: {fileID: 441696401392643634}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ShelfUnit2 (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7813,7 +7813,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7954271238003705320}
   - component: {fileID: 1746604768271513717}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7834,7 +7834,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5717661454773206850}
-  - {fileID: 2227234942357462993}
   - {fileID: 2557213380317189298}
   - {fileID: 7696067576611005125}
   m_Father: {fileID: 7654579091524711883}
@@ -8096,7 +8095,7 @@ GameObject:
   - component: {fileID: 2531523846372739741}
   - component: {fileID: 3004128026182357506}
   - component: {fileID: 6437305227841008106}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: InkwellAndFeather
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8413,7 +8412,7 @@ GameObject:
   - component: {fileID: 7632337530789425409}
   - component: {fileID: 2776458416230260646}
   - component: {fileID: 1460994590391961766}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: CandleFlame (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8616,7 +8615,7 @@ GameObject:
   - component: {fileID: 8898542336302009073}
   - component: {fileID: 2094406114173742454}
   - component: {fileID: 3934717928876765435}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8818,7 +8817,7 @@ GameObject:
   - component: {fileID: 6170315650170384458}
   - component: {fileID: 9204396251124253831}
   - component: {fileID: 5163342444006619654}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Feather7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8908,7 +8907,7 @@ GameObject:
   - component: {fileID: 4490736666518262518}
   - component: {fileID: 4628474097736898586}
   - component: {fileID: 7179730896088439445}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9111,7 +9110,7 @@ GameObject:
   - component: {fileID: 3808681744313855458}
   - component: {fileID: 6657446544999711285}
   - component: {fileID: 4923618600995109074}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: CandleFlame (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9539,7 +9538,7 @@ GameObject:
   - component: {fileID: 1669441620363203381}
   - component: {fileID: 9198482018578200869}
   - component: {fileID: 5273087184817467184}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9742,7 +9741,7 @@ GameObject:
   - component: {fileID: 998159101814553930}
   - component: {fileID: 7076504942709787550}
   - component: {fileID: 9036079817640343731}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9832,7 +9831,7 @@ GameObject:
   - component: {fileID: 5304136863788687668}
   - component: {fileID: 3393299951300391418}
   - component: {fileID: 7821066166142991065}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Point Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10298,7 +10297,7 @@ GameObject:
   - component: {fileID: 7167390278460743845}
   - component: {fileID: 7943437874895080318}
   - component: {fileID: 7085068086165674885}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10502,7 +10501,7 @@ GameObject:
   - component: {fileID: 7434839513347626550}
   - component: {fileID: 187420662448979062}
   - component: {fileID: 8154880633578091151}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: DeskWithDrawers (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10733,7 +10732,7 @@ GameObject:
   - component: {fileID: 2817890453477588049}
   - component: {fileID: 6181251896342091352}
   - component: {fileID: 7100194283409637729}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: PaperScrollOpen2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10821,7 +10820,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1324660906729463886}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11081,7 +11080,7 @@ GameObject:
   - component: {fileID: 1997400373113231067}
   - component: {fileID: 7120157654626442277}
   - component: {fileID: 9125412093449583538}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: PaperScrollOpen2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11397,7 +11396,7 @@ GameObject:
   - component: {fileID: 2272622573089601555}
   - component: {fileID: 145451717787013668}
   - component: {fileID: 4801525752250011868}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: EnvelopeWaxSealed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11598,7 +11597,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7696067576611005125}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11744,7 +11743,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8024319295031790051}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12120,7 +12119,7 @@ GameObject:
   - component: {fileID: 7171705055222155918}
   - component: {fileID: 6432503933864445766}
   - component: {fileID: 7028318896159071177}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: InkwellAndFeather
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12887,7 +12886,7 @@ GameObject:
   - component: {fileID: 4641666209233956571}
   - component: {fileID: 8870136568271495841}
   - component: {fileID: 7597022578829562888}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Catfigurine_Collar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13090,7 +13089,7 @@ GameObject:
   - component: {fileID: 5722479912955975154}
   - component: {fileID: 6474194000678818027}
   - component: {fileID: 5490948917687909251}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13404,7 +13403,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3110642130804674762}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13443,7 +13442,7 @@ GameObject:
   - component: {fileID: 6646166752532363152}
   - component: {fileID: 1314512748272029612}
   - component: {fileID: 5091647087094483518}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13646,7 +13645,7 @@ GameObject:
   - component: {fileID: 2406458543103747804}
   - component: {fileID: 4989613426868977007}
   - component: {fileID: 5282308297802783067}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Wand6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14301,7 +14300,7 @@ GameObject:
   - component: {fileID: 7664345077302763768}
   - component: {fileID: 2151462427349953671}
   - component: {fileID: 4817850302203902737}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: PaperScroll5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14504,7 +14503,7 @@ GameObject:
   - component: {fileID: 9100351834514855089}
   - component: {fileID: 7902000351297338400}
   - component: {fileID: 6628154525498251326}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14592,7 +14591,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5576746935436246100}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15023,7 +15022,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8921213087140460773}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Side0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15285,7 +15284,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5709613025759258041}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15910,7 +15909,7 @@ GameObject:
   - component: {fileID: 8756827340358990932}
   - component: {fileID: 977596507822030372}
   - component: {fileID: 7723511641924110791}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: CandleFlame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16001,7 +16000,7 @@ GameObject:
   - component: {fileID: 8569930579816448815}
   - component: {fileID: 5364275188571157826}
   - component: {fileID: 7405737013894397855}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16405,7 +16404,7 @@ GameObject:
   - component: {fileID: 2714799151369862059}
   - component: {fileID: 4648746774416799556}
   - component: {fileID: 7570227860292835144}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16945,7 +16944,7 @@ GameObject:
   - component: {fileID: 5607731924371491005}
   - component: {fileID: 2172567535264219152}
   - component: {fileID: 5017485747418962589}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17035,7 +17034,7 @@ GameObject:
   - component: {fileID: 3574503799632204659}
   - component: {fileID: 854563793708195513}
   - component: {fileID: 5301321503040132763}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17125,7 +17124,7 @@ GameObject:
   - component: {fileID: 451554429696998107}
   - component: {fileID: 8979144801241877863}
   - component: {fileID: 3404779590571000558}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Envelope
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17328,7 +17327,7 @@ GameObject:
   - component: {fileID: 7110085055504685457}
   - component: {fileID: 3868955841446098562}
   - component: {fileID: 6339421137724365200}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: PaperScrollOpen2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17418,7 +17417,7 @@ GameObject:
   - component: {fileID: 2120299231625500556}
   - component: {fileID: 7744547452923365242}
   - component: {fileID: 4519121042091616969}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Feather7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17508,7 +17507,7 @@ GameObject:
   - component: {fileID: 491850375192177130}
   - component: {fileID: 5645090303503266208}
   - component: {fileID: 4946250752700680733}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: EnvelopeWaxSealed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17598,7 +17597,7 @@ GameObject:
   - component: {fileID: 1623429615150133420}
   - component: {fileID: 5878413734500735970}
   - component: {fileID: 6753485408713077305}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Catfigurine_Collar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17911,7 +17910,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7552347776978516753}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18297,7 +18296,7 @@ GameObject:
   - component: {fileID: 7507135462337681202}
   - component: {fileID: 8731124015912376036}
   - component: {fileID: 8068958052026606034}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Catfigurine_Collar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19177,7 +19176,7 @@ GameObject:
   - component: {fileID: 1919104955586672665}
   - component: {fileID: 8224342066012896438}
   - component: {fileID: 6239434555658267088}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19831,7 +19830,7 @@ GameObject:
   - component: {fileID: 6767281522187382024}
   - component: {fileID: 3996265288306098043}
   - component: {fileID: 5036888379967773074}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19921,7 +19920,7 @@ GameObject:
   - component: {fileID: 5295735507618975297}
   - component: {fileID: 684037936688147966}
   - component: {fileID: 3291463999671279011}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Catfigurine_Collar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20011,7 +20010,7 @@ GameObject:
   - component: {fileID: 8335154788515927385}
   - component: {fileID: 2608864897845215052}
   - component: {fileID: 5758093088579290641}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: PaperScrollOpen2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20214,7 +20213,7 @@ GameObject:
   - component: {fileID: 4047806888219532357}
   - component: {fileID: 4214790466999124393}
   - component: {fileID: 1281794358812014885}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: PaperScrollOpen2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20972,7 +20971,7 @@ GameObject:
   - component: {fileID: 5036853334383589336}
   - component: {fileID: 3429678326176005501}
   - component: {fileID: 4861778199297178627}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Chandelier (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -21067,7 +21066,7 @@ GameObject:
   - component: {fileID: 2782797329347942048}
   - component: {fileID: 5119462064152241423}
   - component: {fileID: 6589226595992025845}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: CandleFlame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -21157,7 +21156,7 @@ GameObject:
   - component: {fileID: 8425659318534111404}
   - component: {fileID: 2565375554888661277}
   - component: {fileID: 3731585683740433757}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -21247,7 +21246,7 @@ GameObject:
   - component: {fileID: 1346142847168513972}
   - component: {fileID: 1937255208082501965}
   - component: {fileID: 7235397945112081158}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: PaperScrollOpen2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -21337,7 +21336,7 @@ GameObject:
   - component: {fileID: 3556232213855889475}
   - component: {fileID: 5095369823140406001}
   - component: {fileID: 8073975860040176758}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: EnvelopeWaxSealed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -21991,7 +21990,7 @@ GameObject:
   - component: {fileID: 4728271933660327662}
   - component: {fileID: 3407120842099582374}
   - component: {fileID: 2022369653420087694}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: PaperScroll5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -22081,7 +22080,7 @@ GameObject:
   - component: {fileID: 7721101666156484501}
   - component: {fileID: 875473109446269611}
   - component: {fileID: 5755859080835894912}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: EnvelopeWaxSealed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -22284,7 +22283,7 @@ GameObject:
   - component: {fileID: 1820096833919073437}
   - component: {fileID: 7006335391492941685}
   - component: {fileID: 5811083181405612032}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ShelfUnit2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -22531,7 +22530,7 @@ Transform:
   m_LocalScale: {x: 5, y: 6, z: 43.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2227234942357462993}
+  m_Father: {fileID: 6937844005583937157}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &4729320005557546831
 MeshFilter:
@@ -22849,7 +22848,7 @@ GameObject:
   - component: {fileID: 8862465076719500270}
   - component: {fileID: 6143337916128195282}
   - component: {fileID: 2775180642890438626}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -23050,7 +23049,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7974669650744458988}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -23200,7 +23199,7 @@ GameObject:
   - component: {fileID: 9184658926820400269}
   - component: {fileID: 6239627312108427051}
   - component: {fileID: 8179642301279843228}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: PaperScrollOpen2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -23518,7 +23517,7 @@ GameObject:
   - component: {fileID: 4230923505576896390}
   - component: {fileID: 841072032058115990}
   - component: {fileID: 1546121040647735066}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -23608,7 +23607,7 @@ GameObject:
   - component: {fileID: 5803979832317881572}
   - component: {fileID: 936249148406858237}
   - component: {fileID: 6273152219446935869}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: InkwellAndFeather
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24151,7 +24150,7 @@ GameObject:
   - component: {fileID: 638799488790067341}
   - component: {fileID: 3950511717489333549}
   - component: {fileID: 1333110204424513127}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -25031,7 +25030,7 @@ GameObject:
   - component: {fileID: 366900311396726076}
   - component: {fileID: 4679709596764775498}
   - component: {fileID: 4170378508069538557}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: DeskWithDrawers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -25151,7 +25150,7 @@ GameObject:
   - component: {fileID: 5905848511113243097}
   - component: {fileID: 8320706334524097818}
   - component: {fileID: 8819128863298603533}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ShelfUnit2 (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -25264,7 +25263,7 @@ GameObject:
   - component: {fileID: 7474866227655567603}
   - component: {fileID: 1042408987384813995}
   - component: {fileID: 8970330640034186684}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: InkwellAndFeather
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -25468,7 +25467,7 @@ GameObject:
   - component: {fileID: 2395189459738368431}
   - component: {fileID: 2914872180105533508}
   - component: {fileID: 1642699323120272195}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: DeskWithDrawers (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -25811,7 +25810,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1471972581289388134}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -26074,7 +26073,7 @@ GameObject:
   - component: {fileID: 8829870661355587443}
   - component: {fileID: 2099776547253965070}
   - component: {fileID: 3233857121827272923}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Feather7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -26164,7 +26163,7 @@ GameObject:
   - component: {fileID: 7308314806306108478}
   - component: {fileID: 3770043563393498620}
   - component: {fileID: 8103675607969086387}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -26367,7 +26366,7 @@ GameObject:
   - component: {fileID: 5788794528550833615}
   - component: {fileID: 3379410604562354298}
   - component: {fileID: 4964621172940561601}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Feather7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -26455,7 +26454,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3030192803723952424}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Side_90
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -26494,7 +26493,7 @@ GameObject:
   - component: {fileID: 9004933760028857223}
   - component: {fileID: 2174185576603905211}
   - component: {fileID: 8856376715441058306}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ShelfUnit2 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -26833,7 +26832,7 @@ GameObject:
   - component: {fileID: 4845932016272401585}
   - component: {fileID: 4728662847118442506}
   - component: {fileID: 1422051799336940601}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -27036,7 +27035,7 @@ GameObject:
   - component: {fileID: 5968500564654665109}
   - component: {fileID: 4103641876660770598}
   - component: {fileID: 509204743650313078}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Catfigurine_Collar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -27126,7 +27125,7 @@ GameObject:
   - component: {fileID: 391203196141233098}
   - component: {fileID: 7533976764357935871}
   - component: {fileID: 4194471908421834181}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Hourglass
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -27409,6 +27408,9 @@ Transform:
   - {fileID: 1056274112834594409}
   - {fileID: 7171855389409088803}
   - {fileID: 652672672712827531}
+  - {fileID: 1066236123080244549}
+  - {fileID: 1060635730558081444}
+  - {fileID: 5523425632136842911}
   m_Father: {fileID: 7654579091524711883}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1966533667481290150
@@ -27668,7 +27670,7 @@ GameObject:
   - component: {fileID: 8214244240605831607}
   - component: {fileID: 1603759478623561243}
   - component: {fileID: 3107732393033869487}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Catfigurine_Collar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -28546,7 +28548,7 @@ GameObject:
   - component: {fileID: 2447571337864201091}
   - component: {fileID: 8210448177306418413}
   - component: {fileID: 5969863162919008745}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Hourglass
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -28862,7 +28864,7 @@ GameObject:
   - component: {fileID: 873679407469660453}
   - component: {fileID: 6557738888933397990}
   - component: {fileID: 2249846008267159909}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Catfigurine_Collar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -29574,7 +29576,7 @@ GameObject:
   - component: {fileID: 1247509837392071162}
   - component: {fileID: 2489113245920760103}
   - component: {fileID: 4453536183436410186}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ShelfUnit2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -30136,7 +30138,7 @@ GameObject:
   - component: {fileID: 3701996958487089426}
   - component: {fileID: 5804298492680163369}
   - component: {fileID: 3481271742575073966}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -30340,7 +30342,7 @@ GameObject:
   - component: {fileID: 5983963727563361582}
   - component: {fileID: 6804706881694957053}
   - component: {fileID: 3309361834508061280}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ShelfUnit2 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -30451,7 +30453,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2795855504240152442}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -30623,7 +30625,7 @@ GameObject:
   - component: {fileID: 8910783994142637848}
   - component: {fileID: 7474640784535457728}
   - component: {fileID: 4741684571565874336}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -30713,7 +30715,7 @@ GameObject:
   - component: {fileID: 8323250809811886815}
   - component: {fileID: 5124148236840972403}
   - component: {fileID: 5457531395496894289}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -30916,7 +30918,7 @@ GameObject:
   - component: {fileID: 494226356386915410}
   - component: {fileID: 8788447470322130668}
   - component: {fileID: 7168279267925524810}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Envelope
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -31345,7 +31347,7 @@ GameObject:
   - component: {fileID: 706640059217357095}
   - component: {fileID: 2606278727676370437}
   - component: {fileID: 5625497974094049134}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: InkwellAndFeather
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -31546,7 +31548,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1154767381184622566}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -31582,7 +31584,7 @@ GameObject:
   - component: {fileID: 5716638786933463468}
   - component: {fileID: 6860124994162464359}
   - component: {fileID: 920686203483240948}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Point Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -31820,7 +31822,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4132668556446349493}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Desk
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -31857,7 +31859,7 @@ GameObject:
   - component: {fileID: 5183949272686416258}
   - component: {fileID: 4178348146627951193}
   - component: {fileID: 3181452801558580272}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Hourglass
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32512,7 +32514,7 @@ GameObject:
   - component: {fileID: 169435978439967162}
   - component: {fileID: 390198382588467194}
   - component: {fileID: 6855316096090635236}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: PaperScrollOpen2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32602,7 +32604,7 @@ GameObject:
   - component: {fileID: 8765389720372761829}
   - component: {fileID: 7517082256955482675}
   - component: {fileID: 1666094837931429015}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32934,12 +32936,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7061739699150822821}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: -28.5, y: 0, z: 3}
   m_LocalScale: {x: 9.5, y: 6, z: 55}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2227234942357462993}
+  m_Father: {fileID: 6937844005583937157}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!33 &8834820019794934460
 MeshFilter:
@@ -33142,7 +33144,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 751401970656168285}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33178,7 +33180,7 @@ GameObject:
   - component: {fileID: 7083977317120295400}
   - component: {fileID: 6013997663493900614}
   - component: {fileID: 8393657359540925315}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: WitchHat2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33381,7 +33383,7 @@ GameObject:
   - component: {fileID: 4020398989776869707}
   - component: {fileID: 4731359875841138520}
   - component: {fileID: 3257988460650397906}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Envelope
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33472,7 +33474,7 @@ GameObject:
   - component: {fileID: 9014721456358867978}
   - component: {fileID: 5641349258325268551}
   - component: {fileID: 5484632476167746864}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: DeskWithDrawers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33589,7 +33591,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7003314347621620941}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33850,7 +33852,7 @@ GameObject:
   - component: {fileID: 8245173773533485537}
   - component: {fileID: 4782524305078511357}
   - component: {fileID: 3059561254590886398}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: InkwellAndFeather
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33941,7 +33943,7 @@ GameObject:
   - component: {fileID: 8864410801157772997}
   - component: {fileID: 828525139074081387}
   - component: {fileID: 4004447783571100419}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -34141,7 +34143,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 792531131100577646}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -34539,7 +34541,7 @@ Transform:
   m_LocalScale: {x: 9.9, y: 6, z: 10}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2227234942357462993}
+  m_Father: {fileID: 6937844005583937157}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &7579567187021559391
 MeshFilter:
@@ -35082,7 +35084,7 @@ GameObject:
   - component: {fileID: 8313646061600837603}
   - component: {fileID: 7890859286437316124}
   - component: {fileID: 6317252682438744793}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -35282,7 +35284,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2664781977104330076}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Side_270
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -35431,7 +35433,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4002148270130624117}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -35468,7 +35470,7 @@ GameObject:
   - component: {fileID: 1609598235234368387}
   - component: {fileID: 1637057669353329143}
   - component: {fileID: 9176485885547507776}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -35895,7 +35897,7 @@ GameObject:
   - component: {fileID: 7306390484268599403}
   - component: {fileID: 484610138235590443}
   - component: {fileID: 2423604816480405362}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -35985,7 +35987,7 @@ GameObject:
   - component: {fileID: 8317783992433868519}
   - component: {fileID: 6060633644247600439}
   - component: {fileID: 5900699430633846339}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: PaperScroll5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -36302,7 +36304,7 @@ GameObject:
   - component: {fileID: 177724132326866149}
   - component: {fileID: 4802476172151407737}
   - component: {fileID: 8226849591842259689}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: PaperScrollOpen2 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -36504,7 +36506,7 @@ GameObject:
   - component: {fileID: 5226189717768574624}
   - component: {fileID: 4262210482617628194}
   - component: {fileID: 9157772755330279577}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Feather7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -36594,7 +36596,7 @@ GameObject:
   - component: {fileID: 1520683079446040631}
   - component: {fileID: 2248544773890475720}
   - component: {fileID: 4395451082544037240}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -36796,7 +36798,7 @@ GameObject:
   - component: {fileID: 8177544933822888204}
   - component: {fileID: 2418636194096319496}
   - component: {fileID: 4945811297341082154}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: EnvelopeWaxSealed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -37110,7 +37112,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5332952871693107029}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Side_180
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -37373,7 +37375,7 @@ GameObject:
   - component: {fileID: 4498393166570130673}
   - component: {fileID: 4104546950633443677}
   - component: {fileID: 4526882406561035839}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -37802,7 +37804,7 @@ GameObject:
   - component: {fileID: 2738244691021215481}
   - component: {fileID: 4661022970763377412}
   - component: {fileID: 8752345375531576982}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Catfigurine_Collar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -37892,7 +37894,7 @@ GameObject:
   - component: {fileID: 843774099033053391}
   - component: {fileID: 1146307268199659836}
   - component: {fileID: 3633893085011985443}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: EnvelopeWaxSealed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -38321,7 +38323,7 @@ GameObject:
   - component: {fileID: 1956793924146584309}
   - component: {fileID: 1570669297829220288}
   - component: {fileID: 3519310969942527923}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Point Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -38446,7 +38448,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8831579697048841843}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -39274,7 +39276,7 @@ GameObject:
   - component: {fileID: 2828716204726799657}
   - component: {fileID: 5029990669727448259}
   - component: {fileID: 2286463701107407044}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Envelope
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -39590,7 +39592,7 @@ GameObject:
   - component: {fileID: 5055226189161090363}
   - component: {fileID: 85456979478873821}
   - component: {fileID: 8150994303454508591}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -39680,7 +39682,7 @@ GameObject:
   - component: {fileID: 2543316982010405589}
   - component: {fileID: 3994112372425394423}
   - component: {fileID: 123712027425979847}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: EnvelopeWaxSealed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -39883,7 +39885,7 @@ GameObject:
   - component: {fileID: 1720561495879235727}
   - component: {fileID: 2374335515384726921}
   - component: {fileID: 6820501194146209320}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk_Drawer (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -39971,7 +39973,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2214192382886622183}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Desk
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -40797,7 +40799,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6978911552914881022}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -41061,7 +41063,7 @@ GameObject:
   - component: {fileID: 6819161131490017192}
   - component: {fileID: 2850864919919073203}
   - component: {fileID: 916856678221319114}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ShelfUnit2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -41276,40 +41278,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.4999914, y: 3.0057428, z: 0.225}
   m_Center: {x: -1.2499957, y: 1.5028714, z: 0}
---- !u!1 &9142628561214050539
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2227234942357462993}
-  m_Layer: 6
-  m_Name: Pillar
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2227234942357462993
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9142628561214050539}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1066236123080244549}
-  - {fileID: 1060635730558081444}
-  - {fileID: 5523425632136842911}
-  m_Father: {fileID: 7954271238003705320}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &9142806865208725161
 GameObject:
   m_ObjectHideFlags: 0
@@ -41321,7 +41289,7 @@ GameObject:
   - component: {fileID: 4737914953345210}
   - component: {fileID: 4172335582208994568}
   - component: {fileID: 2590867998719139979}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Wand6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -41667,7 +41635,7 @@ GameObject:
   - component: {fileID: 2618555692011976945}
   - component: {fileID: 2786459616562090476}
   - component: {fileID: 1852898016058349530}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: PaperScroll5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -41886,6 +41854,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PaperScroll5
       objectReference: {fileID: 0}
+    - target: {fileID: 5625569111888443678, guid: 14c8c67ba5e7f3b4e9bb83cf7be34dae, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -41907,6 +41879,10 @@ PrefabInstance:
     - target: {fileID: 7262413926614039965, guid: 963edd54cf981244ca0f79a60172190c, type: 3}
       propertyPath: m_Name
       value: PaperScrollOpen4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7262413926614039965, guid: 963edd54cf981244ca0f79a60172190c, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 8035149962387760935, guid: 963edd54cf981244ca0f79a60172190c, type: 3}
       propertyPath: m_LocalScale.x
@@ -42046,6 +42022,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: DeskWithDrawers
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: a670e5b1597558a4b8de4689645b62e6, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -42160,6 +42140,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: WitchHat2
       objectReference: {fileID: 0}
+    - target: {fileID: 4042303528936450088, guid: 855bf06f2afccf1499c912a35b751f7b, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -42181,6 +42165,10 @@ PrefabInstance:
     - target: {fileID: 6288292741277823391, guid: 4975a9823cb4c1e4a9d6d04d6d254ece, type: 3}
       propertyPath: m_Name
       value: PaperScrollOpen2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6288292741277823391, guid: 4975a9823cb4c1e4a9d6d04d6d254ece, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 6633609024652208933, guid: 4975a9823cb4c1e4a9d6d04d6d254ece, type: 3}
       propertyPath: m_LocalScale.x
@@ -42315,6 +42303,10 @@ PrefabInstance:
     - target: {fileID: 5625569111888443678, guid: 14c8c67ba5e7f3b4e9bb83cf7be34dae, type: 3}
       propertyPath: m_Name
       value: PaperScroll5 (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 5625569111888443678, guid: 14c8c67ba5e7f3b4e9bb83cf7be34dae, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -42464,6 +42456,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PaperScroll5 (6)
       objectReference: {fileID: 0}
+    - target: {fileID: 5625569111888443678, guid: 14c8c67ba5e7f3b4e9bb83cf7be34dae, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -42542,6 +42538,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Hourglass
       objectReference: {fileID: 0}
+    - target: {fileID: 5588224288793954580, guid: 6c33e561f3f14e4469d3713ea5c91c20, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -42563,6 +42563,10 @@ PrefabInstance:
     - target: {fileID: 576039951332292517, guid: 53758f840de85f34f81644bf881842bb, type: 3}
       propertyPath: m_Name
       value: Staff2
+      objectReference: {fileID: 0}
+    - target: {fileID: 576039951332292517, guid: 53758f840de85f34f81644bf881842bb, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 915728139893107999, guid: 53758f840de85f34f81644bf881842bb, type: 3}
       propertyPath: m_LocalScale.x
@@ -42744,6 +42748,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Candle
       objectReference: {fileID: 0}
+    - target: {fileID: 1457563808265857201, guid: ef0bc0984298ade4ca5d32623367d866, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 2265765961771954699, guid: ef0bc0984298ade4ca5d32623367d866, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -42865,6 +42873,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SM_Bld_Floor_Feature_02
       objectReference: {fileID: 0}
+    - target: {fileID: 5721609056950694649, guid: 1eb230fa9367a9a4ab8010e1ce91b299, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 5661676719174305719, guid: 1eb230fa9367a9a4ab8010e1ce91b299, type: 3}
     m_RemovedGameObjects: []
@@ -42887,6 +42899,10 @@ PrefabInstance:
     - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_Name
       value: Desk_Drawer (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1106762383864375135, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -43014,6 +43030,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ShelfUnit2 (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 15c954d0c4da77a47b06b87cfaf40f97, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -43125,6 +43145,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PaperScroll5 (4)
       objectReference: {fileID: 0}
+    - target: {fileID: 5625569111888443678, guid: 14c8c67ba5e7f3b4e9bb83cf7be34dae, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -43146,6 +43170,10 @@ PrefabInstance:
     - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_Name
       value: Desk_Drawer (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1106762383864375135, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -43212,6 +43240,10 @@ PrefabInstance:
     - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_Name
       value: Desk_Drawer (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1106762383864375135, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -43335,6 +43367,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Goblet
       objectReference: {fileID: 0}
+    - target: {fileID: 2296940912122208893, guid: d605800eccec2a04295237d7c121a6a8, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -43396,6 +43432,10 @@ PrefabInstance:
     - target: {fileID: 4103310229248233833, guid: 46659313f83d5c3409531b209c6e0901, type: 3}
       propertyPath: m_Name
       value: Envelope
+      objectReference: {fileID: 0}
+    - target: {fileID: 4103310229248233833, guid: 46659313f83d5c3409531b209c6e0901, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -43463,6 +43503,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SM_Bld_Floor_Feature_01 (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 1948160617380317174, guid: e8856d2c52cea9e49a0290f8dda67c1d, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 2956936551712456876, guid: e8856d2c52cea9e49a0290f8dda67c1d, type: 3}
     m_RemovedGameObjects: []
@@ -43485,6 +43529,10 @@ PrefabInstance:
     - target: {fileID: 153697116346820673, guid: 888885351fc85dd43bd886d04665657d, type: 3}
       propertyPath: m_Name
       value: ShelfUnit2 (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 153697116346820673, guid: 888885351fc85dd43bd886d04665657d, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 678313024576746235, guid: 888885351fc85dd43bd886d04665657d, type: 3}
       propertyPath: m_LocalScale.x
@@ -43653,6 +43701,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PaperScroll5 (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 5625569111888443678, guid: 14c8c67ba5e7f3b4e9bb83cf7be34dae, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -43735,6 +43787,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ShelfUnit2
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 15c954d0c4da77a47b06b87cfaf40f97, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -43789,6 +43845,10 @@ PrefabInstance:
     - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_Name
       value: Desk_Drawer (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1106762383864375135, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -43856,6 +43916,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Desk_Drawer (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 1106762383864375135, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.62300014
@@ -43922,6 +43986,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Desk_Drawer
       objectReference: {fileID: 0}
+    - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 1106762383864375135, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.62300014
@@ -43987,6 +44055,10 @@ PrefabInstance:
     - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_Name
       value: Desk_Drawer (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1106762383864375135, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -44110,6 +44182,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PaperScroll5 (8)
       objectReference: {fileID: 0}
+    - target: {fileID: 5625569111888443678, guid: 14c8c67ba5e7f3b4e9bb83cf7be34dae, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -44216,6 +44292,10 @@ PrefabInstance:
     - target: {fileID: 7469357619539174865, guid: 446352eb5d21a1b41b5c1b7296d913f4, type: 3}
       propertyPath: m_Name
       value: Catfigurine_Collar
+      objectReference: {fileID: 0}
+    - target: {fileID: 7469357619539174865, guid: 446352eb5d21a1b41b5c1b7296d913f4, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 7846305752456970091, guid: 446352eb5d21a1b41b5c1b7296d913f4, type: 3}
       propertyPath: m_LocalScale.x
@@ -44355,6 +44435,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: DeskWithDrawers (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: a670e5b1597558a4b8de4689645b62e6, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -44412,6 +44496,10 @@ PrefabInstance:
     - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_Name
       value: Desk_Drawer
+      objectReference: {fileID: 0}
+    - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1106762383864375135, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -44539,6 +44627,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Crystal4
       objectReference: {fileID: 0}
+    - target: {fileID: 8970007579505009731, guid: 05575637526520749873c6e77c588aa6, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -44590,6 +44682,10 @@ PrefabInstance:
     - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_Name
       value: Desk_Drawer
+      objectReference: {fileID: 0}
+    - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1106762383864375135, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -44713,6 +44809,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PaperScroll5 (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 5625569111888443678, guid: 14c8c67ba5e7f3b4e9bb83cf7be34dae, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -44734,6 +44834,10 @@ PrefabInstance:
     - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_Name
       value: Desk_Drawer (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1106762383864375135, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -44857,6 +44961,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Candlestick
       objectReference: {fileID: 0}
+    - target: {fileID: 2289844257883737015, guid: b0f5dc0af671ee94e98d8964331dc4dd, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -44881,6 +44989,10 @@ PrefabInstance:
     - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_Name
       value: Desk_Drawer (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1106762383864375135, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -45020,6 +45132,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Desk_Drawer (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 1106762383864375135, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.62300014
@@ -45146,6 +45262,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: DeskWithDrawers (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: a670e5b1597558a4b8de4689645b62e6, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -45260,6 +45380,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ClocheBase1
       objectReference: {fileID: 0}
+    - target: {fileID: 646726707865733221, guid: 9c3354b41b61786489d5307cfd4be317, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -45317,6 +45441,10 @@ PrefabInstance:
     - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_Name
       value: Desk_Drawer (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1106762383864375135, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -45440,6 +45568,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: InkwellAndFeather (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 1977124368713913504, guid: 58f1020c25704ee45969703025c25eea, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5135902045362626892, guid: 58f1020c25704ee45969703025c25eea, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -45461,6 +45597,10 @@ PrefabInstance:
     - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_Name
       value: Desk_Drawer (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1106762383864375135, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -45528,6 +45668,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Desk_Drawer (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 1106762383864375135, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.62300014
@@ -45593,6 +45737,10 @@ PrefabInstance:
     - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_Name
       value: Desk_Drawer (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1106762383864375135, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -45700,6 +45848,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SM_Bld_Floor_Feature_01
       objectReference: {fileID: 0}
+    - target: {fileID: 1948160617380317174, guid: e8856d2c52cea9e49a0290f8dda67c1d, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 2956936551712456876, guid: e8856d2c52cea9e49a0290f8dda67c1d, type: 3}
     m_RemovedGameObjects: []
@@ -45722,6 +45874,10 @@ PrefabInstance:
     - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_Name
       value: Desk_Drawer (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1106762383864375135, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -45917,6 +46073,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PaperScroll5 (9)
       objectReference: {fileID: 0}
+    - target: {fileID: 5625569111888443678, guid: 14c8c67ba5e7f3b4e9bb83cf7be34dae, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -45938,6 +46098,10 @@ PrefabInstance:
     - target: {fileID: 2629149185531765914, guid: a423d1fa80a61f54faac8dba5d189f03, type: 3}
       propertyPath: m_Name
       value: EnvelopeWaxSealed
+      objectReference: {fileID: 0}
+    - target: {fileID: 2629149185531765914, guid: a423d1fa80a61f54faac8dba5d189f03, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 3402273726951112224, guid: a423d1fa80a61f54faac8dba5d189f03, type: 3}
       propertyPath: m_LocalPosition.x
@@ -46057,6 +46221,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PaperScroll5 (7)
       objectReference: {fileID: 0}
+    - target: {fileID: 5625569111888443678, guid: 14c8c67ba5e7f3b4e9bb83cf7be34dae, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -46135,6 +46303,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: InkwellAndFeather
       objectReference: {fileID: 0}
+    - target: {fileID: 1977124368713913504, guid: 58f1020c25704ee45969703025c25eea, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5135902045362626892, guid: 58f1020c25704ee45969703025c25eea, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -46156,6 +46332,10 @@ PrefabInstance:
     - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_Name
       value: Desk_Drawer (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 294935381394095589, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1106762383864375135, guid: 5ce0d206c58f30b4b802f99d865c1a1e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -46278,6 +46458,10 @@ PrefabInstance:
     - target: {fileID: 3065286199392128783, guid: c37b9d2217567b84ebe9bb46ae6fadc0, type: 3}
       propertyPath: m_Name
       value: Wand6
+      objectReference: {fileID: 0}
+    - target: {fileID: 3065286199392128783, guid: c37b9d2217567b84ebe9bb46ae6fadc0, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -46441,6 +46625,10 @@ PrefabInstance:
     - target: {fileID: 5625569111888443678, guid: 14c8c67ba5e7f3b4e9bb83cf7be34dae, type: 3}
       propertyPath: m_Name
       value: PaperScroll5 (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 5625569111888443678, guid: 14c8c67ba5e7f3b4e9bb83cf7be34dae, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -13,9 +13,10 @@ namespace Study3D.FpsGame.Weapon.Cards
         public Vector3 Normal;    // 맞은 면의 법선 (부딪힌 게 아니면 진행 방향)
         public Vector3 Forward;   // 발동 순간 발사체의 진행 방향
         public Collider Target;   // 맞은 대상 (부딪힌 게 아니면 null)
-        public bool IsEnemy;      // 맞은 대상이 적인지
+        public ContactKind Contact; // 맞은 대상의 종류: 적 / 맵(World) / 구조물(Prop). 부딪힌 게 아니면 Ignore
+        public bool IsEnemy;      // 맞은 대상이 적인지 (적이 아닌 충돌 = 맵 또는 구조물)
 
-        public CardContext(Projectile projectile, Vector3 point, Vector3 normal, Collider target, bool isEnemy)
+        public CardContext(Projectile projectile, Vector3 point, Vector3 normal, Collider target, ContactKind contact)
         {
             Projectile = projectile;
             Slot = -1;
@@ -24,7 +25,8 @@ namespace Study3D.FpsGame.Weapon.Cards
             Normal = normal;
             Forward = projectile.transform.forward;
             Target = target;
-            IsEnemy = isEnemy;
+            Contact = contact;
+            IsEnemy = contact == ContactKind.Enemy;
         }
 
         public CardMultiplier Multiplier => Projectile.Multiplier;

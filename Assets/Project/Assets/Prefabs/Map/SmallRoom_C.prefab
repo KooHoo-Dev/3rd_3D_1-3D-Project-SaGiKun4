@@ -495,7 +495,7 @@ GameObject:
   - component: {fileID: 2137705289219974251}
   - component: {fileID: 7595122379570314061}
   - component: {fileID: 8366745062709181757}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Candlestick (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2420,7 +2420,7 @@ GameObject:
   - component: {fileID: 8511914921013856214}
   - component: {fileID: 7118738488778714317}
   - component: {fileID: 4721107457975728469}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Crystal3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4698,7 +4698,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5100207298007073978}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5926,7 +5926,7 @@ GameObject:
   - component: {fileID: 6849522801909666179}
   - component: {fileID: 5270040764748820125}
   - component: {fileID: 1623475807226622462}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Candlestick (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8600,7 +8600,7 @@ GameObject:
   - component: {fileID: 6210250452004293613}
   - component: {fileID: 7619833020653763628}
   - component: {fileID: 1491850926965394523}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Point Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8727,7 +8727,7 @@ GameObject:
   - component: {fileID: 8762069920738401299}
   - component: {fileID: 5344453295557276688}
   - component: {fileID: 8715465045883226497}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Point Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9416,7 +9416,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4412649957513604900}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Objects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12889,7 +12889,7 @@ GameObject:
   - component: {fileID: 4858626682912303874}
   - component: {fileID: 4129048479998482361}
   - component: {fileID: 5408230284872823151}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Crystal3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14919,7 +14919,7 @@ GameObject:
   m_Component:
   - component: {fileID: 580595485077415330}
   - component: {fileID: 8009051616364378520}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20405,7 +20405,7 @@ GameObject:
   - component: {fileID: 2373168273242059907}
   - component: {fileID: 7335395773768919973}
   - component: {fileID: 3399261687639447284}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Point Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20781,7 +20781,7 @@ GameObject:
   - component: {fileID: 3615507408600245865}
   - component: {fileID: 4330240192055691666}
   - component: {fileID: 3931938809419706169}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Candlestick (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -22250,7 +22250,7 @@ GameObject:
   - component: {fileID: 1882208962036876028}
   - component: {fileID: 3449569129500735189}
   - component: {fileID: 6092856251314403951}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Crystal3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -23626,7 +23626,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6586134637281972667, guid: 765a09d71bcc2d049a8308446b69ee23, type: 3}
       propertyPath: m_Layer
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -23964,7 +23964,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4048988961925220251, guid: 05a78e3d2b5b88541bc0aa21e32295fc, type: 3}
       propertyPath: m_Layer
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -24094,7 +24094,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6586134637281972667, guid: 765a09d71bcc2d049a8308446b69ee23, type: 3}
       propertyPath: m_Layer
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -24176,7 +24176,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6586134637281972667, guid: 765a09d71bcc2d049a8308446b69ee23, type: 3}
       propertyPath: m_Layer
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -24258,7 +24258,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6586134637281972667, guid: 765a09d71bcc2d049a8308446b69ee23, type: 3}
       propertyPath: m_Layer
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -24510,7 +24510,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6586134637281972667, guid: 765a09d71bcc2d049a8308446b69ee23, type: 3}
       propertyPath: m_Layer
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -24720,7 +24720,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6586134637281972667, guid: 765a09d71bcc2d049a8308446b69ee23, type: 3}
       propertyPath: m_Layer
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -577,7 +577,7 @@ GameObject:
   - component: {fileID: 7612432383356067406}
   - component: {fileID: 603452288454096693}
   - component: {fileID: 2036414382156779152}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Desk
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -809,7 +809,7 @@ GameObject:
   - component: {fileID: 6751819369877697686}
   - component: {fileID: 7927215970230443305}
   - component: {fileID: 8982650987157626812}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: CauldronFillPlane2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1013,7 +1013,7 @@ GameObject:
   - component: {fileID: 727199340335244091}
   - component: {fileID: 2665744675722248680}
   - component: {fileID: 2075714434182913694}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage_Ring
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1499,7 +1499,7 @@ GameObject:
   - component: {fileID: 8557274976399565461}
   - component: {fileID: 3484744523646363391}
   - component: {fileID: 1311889096175155959}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage_Ring
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1590,7 +1590,7 @@ GameObject:
   - component: {fileID: 4129101202295646828}
   - component: {fileID: 2596155783332156954}
   - component: {fileID: 2932656807996872144}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage_Door
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1702,7 +1702,7 @@ GameObject:
   - component: {fileID: 1962773392948804361}
   - component: {fileID: 4312819073717308490}
   - component: {fileID: 1719356669693887817}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdPerch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2493,7 +2493,7 @@ GameObject:
   - component: {fileID: 2488957980530979582}
   - component: {fileID: 6929864855829950515}
   - component: {fileID: 4925434697779984879}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage_Door
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2854,7 +2854,7 @@ GameObject:
   - component: {fileID: 1430395008041484087}
   - component: {fileID: 8584035099161729950}
   - component: {fileID: 1460352276999264080}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: SM_Bld_Base_Pillar_01 (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3075,7 +3075,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8494675182778804076}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdcageWithPerch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3223,7 +3223,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1566541418450602705}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Birdcage (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3314,7 +3314,7 @@ GameObject:
   - component: {fileID: 3334423579562296142}
   - component: {fileID: 308121665513708794}
   - component: {fileID: 6622449527785364809}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: WallShelf
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3427,7 +3427,7 @@ GameObject:
   - component: {fileID: 5827636489788960998}
   - component: {fileID: 5783525440014563255}
   - component: {fileID: 8203598482575610565}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BookClosed9
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3537,7 +3537,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6212998494159769089}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Birdcage (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4140,7 +4140,7 @@ GameObject:
   - component: {fileID: 7450892814071268382}
   - component: {fileID: 9031855138300466889}
   - component: {fileID: 5170095651776132176}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Candlestick (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4253,7 +4253,7 @@ GameObject:
   - component: {fileID: 1883298668284733883}
   - component: {fileID: 5923208974379877760}
   - component: {fileID: 931871536712696366}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BookOpen6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4454,7 +4454,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8009335956000556189}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Birdcage (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4943,7 +4943,7 @@ GameObject:
   - component: {fileID: 3895913843564731667}
   - component: {fileID: 6959211000394173715}
   - component: {fileID: 3842734227070171799}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage_Door
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5034,7 +5034,7 @@ GameObject:
   - component: {fileID: 1818129665401310939}
   - component: {fileID: 4072647253239712809}
   - component: {fileID: 711266221726673835}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5146,7 +5146,7 @@ GameObject:
   - component: {fileID: 7773223118281773847}
   - component: {fileID: 12738965917075777}
   - component: {fileID: 5298860807691335001}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage_Ring
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5462,7 +5462,7 @@ GameObject:
   - component: {fileID: 8908838942583792904}
   - component: {fileID: 3087944090954866168}
   - component: {fileID: 3207227419358223141}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage_Door
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5779,7 +5779,7 @@ GameObject:
   - component: {fileID: 6857240159959896931}
   - component: {fileID: 7408636655408442887}
   - component: {fileID: 8187691549254701401}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: CauldronLarge
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6582,7 +6582,7 @@ GameObject:
   - component: {fileID: 1958603931012923060}
   - component: {fileID: 7388786043696479267}
   - component: {fileID: 3962311470204354044}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage_Ring
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7235,7 +7235,7 @@ GameObject:
   - component: {fileID: 3903732750166960886}
   - component: {fileID: 948450725970516366}
   - component: {fileID: 5823487588770425581}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage_Door
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7664,7 +7664,7 @@ GameObject:
   - component: {fileID: 614353664650484977}
   - component: {fileID: 1552229968588142957}
   - component: {fileID: 1416582471554413776}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: ChestLarge_Lid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7981,7 +7981,7 @@ GameObject:
   - component: {fileID: 5324085037406491749}
   - component: {fileID: 853555374429348881}
   - component: {fileID: 2026962781893507577}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage_Ring
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8093,7 +8093,7 @@ GameObject:
   - component: {fileID: 7000451002766374361}
   - component: {fileID: 8884312702561235228}
   - component: {fileID: 2349921234807563614}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage_Door
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8184,7 +8184,7 @@ GameObject:
   - component: {fileID: 3768179564789436867}
   - component: {fileID: 8730691517769604637}
   - component: {fileID: 6167735828824242660}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: WallShelf (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8409,7 +8409,7 @@ GameObject:
   - component: {fileID: 126554780926172907}
   - component: {fileID: 4657182997578800510}
   - component: {fileID: 9009381960317437029}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Feather1 (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8500,7 +8500,7 @@ GameObject:
   - component: {fileID: 7473298153232368069}
   - component: {fileID: 2097263509028090673}
   - component: {fileID: 7820676432857582138}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: SM_Bld_Base_Pillar_01 (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8724,7 +8724,7 @@ GameObject:
   - component: {fileID: 3160867867719934746}
   - component: {fileID: 927503453518234567}
   - component: {fileID: 6068758859034695145}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage_Door
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9492,7 +9492,7 @@ GameObject:
   - component: {fileID: 4984040708582721176}
   - component: {fileID: 253627082819271517}
   - component: {fileID: 7138651770441863946}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: ChestLarge_Lid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11192,7 +11192,7 @@ GameObject:
   - component: {fileID: 6339803307448347505}
   - component: {fileID: 1053899201073379839}
   - component: {fileID: 6807091309923600487}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Point Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11545,7 +11545,7 @@ GameObject:
   - component: {fileID: 5158356509154686861}
   - component: {fileID: 4934116466459094850}
   - component: {fileID: 5304281756957708230}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage_Ring
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12493,7 +12493,7 @@ GameObject:
   - component: {fileID: 2034337505705172730}
   - component: {fileID: 1539919993647956252}
   - component: {fileID: 1116003618049251500}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12606,7 +12606,7 @@ GameObject:
   - component: {fileID: 1467745533793738672}
   - component: {fileID: 2969643086758490799}
   - component: {fileID: 4924519877806086841}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12719,7 +12719,7 @@ GameObject:
   - component: {fileID: 1913071493886471450}
   - component: {fileID: 513037037842890915}
   - component: {fileID: 822924236964380201}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12829,7 +12829,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7841241875747388427}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Birdcage (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13090,7 +13090,7 @@ GameObject:
   - component: {fileID: 5590071738812679720}
   - component: {fileID: 4436166802154122938}
   - component: {fileID: 3810854693794230421}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage_Door
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13970,7 +13970,7 @@ GameObject:
   - component: {fileID: 8591092821263442551}
   - component: {fileID: 4102387105257529517}
   - component: {fileID: 471924425563505983}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Point Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14584,7 +14584,7 @@ GameObject:
   - component: {fileID: 1754229476962288884}
   - component: {fileID: 1108621311649033542}
   - component: {fileID: 6158041174049276780}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: SM_Bld_Base_Pillar_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14944,7 +14944,7 @@ GameObject:
   - component: {fileID: 5184065425849586963}
   - component: {fileID: 4270658945991095734}
   - component: {fileID: 632198215861671483}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Bone1 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15281,7 +15281,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5011904784189909126}
   - component: {fileID: 8056046818934863389}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Props
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15450,7 +15450,7 @@ GameObject:
   - component: {fileID: 6254260142905962276}
   - component: {fileID: 1961253191684371008}
   - component: {fileID: 1722023808501047695}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: CauldronStand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15563,7 +15563,7 @@ GameObject:
   - component: {fileID: 7884498563013336303}
   - component: {fileID: 2253868794233451264}
   - component: {fileID: 4196960081712156188}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15787,7 +15787,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5419503063401206431}
   - component: {fileID: 1140448287639341258}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: ChestLarge
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15845,7 +15845,7 @@ GameObject:
   - component: {fileID: 5476361029976868167}
   - component: {fileID: 3476771007411363869}
   - component: {fileID: 1635932677361020366}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Bone1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16410,7 +16410,7 @@ GameObject:
   - component: {fileID: 4937229701100279372}
   - component: {fileID: 7275453739649978151}
   - component: {fileID: 3719601023758385365}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Candlestick
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17199,7 +17199,7 @@ GameObject:
   - component: {fileID: 6653743809085919857}
   - component: {fileID: 9007807418896861660}
   - component: {fileID: 1548034767140943119}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17651,7 +17651,7 @@ GameObject:
   - component: {fileID: 7833524719368032118}
   - component: {fileID: 434249150770712096}
   - component: {fileID: 3434759456565780652}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17877,7 +17877,7 @@ GameObject:
   - component: {fileID: 6557408284652662532}
   - component: {fileID: 9062192019649458812}
   - component: {fileID: 1392613047132097559}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage_Ring
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17990,7 +17990,7 @@ GameObject:
   - component: {fileID: 8834962992624157918}
   - component: {fileID: 6344549139448966249}
   - component: {fileID: 7852941440035353365}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BoneStick
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18102,7 +18102,7 @@ GameObject:
   - component: {fileID: 8852465668779168491}
   - component: {fileID: 4621951592417826370}
   - component: {fileID: 1971380369963328138}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage_Ring
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18192,7 +18192,7 @@ GameObject:
   - component: {fileID: 1554441628192087748}
   - component: {fileID: 4007436912528295060}
   - component: {fileID: 4143028007505779152}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: LanternLit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18282,7 +18282,7 @@ GameObject:
   - component: {fileID: 7627583445919618677}
   - component: {fileID: 95804869911988118}
   - component: {fileID: 4308043444283298882}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: ChestLarge
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18370,7 +18370,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7910522553256956018}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Objects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18760,7 +18760,7 @@ GameObject:
   - component: {fileID: 2897224192372966398}
   - component: {fileID: 8572120971656220546}
   - component: {fileID: 5736329192916022268}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: SM_Bld_Base_Pillar_01 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18870,7 +18870,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6218624930386836800}
   - component: {fileID: 5289002949515778936}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: ChestLarge (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19457,7 +19457,7 @@ GameObject:
   - component: {fileID: 760800543911740031}
   - component: {fileID: 8812536498075104873}
   - component: {fileID: 8318741825921653869}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BookOpen5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19569,7 +19569,7 @@ GameObject:
   - component: {fileID: 8602146881298304656}
   - component: {fileID: 9081353593495489919}
   - component: {fileID: 2030058089362250632}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Point Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19807,7 +19807,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4534192842157672381}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Birdcage (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20633,7 +20633,7 @@ GameObject:
   - component: {fileID: 8673582388369853950}
   - component: {fileID: 520705636091458414}
   - component: {fileID: 7574836583667263517}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: EnvelopeWaxSealed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20837,7 +20837,7 @@ GameObject:
   - component: {fileID: 425613925791566061}
   - component: {fileID: 7444498716429193956}
   - component: {fileID: 113929099930756964}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Bookstand2WithBook
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -21176,7 +21176,7 @@ GameObject:
   - component: {fileID: 5491293587865014765}
   - component: {fileID: 2640353921649533095}
   - component: {fileID: 4249753227632879096}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Crystal3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -21625,7 +21625,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4225845419167529943}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -22108,7 +22108,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4878106090372873996}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Pillar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -22708,7 +22708,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 236906597658244497}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Birdcage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -22745,7 +22745,7 @@ GameObject:
   - component: {fileID: 7738715598267125183}
   - component: {fileID: 7382530157970654462}
   - component: {fileID: 2098604461328758282}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Crystal3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -22858,7 +22858,7 @@ GameObject:
   - component: {fileID: 6956391436902455388}
   - component: {fileID: 5489202004690335096}
   - component: {fileID: 6151569419968581636}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Feather1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -22948,7 +22948,7 @@ GameObject:
   - component: {fileID: 2478928564929953760}
   - component: {fileID: 6887238652237880124}
   - component: {fileID: 8100381584198565680}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Feather1 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -23038,7 +23038,7 @@ GameObject:
   - component: {fileID: 5263570012317027105}
   - component: {fileID: 4256711248695713959}
   - component: {fileID: 8601842502193522919}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: LanternLitRing
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -23807,7 +23807,7 @@ GameObject:
   - component: {fileID: 3991218601038014132}
   - component: {fileID: 6662374121358758502}
   - component: {fileID: 5592847021589727688}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: CauldronCampfire
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24033,7 +24033,7 @@ GameObject:
   - component: {fileID: 2993432665409025621}
   - component: {fileID: 4089380177952682014}
   - component: {fileID: 389741186071924397}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: SM_Bld_Base_Pillar_01 (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24367,7 +24367,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5453031915264752098}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Birdcage (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24630,7 +24630,7 @@ GameObject:
   - component: {fileID: 6993368574935538290}
   - component: {fileID: 8554667973691437195}
   - component: {fileID: 942594366681296352}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: BirdCage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24742,7 +24742,7 @@ GameObject:
   - component: {fileID: 7264415848763767520}
   - component: {fileID: 677185264928328413}
   - component: {fileID: 8936531075829356016}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Point Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24868,7 +24868,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8108637241357569544}
   - component: {fileID: 3104773965646611903}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: CauldronLargeCampfire
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24925,7 +24925,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1065764870530660293}
   - component: {fileID: 5313877385742880762}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Lantern_Lit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -25208,7 +25208,7 @@ GameObject:
   - component: {fileID: 5728270732356510003}
   - component: {fileID: 7875116856658139906}
   - component: {fileID: 3257553566197134041}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: ChestLarge
   m_TagString: Untagged
   m_Icon: {fileID: 0}

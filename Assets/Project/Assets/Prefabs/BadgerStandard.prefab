@@ -1336,6 +1336,7 @@ MonoBehaviour:
     Damage: 1
   projectilePoolKey: Projectile
   projectilePoolExpandSize: 32
+  maxProjectiles: 500
 --- !u!1 &1799002981115417447
 GameObject:
   m_ObjectHideFlags: 0
@@ -4258,10 +4259,6 @@ MonoBehaviour:
   - {fileID: 6633295084608861195}
   animator: {fileID: 1727535670904916759}
   viewModelAnimator: {fileID: 131156695774196241}
-  groundCheckDistance: 0.1
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 0
 --- !u!114 &7759711297833411199
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4302,6 +4299,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 056f48c29e994da7810046bf2baa0356, type: 2}
   - {fileID: 11400000, guid: 0252a14a8cef4b69b714cf2e832ea0c6, type: 2}
   - {fileID: 11400000, guid: ed13c5f7a9d04cd9acb15cf0ce26b281, type: 2}
+  - {fileID: 11400000, guid: 1ff4ffc00d057344badc4f5b7faacd0d, type: 2}
+  - {fileID: 11400000, guid: 7173be9b565a31e49bbf0dc6e044312b, type: 2}
+  - {fileID: 11400000, guid: 5769efd75e170ea4c88d8a705de5d5a0, type: 2}
   handLimit: 6
   maxHp: 100
   weapon: {fileID: 680842510505307335}
@@ -5217,6 +5217,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Study3D.FpsGame.UI.SpineOrbitCamera
   player: {fileID: 1325387254121880519}
   spinePivot: {fileID: 5474486757508913048}
+  collisionRadius: 0.15
 --- !u!1 &5768519812535202167
 GameObject:
   m_ObjectHideFlags: 0

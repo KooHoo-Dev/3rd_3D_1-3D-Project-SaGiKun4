@@ -20,9 +20,10 @@ namespace Study3D.FpsGame
     // - 부딪힌 뒤 "어떻게" 반응할지(튕김, 관통 등)는 여기서 정하지 않고 발사체에 실린 카드가 처리합니다.
     public enum ContactKind
     {
-        Ignore, // 처리 대상이 아님
+        Ignore, // 처리 대상이 아님 (부딪히지 않은 발사, 진행 중 시점도 이 값)
         Enemy,  // 적: 피해를 주는 대상
-        World,  // 벽, 바닥 등 환경
+        World,  // 맵의 벽, 바닥 등 (관통으로 뚫을 수 없음. 뚫으면 맵 밖으로 나가므로)
+        Prop,   // 맵 안의 구조물 (상자, 기둥 등. 관통으로 뚫을 수 있음)
     }
 
     public class CombatEvent : InGameEvent

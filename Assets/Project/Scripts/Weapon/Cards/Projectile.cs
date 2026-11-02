@@ -266,7 +266,7 @@ namespace Study3D.FpsGame.Weapon.Cards
                 lastHitTarget = null;
             }
 
-            CardContext context = new CardContext(this, hit.point, hit.normal, hit.collider, isEnemy);
+            CardContext context = new CardContext(this, hit.point, hit.normal, hit.collider, contactKind);
             keepFlying = false;
             responseClaimed = false;
             RunTiming(CardTiming.Hit, context, 0);
@@ -307,7 +307,7 @@ namespace Study3D.FpsGame.Weapon.Cards
 
         // 부딪힌 게 아닐 때(발사, 진행 중, 수명 만료)의 정보 입니다.
         private CardContext FlightContext() =>
-            new CardContext(this, transform.position, transform.forward, null, false);
+            new CardContext(this, transform.position, transform.forward, null, ContactKind.Ignore);
 
         public int GetCount(int slot) => counts[slot];
         public void SetCount(int slot, int value) => counts[slot] = value;

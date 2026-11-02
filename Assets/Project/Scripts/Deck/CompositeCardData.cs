@@ -71,6 +71,26 @@ namespace Study3D.FpsGame.Deck
             return Create(newName, newParts.ToArray());
         }
 
+        // 대상 변경은 발동 순서상 첫 반응 카드에만 적용합니다. (재료가 조합 카드면 그 안까지 찾아 내려갑니다)
+        // 반응 카드가 없으면 null 입니다. 나머지 재료는 그대로 공유하고, 조합 카드 자체는 새로 만듭니다.
+        public override CardData WithTarget(ContactTarget newTarget, string newName)
+        {
+            for (int i = 0; i < parts.Count; i++)
+            {
+                if (IsUsablePart(parts[i]) == false)
+                    continue;
+
+                CardData changed = parts[i].WithTarget(newTarget, parts[i].CardName);
+                if (changed == null)
+                    continue;
+
+                List<CardData> newParts = new List<CardData>(parts);
+                newParts[i] = changed;
+                return Create(newName, newParts.ToArray());
+            }
+            return null;
+        }
+
         // 비어 있거나 자기 자신인 재료는 건너뜁니다.
         private bool IsUsablePart(CardData part)
         {

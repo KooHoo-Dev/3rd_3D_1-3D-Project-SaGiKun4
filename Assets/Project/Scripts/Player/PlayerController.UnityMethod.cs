@@ -58,7 +58,8 @@ namespace Study3D.FpsGame.Player
                 MenuScreen.Instance.Toggle(MenuMode.Upgrade);
 
             // 인벤토리 열기/닫기. (강화 화면이 열려 있으면 인벤토리로 바뀝니다)
-            if (SimpleInput.GetKeyDown(Key.Tab))
+            // Tab은 남은 덱 목록(DrawPileView)이 누르고 있는 동안 보여 주는 데 씁니다.
+            if (SimpleInput.GetKeyDown(Key.I))
                 MenuScreen.Instance.Toggle(MenuMode.Inventory);
         }
 
