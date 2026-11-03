@@ -16,8 +16,8 @@ TagManager:
   - World
   - Prop
   - Enemy
-  - 
-  - Head
+  - ViewModel
+  - GuestModel
   - LocalBody
   - 
   - 
