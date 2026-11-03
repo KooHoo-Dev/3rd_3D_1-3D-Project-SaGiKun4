@@ -38,7 +38,7 @@ namespace Study3D.FpsGame.Deck
         }
         
         public override string Description {
-            get { return $"카드가 {TargetText(Target)} 충돌시, \n튕겨져 나옵니다"; }
+            get { return $"카드가 {ValueText(BounceCount)}회 한해 \n{TargetText(Target)} 충돌시 튕겨져 나옵니다"; }
         }
 
         // 실제 대상(Target)으로 적습니다. (나중에 대상이 바뀌어도 설명이 따라가도록)
