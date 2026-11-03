@@ -8,6 +8,7 @@ namespace Study3D.FpsGame.UI
     {
         Upgrade,
         Inventory,
+        Cauldron, // 가마솥 선택 화면 (강화 / 요리). 화면 전체를 덮습니다.
     }
 
     // MenuView
@@ -19,29 +20,42 @@ namespace Study3D.FpsGame.UI
         [SerializeField] private CardListView cardList;
         [SerializeField] private UpgradePanel upgradePanel;
         [SerializeField] private InventoryPanel inventoryPanel;
+        [SerializeField] private CauldronPanel cauldronPanel;
         [SerializeField] private Button cancelButton;
 
         public CardListView CardList => cardList;
         public UpgradePanel UpgradePanel => upgradePanel;
         public InventoryPanel InventoryPanel => inventoryPanel;
+        public CauldronPanel CauldronPanel => cauldronPanel;
         public Button CancelButton => cancelButton;
 
 #if UNITY_EDITOR
         // UpgradeUIBuilder가 조립 직후 호출합니다.
-        public void EditorSetup(CardListView list, UpgradePanel upgrade, InventoryPanel inventory, Button cancel)
+        public void EditorSetup(CardListView list, UpgradePanel upgrade, InventoryPanel inventory, CauldronPanel cauldron, Button cancel)
         {
             cardList = list;
             upgradePanel = upgrade;
             inventoryPanel = inventory;
+            cauldronPanel = cauldron;
             cancelButton = cancel;
+        }
+
+        // 이미 조립된 화면에 가마솥 패널만 붙일 때 UpgradeUIBuilder가 호출합니다.
+        public void EditorSetCauldronPanel(CauldronPanel cauldron)
+        {
+            cauldronPanel = cauldron;
         }
 #endif
 
-        // mode의 왼쪽 패널만 켭니다. (화면 루트를 켜기 전에 불러야 꺼질 패널의 OnEnable이 돌지 않습니다)
+        // mode의 패널만 켭니다. (화면 루트를 켜기 전에 불러야 꺼질 패널의 OnEnable이 돌지 않습니다)
         public void ShowPanel(MenuMode mode)
         {
             upgradePanel.gameObject.SetActive(mode == MenuMode.Upgrade);
             inventoryPanel.gameObject.SetActive(mode == MenuMode.Inventory);
+            if (cauldronPanel != null)
+            {
+                cauldronPanel.gameObject.SetActive(mode == MenuMode.Cauldron);
+            }
         }
     }
 }

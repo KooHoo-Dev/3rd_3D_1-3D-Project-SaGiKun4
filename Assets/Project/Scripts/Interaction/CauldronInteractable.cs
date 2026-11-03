@@ -4,7 +4,7 @@ using Study3D.FpsGame.UI;
 namespace Study3D.FpsGame.Interaction
 {
     // CauldronInteractable
-    // : 강화창. F키를 누르면 카드 강화 화면(MenuScreen의 강화 모드)을 엽니다.
+    // : 가마솥. F키를 누르면 선택 화면(MenuScreen의 가마솥 모드: 카드 강화 / 요리)을 엽니다.
     // - 열 수 있는지(재장전 중 등)는 MenuScreen.Open이 판단합니다.
     public class CauldronInteractable : Interactable
     {
@@ -15,7 +15,7 @@ namespace Study3D.FpsGame.Interaction
 
         public override void Interact(LocalPlayer player)
         {
-            MenuScreen.Instance.Open(MenuMode.Upgrade);
+            MenuScreen.Instance.Open(MenuMode.Cauldron);
         }
     }
 }

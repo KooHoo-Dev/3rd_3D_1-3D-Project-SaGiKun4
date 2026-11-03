@@ -7,7 +7,7 @@ namespace Study3D.FpsGame.UI
     // PlayerHpView
     // : 화면 왼쪽 아래 캐릭터 초상화 옆에 초록색 체력 바와 "현재 / 최대" 숫자를 보여줍니다. (실드는 없음)
     // - 바의 길이는 이미지 채우기 대신 오른쪽 앵커를 체력 비율만큼 옮겨서 줄입니다. (스프라이트가 없어도 됨)
-    // - 피격(OnTakenDamage) 때만 갱신합니다. 회복은 아직 이벤트가 없어서 반영되지 않습니다. (LocalPlayer.TakeHeal이 비어 있음)
+    // - 피격(OnTakenDamage)과 회복(OnHealed) 때만 갱신합니다.
     public class PlayerHpView : MonoBehaviour
     {
         [Tooltip("초록색 체력 바 (왼쪽 끝 기준으로 늘어나고 줄어듭니다)")]
@@ -26,6 +26,7 @@ namespace Study3D.FpsGame.UI
             }
 
             subscribedPlayer.OnTakenDamage += OnTakenDamage;
+            subscribedPlayer.OnHealed += OnHealed;
             ShowHp(subscribedPlayer.Health.HP, subscribedPlayer.Health.MaxHP);
         }
 
@@ -34,10 +35,16 @@ namespace Study3D.FpsGame.UI
             if (subscribedPlayer != null)
             {
                 subscribedPlayer.OnTakenDamage -= OnTakenDamage;
+                subscribedPlayer.OnHealed -= OnHealed;
             }
         }
 
         private void OnTakenDamage(int damage, int hp, int maxHp)
+        {
+            ShowHp(hp, maxHp);
+        }
+
+        private void OnHealed(int healed, int hp, int maxHp)
         {
             ShowHp(hp, maxHp);
         }

@@ -155,7 +155,26 @@ namespace Study3D.FpsGame.Player
 
         public void TakeHeal(HealEvent healEvent)
         {
+            Heal(healEvent.Heal);
+        }
 
+        // amount만큼 회복합니다. (최대 HP를 넘지 않음) 죽었거나 실제로 오른 양이 없으면 알리지 않습니다.
+        public void Heal(int amount)
+        {
+            if (IsDead || amount <= 0)
+                return;
+
+            int before = Health.HP;
+            Health.Heal(amount);
+            int healed = Health.HP - before;
+            if (healed <= 0)
+                return;
+
+            Debug.Log($"[LocalPlayer] 회복 +{healed} (HP {Health.HP}/{Health.MaxHP})");
+            if (OnHealed != null)
+            {
+                OnHealed.Invoke(healed, Health.HP, Health.MaxHP);
+            }
         }
 
         #endregion

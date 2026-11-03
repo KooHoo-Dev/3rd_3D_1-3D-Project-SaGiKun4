@@ -38,6 +38,16 @@ namespace Study3D.FpsGame.UI
             menuView.CancelButton.onClick.AddListener(Close);
             // 강화에 성공하면 화면을 닫습니다.
             menuView.UpgradePanel.OnEnhanced += Close;
+            if (menuView.CauldronPanel != null)
+            {
+                // 가마솥에서 강화를 고르면 강화창으로 바꾸고, 요리를 마치면 닫습니다.
+                menuView.CauldronPanel.OnUpgradeChosen += OpenUpgrade;
+                menuView.CauldronPanel.OnCooked += Close;
+            }
+            else
+            {
+                Debug.LogWarning("[MenuScreen] 가마솥 패널(CauldronPanel)이 연결되어 있지 않습니다. UpgradeUIBuilder의 '5. Add Cauldron Panel'을 실행하세요.");
+            }
             // 화면은 열 때까지 꺼 둡니다. (씬에 켜진 채로 저장되어 있어도 가려지지 않게)
             menuView.gameObject.SetActive(false);
         }
@@ -77,6 +87,16 @@ namespace Study3D.FpsGame.UI
 
             menuView.CancelButton.onClick.RemoveListener(Close);
             menuView.UpgradePanel.OnEnhanced -= Close;
+            if (menuView.CauldronPanel != null)
+            {
+                menuView.CauldronPanel.OnUpgradeChosen -= OpenUpgrade;
+                menuView.CauldronPanel.OnCooked -= Close;
+            }
+        }
+
+        private void OpenUpgrade()
+        {
+            Open(MenuMode.Upgrade);
         }
 
         // 같은 모드가 열려 있으면 닫고, 아니면 그 모드로 엽니다.

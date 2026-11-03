@@ -13,7 +13,8 @@ using UnityEngine.UI;
 /// 메뉴 화면(강화, 이후 인벤토리/옵션)을 코드만으로 조립하는 에디터 툴.
 /// 빈 GameObject에 붙인 뒤 컴포넌트 우클릭 메뉴에서 실행한다.
 /// 화면을 절반으로 나눠 오른쪽엔 모든 모드가 같이 쓰는 카드 목록(CardListView), 왼쪽엔 모드별 패널을 둔다.
-/// 지금 왼쪽 패널은 강화(UpgradePanel: 선택 칸 2개 + 강화 + 비우기) 하나. 오른쪽 상단엔 취소 버튼.
+/// 지금 왼쪽 패널은 강화(UpgradePanel: 선택 칸 2개 + 강화 + 비우기)와 인벤토리. 오른쪽 상단엔 취소 버튼.
+/// 가마솥 선택 화면(CauldronPanel: 왼쪽 강화 / 오른쪽 요리)은 화면 전체를 덮는다. 이미 만든 화면에는 '5. Add Cauldron Panel'로 붙인다.
 /// 조립하면서 루트에 MenuView를 붙이고 목록/패널/버튼 참조를 넣어 준다. (런타임에 이름으로 찾지 않음)
 /// 카드 보상 화면(CardDropScreen: 화면 3등분, 칸마다 가운데 카드 한 장)은 따로 '3. Build Card Drop UI'로 조립한다.
 /// </summary>
@@ -100,6 +101,9 @@ public class UpgradeUIBuilder : MonoBehaviour
     private static readonly Color ClearColor = new Color(0.45f, 0.45f, 0.48f);
     private static readonly Color TagColor = new Color(0.85f, 0.65f, 0.25f);
     private static readonly Color TagTextColor = new Color(0.12f, 0.10f, 0.06f);
+    private static readonly Color CauldronBackgroundColor = new Color(0.04f, 0.04f, 0.04f, 0.96f);
+    private static readonly Color CookColor = new Color(0.80f, 0.45f, 0.20f);
+    private static readonly Vector2 CauldronOptionSize = new Vector2(560f, 560f);
 
     // 강화 태그 (카드 기준 크기 200x280 안의 단위. 카드 스케일을 같이 받음)
     // 태그는 카드 영역을 덮지 않도록 카드 오른쪽 가장자리 바깥에 딱 붙인다
@@ -130,10 +134,12 @@ public class UpgradeUIBuilder : MonoBehaviour
         UpgradePanel upgradePanel = CreateUpgradePanel(canvas, cardList, slotCardSize);
         InventoryPanel inventoryPanel = CreateInventoryPanel(canvas, cardList, slotCardSize);
         CreateDivider(canvas);
+        // 가마솥 패널은 화면 전체를 덮으므로 목록, 구분선보다 뒤(위)에, 취소 버튼보다는 앞(아래)에 둔다
+        CauldronPanel cauldronPanel = CreateCauldronPanel(canvas);
         Button cancel = CreateCancelButton(canvas);
 
         MenuView view = canvas.gameObject.AddComponent<MenuView>();
-        view.EditorSetup(cardList, upgradePanel, inventoryPanel, cancel);
+        view.EditorSetup(cardList, upgradePanel, inventoryPanel, cauldronPanel, cancel);
         EditorUtility.SetDirty(view);
 
         AttachSlotHighlight(canvas, upgradePanel);
@@ -226,6 +232,46 @@ public class UpgradeUIBuilder : MonoBehaviour
         EditorUtility.SetDirty(this);
         EditorSceneManager.MarkSceneDirty(gameObject.scene);
         Debug.Log($"[UpgradeUIBuilder] '{removed}' 삭제 완료");
+    }
+
+    // 이미 조립된 메뉴 화면에 가마솥 선택 패널만 붙인다. (화면을 다시 조립하지 않아도 되게)
+    [ContextMenu("5. Add Cauldron Panel")]
+    private void AddCauldronPanel()
+    {
+        // 이 빌더로 만든 화면이 없으면(예전에 만든 화면 등) 씬의 MenuView에 붙인다
+        MenuView view = null;
+        if (builtRoot != null)
+        {
+            view = builtRoot.GetComponent<MenuView>();
+        }
+        if (view == null)
+        {
+            view = FindAnyObjectByType<MenuView>(FindObjectsInactive.Include);
+        }
+        if (view == null)
+        {
+            Debug.LogWarning("[UpgradeUIBuilder] 씬에 메뉴 화면(MenuView)이 없습니다. 먼저 '1. Build UI'를 실행하세요.");
+            return;
+        }
+        if (view.CauldronPanel != null)
+        {
+            Debug.LogWarning("[UpgradeUIBuilder] 가마솥 패널이 이미 있습니다.");
+            return;
+        }
+
+        CauldronPanel cauldronPanel = CreateCauldronPanel(view.transform);
+        // 취소 버튼보다 아래에 그려지도록 취소 버튼 자리로 옮긴다 (취소 버튼은 한 칸 뒤로 밀림)
+        if (view.CancelButton != null)
+        {
+            cauldronPanel.transform.SetSiblingIndex(view.CancelButton.transform.GetSiblingIndex());
+        }
+        Undo.RegisterCreatedObjectUndo(cauldronPanel.gameObject, "Add Cauldron Panel");
+
+        Undo.RecordObject(view, "Add Cauldron Panel");
+        view.EditorSetCauldronPanel(cauldronPanel);
+        EditorUtility.SetDirty(view);
+        EditorSceneManager.MarkSceneDirty(view.gameObject.scene);
+        Debug.Log("[UpgradeUIBuilder] 가마솥 패널 추가 완료");
     }
 
     #region Size
@@ -824,6 +870,61 @@ public class UpgradeUIBuilder : MonoBehaviour
         colors.selectedColor = new Color(0.7f, 0.7f, 0.7f);
         colors.pressedColor = new Color(0.5f, 0.5f, 0.5f);
         button.colors = colors;
+        return button;
+    }
+    #endregion
+
+    #region Cauldron (가마솥 선택 화면: 화면 2등분, 왼쪽 강화 / 오른쪽 요리)
+    private CauldronPanel CreateCauldronPanel(Transform canvas)
+    {
+        RectTransform area = NewUI("CauldronPanel", canvas).GetComponent<RectTransform>();
+        Stretch(area, 0f);
+
+        // 뒤쪽 카드 목록을 가리고 클릭도 막는 배경
+        GameObject bg = NewPanel("Background", area, Vector2.zero);
+        Image bgImage = bg.GetComponent<Image>();
+        bgImage.color = CauldronBackgroundColor;
+        bgImage.raycastTarget = true;
+        Stretch(bg.GetComponent<RectTransform>(), 0f);
+
+        TMP_Text title = NewText("TitleText", area, "가마솥", 48f, TextAlignmentOptions.Center);
+        Place(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -AreaPadding * 2f), new Vector2(referenceResolution.x - AreaPadding * 2f, 70f));
+
+        TMP_Text upgradeDesc;
+        Button upgrade = CreateCauldronOption("UpgradeOption", area, 0f, 0.5f, "카드를 강화한다", "강화창을 엽니다", ConfirmColor, out upgradeDesc);
+        TMP_Text cookDesc;
+        Button cook = CreateCauldronOption("CookOption", area, 0.5f, 1f, "요리를 준비한다", "최대 체력의 30% 회복\n200 골드", CookColor, out cookDesc);
+
+        CauldronPanel panel = area.gameObject.AddComponent<CauldronPanel>();
+        panel.EditorSetup(upgrade, cook, cookDesc);
+        EditorUtility.SetDirty(panel);
+        return panel;
+    }
+
+    // 화면 가로 minX ~ maxX 칸 가운데에 큰 버튼 하나 (위쪽 제목 + 아래쪽 설명)
+    private Button CreateCauldronOption(string name, RectTransform area, float minX, float maxX, string titleText, string descText, Color color, out TMP_Text desc)
+    {
+        RectTransform column = CreateHalfArea(name, area, minX, maxX);
+
+        Button button = NewButton("Button", column, titleText, out TMP_Text label);
+        button.GetComponent<Image>().color = color;
+        ColorBlock colors = button.colors;
+        colors.disabledColor = new Color(0.35f, 0.35f, 0.35f, 0.6f);
+        button.colors = colors;
+        Place((RectTransform)button.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -30f), CauldronOptionSize);
+
+        // 제목은 버튼 위쪽 절반, 설명은 아래쪽 절반
+        label.fontSize = 44f;
+        label.rectTransform.anchorMin = new Vector2(0f, 0.5f);
+        label.rectTransform.offsetMin = new Vector2(AreaPadding, 0f);
+        label.rectTransform.offsetMax = new Vector2(-AreaPadding, -AreaPadding);
+
+        desc = NewText("DescText", button.transform, descText, 30f, TextAlignmentOptions.Top);
+        desc.color = EmptyTextColor;
+        Stretch(desc.rectTransform, 0f);
+        desc.rectTransform.anchorMax = new Vector2(1f, 0.5f);
+        desc.rectTransform.offsetMin = new Vector2(AreaPadding, AreaPadding);
+        desc.rectTransform.offsetMax = new Vector2(-AreaPadding, -16f);
         return button;
     }
     #endregion
