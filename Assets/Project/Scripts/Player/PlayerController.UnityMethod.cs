@@ -41,6 +41,14 @@ namespace Study3D.FpsGame.Player
 
             UpdateMovement(canAct);
             if (canAct == false)
+            {
+                // 메뉴가 닫히면 그 다음 두 프레임 동안 커서를 다시 잠급니다.
+                relockFramesLeft = 2;
+                return;
+            }
+
+            // 커서가 풀려 있던 프레임의 클릭은 잠그는 데만 쓰고 발사하지 않습니다.
+            if (UpdateCursorLock())
                 return;
 
             UpdateCameraRotation();
@@ -67,6 +75,30 @@ namespace Study3D.FpsGame.Player
         private void LateUpdate()
         {
             ApplySpineBend();
+        }
+
+        // 에디터는 Esc를 누른 프레임이 끝날 때 커서 잠금을 강제로 풉니다.
+        // 그래서 Esc로 메뉴를 닫으면 Close에서 잠근 것이 바로 풀리므로, 메뉴에서 돌아온 직후 프레임에 한 번 더 잠급니다.
+        // 그래도 풀려 있으면(게임 중 Esc, 다른 창 클릭 등) 화면을 클릭할 때 다시 잠급니다.
+        // 클릭으로 잠갔으면 true를 돌려줍니다.
+        private bool UpdateCursorLock()
+        {
+            if (relockFramesLeft > 0)
+            {
+                relockFramesLeft--;
+                LockCursor();
+                return false;
+            }
+
+            if (Cursor.lockState == CursorLockMode.Locked)
+                return false;
+
+            if (SimpleInput.GetMouseButtonDown(SimpleInput.MouseButton.Left))
+            {
+                LockCursor();
+                return true;
+            }
+            return false;
         }
 
         private void LockCursor()

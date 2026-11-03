@@ -49,6 +49,7 @@ namespace Study3D.FpsGame.Player
         private float verticalLookAngle;
         private Quaternion initialCameraRotation;
         private float moveX, moveZ; // 키를 따라 -1 ~ 1 사이를 부드럽게 움직이는 로직에 사용되는 축 값
+        private int relockFramesLeft; // 메뉴에서 돌아온 뒤 커서를 다시 잠글 남은 프레임 수
 
         // 마우스로 누적한 상하 시점 각도 (+ = 아래, - = 위). 카메라 스크립트가 읽어갑니다.
         public float VerticalLookAngle => verticalLookAngle;

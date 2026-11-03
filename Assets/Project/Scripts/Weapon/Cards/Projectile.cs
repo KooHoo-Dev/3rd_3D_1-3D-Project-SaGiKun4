@@ -20,6 +20,8 @@ namespace Study3D.FpsGame.Weapon.Cards
         [SerializeField] private float lifeTime = 120.0f; // 최대 수명. 관통, 반사, 유도 조합으로 끝없이 날아다니는 발사체를 끝내는 안전장치 (사라질 때 소멸 시점 카드가 발동)
         [SerializeField] private float surfaceOffset = 0.01f; // 통과, 반사 후 같은 면에 바로 다시 맞지 않도록 띄우는 거리
         [SerializeField] private float maxPowerScale = 2.0f;  // 화력 전환으로 커질 수 있는 최대 크기 배율
+        [Tooltip("카드 꼬리선 (FX_UI_BarLine 하위 Line의 TrailRenderer). 풀에서 다시 꺼낼 때 이전 궤적을 지웁니다")]
+        [SerializeField] private TrailRenderer trail;
 
         private const float MaxPower = 1e8f;     // 화력 배율 상한 (float 넘침 방지)
         private const float MaxDamage = 2e9f;    // 피해 상한 (int 넘침 방지)
@@ -94,10 +96,21 @@ namespace Study3D.FpsGame.Weapon.Cards
             {
                 pooled.transform.SetPositionAndRotation(position, rotation);
                 pooled.gameObject.SetActive(true);
+                pooled.ClearTrail();
                 return pooled;
             }
 
             return Instantiate(prefab, position, rotation);
+        }
+
+        // 꼬리선은 월드 좌표로 지나온 점을 기억하므로, 풀에서 다시 꺼내면 이전 발사의 궤적이 새 위치까지 이어져 꺾여 보입니다.
+        // 새 위치로 옮기고 켠 직후에 지나온 점을 모두 지웁니다.
+        private void ClearTrail()
+        {
+            if (trail != null)
+            {
+                trail.Clear();
+            }
         }
 
         // Spawn 직후 Weapon이 호출합니다. 실을 카드를 받고 발사 시점 카드를 실행합니다.

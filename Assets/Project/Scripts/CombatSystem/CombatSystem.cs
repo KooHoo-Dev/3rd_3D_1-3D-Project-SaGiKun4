@@ -32,6 +32,13 @@ namespace Study3D.FpsGame
         private readonly Dictionary<Collider, IDamageable> monsterDic = new Dictionary<Collider, IDamageable>();
         private readonly Queue<InGameEvent> inGameEventQueue = new Queue<InGameEvent>();
 
+        // 지금 살아 있는(등록된) 몬스터 목록. 죽는 순간 등록이 풀리므로 죽은 적은 들어 있지 않습니다. (미니맵이 적 위치를 그릴 때 사용)
+        // - foreach로 돌면 새 메모리를 만들지 않습니다. 돌고 있는 동안 등록/해제하면 안 됩니다.
+        public Dictionary<Collider, IDamageable>.ValueCollection Monsters
+        {
+            get { return monsterDic.Values; }
+        }
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
