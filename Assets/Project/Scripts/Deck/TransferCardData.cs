@@ -45,5 +45,9 @@ namespace Study3D.FpsGame.Deck
             context.Count--;
             context.Projectile.Steer(context, next.bounds.center - context.Center);
         }
+
+        public override string Description {
+            get { return $"카드가 {TimingText(Timing)}, \n 인접한 적 {ValueText(TransferCount)}명에게 동일한 피해를 줍니다."; }
+        }
     }
 }
