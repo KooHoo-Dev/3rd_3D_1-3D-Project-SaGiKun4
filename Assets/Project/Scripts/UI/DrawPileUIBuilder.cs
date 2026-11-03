@@ -23,6 +23,8 @@ public class DrawPileUIBuilder : MonoBehaviour
 
     [Header("배치")]
     [SerializeField] private Vector2 referenceResolution = new Vector2(1920f, 1080f);
+    [Tooltip("화면 세로 가운데에서 탭 위쪽 끝(= 목록 위쪽 끝)까지의 높이. 탭은 항상 이 높이에 있고 목록은 여기서 아래로 늘어남")]
+    [SerializeField] private float topOffset = 320f;
     [SerializeField] private float padding = 12f;      // 목록 배경 안쪽 여백
     [SerializeField] private float titleSize = 26f;
     [SerializeField] private Vector2 cellSize = new Vector2(200f, 36f);
@@ -33,6 +35,14 @@ public class DrawPileUIBuilder : MonoBehaviour
     [Header("색상")]
     [SerializeField] private Color panelColor = new Color(0f, 0f, 0f, 0.6f);         // 목록 배경
     [SerializeField] private Color cellColor = new Color(0.25f, 0.30f, 0.38f, 0.9f); // 칸 하나
+
+    [Header("인덱스 탭 (평소에 화면 왼쪽 끝, Tab을 누르면 목록 오른쪽 끝에 붙음)")]
+    [Tooltip("탭 이미지. 비우면 Tab Color 단색 네모")]
+    [SerializeField] private Sprite indexSprite;
+    [SerializeField] private Vector2 tabSize = new Vector2(72f, 88f);
+    [SerializeField] private Color tabColor = new Color(0.25f, 0.30f, 0.38f, 0.9f);
+    [SerializeField] private float countTextSize = 36f;  // 이미지 위의 남은 장수
+    [SerializeField] private float tabLabelSize = 14f;   // 아래쪽 작은 "Tab" 글자
 
     // 조립한 결과 (지우기에 사용)
     [SerializeField, HideInInspector] private GameObject builtRoot;
@@ -48,7 +58,7 @@ public class DrawPileUIBuilder : MonoBehaviour
 
         Undo.RecordObject(this, "Build Draw Pile UI");
         Transform canvas = CreateCanvas();
-        CreatePanel(canvas);
+        CreateDrawPile(canvas);
         builtRoot = canvas.gameObject;
 
         Undo.RegisterCreatedObjectUndo(canvas.gameObject, "Build Draw Pile UI");
@@ -99,33 +109,65 @@ public class DrawPileUIBuilder : MonoBehaviour
     }
     #endregion
 
-    #region Panel
-    // 목록 배경(화면 왼쪽 끝 가운데에 딱 붙음) → 제목(남은 장수) → 칸 목록(칸 템플릿)
-    // 배경은 피벗이 왼쪽 가운데라, 칸이 늘어나면 위아래로 똑같이 커지고 열이 늘어나면 오른쪽으로 넓어진다.
-    private void CreatePanel(Transform canvas)
+    #region Root
+    // 루트(화면 왼쪽 끝에 딱 붙음, 가로 레이아웃) → [목록 패널, 인덱스 탭]
+    // 목록이 꺼져 있으면 레이아웃에서 빠지므로 탭이 화면 왼쪽 끝으로 오고, 켜지면 탭이 목록 오른쪽 위 모서리로 밀려난다.
+    // 루트는 피벗이 왼쪽 위라 위쪽 끝 높이(topOffset)가 고정된다. 그래서 탭은 열고 닫아도 같은 높이에 있고,
+    // 목록은 탭 높이에서 아래로 늘어나서 탭을 잡고 옆에서 끌어낸 것처럼 보인다. (열이 늘어나면 오른쪽으로 넓어짐)
+    private void CreateDrawPile(Transform canvas)
     {
-        RectTransform panel = NewUI("DrawPilePanel", canvas).GetComponent<RectTransform>();
-        Place(panel, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), Vector2.zero, Vector2.zero);
-        Image background = panel.gameObject.AddComponent<Image>();
-        background.color = panelColor;
-        background.raycastTarget = false;
-        AddPanelLayout(panel.gameObject);
+        RectTransform root = NewUI("DrawPileRoot", canvas).GetComponent<RectTransform>();
+        Place(root, new Vector2(0f, 0.5f), new Vector2(0f, 1f), new Vector2(0f, topOffset), Vector2.zero);
+        AddRootLayout(root.gameObject);
 
-        TMP_Text title = NewText("Title", panel, "남은 덱 0장", titleSize);
-        title.fontStyle = FontStyles.Bold;
-
-        GridLayoutGroup grid = CreateGrid(panel);
-        DrawPileRow rowTemplate = CreateCellTemplate(grid.transform);
+        RectTransform panel = CreatePanel(root, out TMP_Text title, out GridLayoutGroup grid, out DrawPileRow rowTemplate);
+        RectTransform beat = CreateIndexTab(root, out TMP_Text countText);
 
         DrawPileView view = canvas.gameObject.AddComponent<DrawPileView>();
-        view.EditorSetup(panel.gameObject, title, grid, rowTemplate, rowsPerColumn);
+        view.EditorSetup(root, panel, title, grid, rowTemplate, rowsPerColumn, beat, countText);
         EditorUtility.SetDirty(view);
 
         // 플레이 전에는 꺼 둔다. (DrawPileView가 Tab 입력에 맞춰 켜고 끈다)
         panel.gameObject.SetActive(false);
     }
 
-    // 제목과 칸 목록을 위에서부터 쌓고, 배경 크기를 내용에 맞추는 레이아웃
+    // 목록과 탭을 왼쪽부터 가로로 붙이고(위쪽 끝 맞춤), 루트 크기를 내용에 맞추는 레이아웃
+    private void AddRootLayout(GameObject target)
+    {
+        HorizontalLayoutGroup layout = target.AddComponent<HorizontalLayoutGroup>();
+        layout.spacing = 0f;
+        layout.childAlignment = TextAnchor.UpperLeft;
+        layout.childControlWidth = true;
+        layout.childControlHeight = true;
+        layout.childForceExpandWidth = false;
+        layout.childForceExpandHeight = false;
+
+        ContentSizeFitter fitter = target.AddComponent<ContentSizeFitter>();
+        fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+    }
+    #endregion
+
+    #region Panel
+    // 목록 배경 → 제목(남은 장수) → 칸 목록(칸 템플릿)
+    // 크기는 루트의 가로 레이아웃이 내용(선호 크기)에 맞춰 준다. (ContentSizeFitter를 겹쳐 붙이지 않음)
+    private RectTransform CreatePanel(Transform root, out TMP_Text title, out GridLayoutGroup grid, out DrawPileRow rowTemplate)
+    {
+        RectTransform panel = NewUI("DrawPilePanel", root).GetComponent<RectTransform>();
+        Image background = panel.gameObject.AddComponent<Image>();
+        background.color = panelColor;
+        background.raycastTarget = false;
+        AddPanelLayout(panel.gameObject);
+
+        title = NewText("Title", panel, "남은 덱 0장", titleSize);
+        title.fontStyle = FontStyles.Bold;
+
+        grid = CreateGrid(panel);
+        rowTemplate = CreateCellTemplate(grid.transform);
+        return panel;
+    }
+
+    // 제목과 칸 목록을 위에서부터 쌓는 레이아웃
     private void AddPanelLayout(GameObject target)
     {
         int layoutPadding = Mathf.RoundToInt(padding);
@@ -137,10 +179,6 @@ public class DrawPileUIBuilder : MonoBehaviour
         layout.childControlHeight = true;
         layout.childForceExpandWidth = false;
         layout.childForceExpandHeight = false;
-
-        ContentSizeFitter fitter = target.AddComponent<ContentSizeFitter>();
-        fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
-        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
     }
 
     // 칸 목록: 위에서부터 세로로 채우고, 행 수(constraintCount)를 넘으면 오른쪽 옆 열로 넘어간다.
@@ -175,6 +213,53 @@ public class DrawPileUIBuilder : MonoBehaviour
         row.EditorSetup(nameText);
         cell.SetActive(false);
         return row;
+    }
+    #endregion
+
+    #region Index Tab
+    // 인덱스 탭(크기는 레이아웃이 tabSize로 맞춤) → 비트(크기 연출용) → 이미지 + 남은 장수 + "Tab"
+    // 레이아웃은 탭 위치/크기만 정하고 scale은 건드리지 않으므로, 비트는 안쪽 자식의 scale만 바꾼다.
+    // 비트의 피벗은 왼쪽 가운데라, 뛸 때 붙어 있는 쪽(왼쪽)은 그대로 두고 오른쪽으로 커진다.
+    private RectTransform CreateIndexTab(Transform root, out TMP_Text countText)
+    {
+        GameObject tab = NewUI("IndexTab", root);
+        LayoutElement element = tab.AddComponent<LayoutElement>();
+        element.minWidth = tabSize.x;
+        element.preferredWidth = tabSize.x;
+        element.minHeight = tabSize.y;
+        element.preferredHeight = tabSize.y;
+
+        RectTransform beat = NewUI("Beat", tab.transform).GetComponent<RectTransform>();
+        Stretch(beat, 0f);
+        beat.pivot = new Vector2(0f, 0.5f);
+
+        GameObject imageObject = NewUI("Image", beat);
+        Image image = imageObject.AddComponent<Image>();
+        image.sprite = indexSprite;
+        image.color = TabImageColor();
+        image.raycastTarget = false;
+        Stretch(image.rectTransform, 0f);
+
+        countText = NewText("Count", beat, "0", countTextSize);
+        Stretch(countText.rectTransform, 0f);
+        countText.alignment = TextAlignmentOptions.Center;
+        countText.fontStyle = FontStyles.Bold;
+
+        TMP_Text label = NewText("TabLabel", beat, "Tab", tabLabelSize);
+        Place(label.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 4f), new Vector2(tabSize.x, tabLabelSize + 4f));
+        label.alignment = TextAlignmentOptions.Bottom;
+        label.color = new Color(1f, 1f, 1f, 0.7f);
+
+        return beat;
+    }
+
+    // 이미지를 넣었으면 원래 색 그대로(흰색), 없으면 단색 네모
+    private Color TabImageColor()
+    {
+        if (indexSprite != null)
+            return Color.white;
+
+        return tabColor;
     }
     #endregion
 
