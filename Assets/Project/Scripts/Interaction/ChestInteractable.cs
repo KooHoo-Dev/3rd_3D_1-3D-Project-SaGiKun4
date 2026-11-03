@@ -71,7 +71,7 @@ namespace Study3D.FpsGame.Interaction
             float time = 0f;
             while (time < shakeDuration)
             {
-                time += Time.deltaTime;
+                time += GameTime.DeltaTime;
                 float fade = 1f - Mathf.Clamp01(time / shakeDuration); // 갈수록 약해짐
                 float angle = Mathf.Sin(time * shakeFrequency * Mathf.PI * 2f) * shakeAngle * fade;
                 transform.localRotation = startRotation * Quaternion.Euler(0f, 0f, angle);
@@ -93,7 +93,7 @@ namespace Study3D.FpsGame.Interaction
             float time = 0f;
             while (time < openDuration)
             {
-                time += Time.deltaTime;
+                time += GameTime.DeltaTime;
                 float t = Mathf.Clamp01(time / openDuration);
                 t = 1f - (1f - t) * (1f - t); // 처음엔 빠르고 끝에서 느려짐
                 lid.localRotation = Quaternion.Slerp(closedRotation, openedRotation, t);

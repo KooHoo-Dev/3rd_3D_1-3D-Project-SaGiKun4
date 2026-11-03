@@ -95,7 +95,11 @@ namespace Study3D.FpsGame.Weapon.Cards
         // 그건 이미 처리했거나 이번 프레임에 새로 생긴 발사체라서 이번 프레임에 다시 처리하지 않습니다.
         private void Update()
         {
-            float deltaTime = Time.deltaTime;
+            // 게임이 멈춰 있으면 이동도 충돌 검사도 하지 않습니다.
+            if (GameTime.IsPaused)
+                return;
+
+            float deltaTime = GameTime.DeltaTime;
             for (int i = projectiles.Count - 1; i >= 0; i--)
             {
                 // 한 발사체가 처리 중에 여러 발사체를 빼면 목록이 i보다 짧아질 수 있습니다.

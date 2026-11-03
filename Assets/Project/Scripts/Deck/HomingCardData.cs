@@ -68,7 +68,7 @@ namespace Study3D.FpsGame.Deck
         // 제한된 회전 속도로 target을 향해 진행 방향을 틉니다.
         private void TurnToward(CardContext context, Projectile projectile, Collider target)
         {
-            float maxRadians = TurnSpeed * context.Multiplier.Effect * Mathf.Deg2Rad * Time.deltaTime;
+            float maxRadians = TurnSpeed * context.Multiplier.Effect * Mathf.Deg2Rad * GameTime.DeltaTime;
             Vector3 direction = Vector3.RotateTowards(context.Forward, target.bounds.center - context.Center, maxRadians, 0f);
             projectile.Steer(context, direction);
         }

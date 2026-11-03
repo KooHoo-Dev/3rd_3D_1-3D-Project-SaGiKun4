@@ -77,6 +77,10 @@ namespace Study3D.FpsGame.Enemy
             mainCollider.enabled = true;
             needsStart = true;
             Register();
+
+            // 정지 중에 풀에서 꺼낸 적도 멈춘 채로 시작합니다.
+            GameTime.PausedChanged += ApplyGamePause;
+            ApplyGamePause(GameTime.IsPaused);
         }
 
         // 씬에 처음부터 있던 적은 OnEnable 때 CombatSystem이 아직 없을 수 있어서 한 번 더 시도합니다.
@@ -87,13 +91,17 @@ namespace Study3D.FpsGame.Enemy
 
         private void Update()
         {
+            // 게임이 멈춰 있으면 상태도 진행하지 않습니다. (애니메이터는 ApplyGamePause 가 멈춤)
+            if (GameTime.IsPaused)
+                return;
+
             if (needsStart)
             {
                 needsStart = false;
                 StartFirstState();
             }
 
-            stateMachine.Tick(Time.deltaTime);
+            stateMachine.Tick(GameTime.DeltaTime);
         }
 
         // 등장 지점을 받았으면 등장 상태로, 아니면 대기 상태로 시작합니다.
@@ -113,6 +121,7 @@ namespace Study3D.FpsGame.Enemy
         {
             hasEntrance = false;
             Unregister();
+            GameTime.PausedChanged -= ApplyGamePause;
         }
 
         #endregion

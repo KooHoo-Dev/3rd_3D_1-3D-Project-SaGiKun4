@@ -84,7 +84,7 @@ namespace Study3D.FpsGame.Weapon
         private void Update()
         {
             // 다음 발사 가능 시간을 체크하는 변수는 계속 더해 줍니다.
-            CurrentFireRate += Time.deltaTime;
+            CurrentFireRate += GameTime.DeltaTime;
         }
 
         // 발사 가능한 상태인지 체크합니다.

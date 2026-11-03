@@ -22,6 +22,9 @@ namespace Study3D.FpsGame.Player
             // Awake/OnEnable 순서가 보장되지 않아 OnEnable에서는 아직 null일 수 있습니다.
             // 모든 Awake가 끝난 뒤인 Start에서 구독합니다.
             Player.LocalPlayer.OnRequestedReload += PlayReloadAnimation;
+
+            GameTime.PausedChanged += ApplyGamePause;
+            ApplyGamePause(GameTime.IsPaused);
         }
 
         private void OnDestroy()
@@ -29,6 +32,8 @@ namespace Study3D.FpsGame.Player
             // 종료나 씬 전환 때 LocalPlayer가 먼저 파괴됐으면 이미 null이라 해제할 대상이 없습니다.
             if (Player.LocalPlayer != null) 
                 Player.LocalPlayer.OnRequestedReload -= PlayReloadAnimation;
+
+            GameTime.PausedChanged -= ApplyGamePause;
         }
         
         private void Update()

@@ -41,12 +41,13 @@ namespace Study3D.FpsGame.UI
                 ReturnToPool();
                 return;
             }
-            currentDuration -= Time.deltaTime;
+            // 게임 시간을 쓰므로 메뉴 등으로 게임이 멈추면 숫자도 멈춘 채로 남습니다.
+            currentDuration -= GameTime.DeltaTime;
             
             // worldPosition 점을 이동시키면서 위로 상승하는 효과를 줄겁니다.
-            // 월드 포지션을 기반으로 (riseSpeed * Time.deltaTime) 썼기 때문에
+            // 월드 포지션을 기반으로 (riseSpeed * GameTime.DeltaTime) 썼기 때문에
             // 실제로 움직이는 거리는 월드 기준 초당 riseSpeed 만큼 입니다. 
-            worldPosition += Vector3.up * (riseSpeed * Time.deltaTime);
+            worldPosition += Vector3.up * (riseSpeed * GameTime.DeltaTime);
             
             // worldPosition을 screen좌표계로 바꿔줍니다.
             // Camera.WorldToScreenPoint(Vector3 position) 함수를 활용합니다.
@@ -56,8 +57,9 @@ namespace Study3D.FpsGame.UI
             text.enabled = (screenPoint.z > 0);
 
             // 스크린 좌표계로 전환된 값을 캔버스(UI) 좌표로 전환합니다.
+            // 캔버스는 UI 전용 카메라(UICamera)로 그려지므로, 여기에는 메인 카메라가 아니라 캔버스의 카메라를 넘깁니다.
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                canvas.transform as RectTransform, screenPoint, mainCamera, 
+                canvas.transform as RectTransform, screenPoint, canvas.worldCamera,
                 out Vector2 localPoint);
 
             //나의 rectTransform의 anchor위치에 해당 좌표를 적용해 줍니다.

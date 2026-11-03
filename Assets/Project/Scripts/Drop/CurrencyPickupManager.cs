@@ -58,7 +58,7 @@ namespace Study3D.FpsGame.Drop
         // 뒤에서부터 처리합니다. 획득된 재화 자리에는 이미 처리한 맨 뒤 재화가 옮겨 오므로 이번 프레임에 다시 처리하지 않습니다.
         private void Update()
         {
-            float deltaTime = Time.deltaTime;
+            float deltaTime = GameTime.DeltaTime;
             for (int i = pickups.Count - 1; i >= 0; i--)
             {
                 if (i < pickups.Count)

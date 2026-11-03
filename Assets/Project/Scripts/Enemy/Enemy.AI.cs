@@ -152,6 +152,20 @@ namespace Study3D.FpsGame.Enemy
             if (info.shortNameHash != stateHash) animator.CrossFadeInFixedTime(stateHash, animFadeTime, 0);
         }
 
+        // 게임이 멈추면 애니메이터도 멈춥니다.
+        // 칼 판정(Attack01이 콜라이더를 켜고 끔)과 애니메이션 종료 판정이 애니메이터 시간으로 돌기 때문에, 이동만 멈추면 정지 중에도 공격이 들어갑니다.
+        private void ApplyGamePause(bool paused)
+        {
+            if (paused)
+            {
+                animator.speed = 0f;
+            }
+            else
+            {
+                animator.speed = 1f;
+            }
+        }
+
         // 해당 상태의 애니메이션을 한 번 끝까지 재생했는지 확인합니다.
         public bool IsAnimEnded(int stateHash)
         {

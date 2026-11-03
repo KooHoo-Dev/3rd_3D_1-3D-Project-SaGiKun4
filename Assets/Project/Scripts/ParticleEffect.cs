@@ -20,6 +20,18 @@ namespace Study3D.FpsGame
 
         private void Update()
         {
+            // 게임이 멈춰 있으면 파티클도 멈춥니다. (자식 파티클 포함)
+            // 이벤트 대신 매 프레임 확인하는 이유: 켜지는 순간 playOnAwake 로 재생이 시작되므로, 정지 중에 꺼낸 이펙트도 여기서 확실히 멈춥니다.
+            if (GameTime.IsPaused)
+            {
+                if (particle.isPaused == false)
+                    particle.Pause(true);
+                return;
+            }
+
+            if (particle.isPaused)
+                particle.Play(true);
+
             // 파티클이 집(ObjectPool)으로 돌아가는 시기는
             // 재생이 끝났을때 입니다.
             // 자식 파티클까지 모두 끝나야 끝난 것으로 봅니다. (여러 파티클로 이루어진 이펙트가 중간에 잘리지 않도록)

@@ -109,7 +109,7 @@ namespace Study3D.FpsGame.Map
             if (room != null && room.isActiveAndEnabled)
                 return;
 
-            roomTimer -= Time.deltaTime;
+            roomTimer -= GameTime.DeltaTime;
             if (roomTimer > 0f)
                 return;
 

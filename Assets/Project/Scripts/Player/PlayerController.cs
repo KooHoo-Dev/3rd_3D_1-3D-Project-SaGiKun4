@@ -70,7 +70,7 @@ namespace Study3D.FpsGame.Player
             // 현재 플레이어의 방향에 맞춰서 moveVector를 계산합니다.
             Vector3 moveVector = (transform.right * moveX) + (transform.forward * moveZ);
             // moveVector의 길이만큼 현재 프레임의 이동량이 조정이 됩니다.
-            controller.Move(moveVector * (speed * Time.deltaTime));
+            controller.Move(moveVector * (speed * GameTime.DeltaTime));
             UpdateMoveAnimation(isRunning);
 
             // CharacterController는 쉬운만큼 까다로워서
@@ -80,8 +80,8 @@ namespace Study3D.FpsGame.Player
             // 보통 바닥 판정이 잘 안된다거나 하는 등의 이슈가 있습니다.
             
             // 아래부터는 중력과 점프 구현
-            velocity.y += gravity * Time.deltaTime;
-            controller.Move(velocity * Time.deltaTime);
+            velocity.y += gravity * GameTime.DeltaTime;
+            controller.Move(velocity * GameTime.DeltaTime);
 
             // controller의 isGrounded는 마지막 Move 적용 기준이라
             // 마지막 수직이동 바로 뒤에 읽어야 합니다. 위의
@@ -122,8 +122,24 @@ namespace Study3D.FpsGame.Player
             if (moveZ < 0f) animSpeed = -moveAmount;
             else animSpeed = moveAmount * (isRunning ? 2f : 1f);
 
-            animator.SetFloat(Speed, animSpeed, SPEED_DAMP_TIME, Time.deltaTime);
-            if (viewModelAnimator != null) viewModelAnimator.SetFloat(Speed, animSpeed, SPEED_DAMP_TIME, Time.deltaTime);
+            animator.SetFloat(Speed, animSpeed, SPEED_DAMP_TIME, GameTime.DeltaTime);
+            if (viewModelAnimator != null) viewModelAnimator.SetFloat(Speed, animSpeed, SPEED_DAMP_TIME, GameTime.DeltaTime);
+        }
+
+        // 게임이 멈추면 몸과 뷰모델 Animator도 멈춥니다. (재장전 같은 애니메이션이 정지 중에 끝나지 않도록)
+        private void ApplyGamePause(bool paused)
+        {
+            float animatorSpeed = 1f;
+            if (paused)
+            {
+                animatorSpeed = 0f;
+            }
+
+            animator.speed = animatorSpeed;
+            if (viewModelAnimator != null)
+            {
+                viewModelAnimator.speed = animatorSpeed;
+            }
         }
 
         // 몸과 뷰모델 Animator에 같은 트리거를 겁니다. Any State 전이라 남은 트리거를 지우고 다시 겁니다.
@@ -152,7 +168,7 @@ namespace Study3D.FpsGame.Player
             // : current에서 target 목표 지점으로 maxDelta를 초과하지 않게 움직인 양을 반환합니다.
             // ex) current = -0.2f, target : -1, maxDelta = 0.1f
             // -0.3이 반환 됩니다.
-            return Mathf.MoveTowards(current, target, AXIS_SPEED * Time.deltaTime);
+            return Mathf.MoveTowards(current, target, AXIS_SPEED * GameTime.DeltaTime);
         }
         
         private void UpdateCameraRotation()

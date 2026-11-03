@@ -39,20 +39,33 @@ namespace Study3D.FpsGame.Feedback
         }
 
         // 피와 데미지 숫자는 각각 이펙트 예산 안에서만 띄웁니다. (피해는 이미 들어간 뒤라 연출만 생략됩니다)
+        // 풀이 등록돼 있지 않은 연출은 건너뜁니다. (맞을 때마다 "풀이 없다" 경고가 쌓이지 않도록 먼저 확인)
         private void OnHit(CombatEvent combatEvent)
         {
-            if (EffectBudget.TryUse(bloodPoolKey))
+            ObjectPoolManager pool = ObjectPoolManager.Instance;
+            if (pool == null)
+                return;
+
+            if (pool.HasPool(bloodPoolKey) && EffectBudget.TryUse(bloodPoolKey))
             {
-                var blood = ObjectPoolManager.Instance.GetObjectOrNull(bloodPoolKey);
+                IObjectPoolItem blood = pool.GetObjectOrNull(bloodPoolKey);
                 blood.GameObject.transform.position = combatEvent.HitPosition;
                 blood.GameObject.SetActive(true);
             }
 
+            if (pool.HasPool(damageTextPoolKey) == false)
+                return;
+
+            // 플레이어가 맞은 피해는 숫자를 띄우지 않습니다. (1인칭이라 카메라 바로 앞에 떠서 화면을 가림)
+            if (combatEvent.Receiver == (IDamageable)Player.Player.LocalPlayer)
+                return;
+
             if (EffectBudget.TryUse(damageTextPoolKey) == false)
                 return;
 
-            FloatingText dmgText =
-                ObjectPoolManager.Instance.GetObjectOrNull(damageTextPoolKey) as FloatingText;
+            FloatingText dmgText = pool.GetObjectOrNull(damageTextPoolKey) as FloatingText;
+            if (dmgText == null)
+                return;
 
             dmgText.Set(
                 combatEvent.HitPosition, 

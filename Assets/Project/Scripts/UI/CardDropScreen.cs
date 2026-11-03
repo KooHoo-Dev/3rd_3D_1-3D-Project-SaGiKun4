@@ -66,6 +66,13 @@ namespace Study3D.FpsGame.UI
             {
                 Instance = null;
             }
+
+            // 열린 채로 씬이 바뀌면 정지 요청이 남지 않게 풀어 줍니다.
+            if (IsOpen)
+            {
+                IsOpen = false;
+                GameTime.Resume();
+            }
         }
 
         // 선택지 칸을 눌렀을 때 그 번호를 알립니다.
@@ -97,6 +104,12 @@ namespace Study3D.FpsGame.UI
                 }
             }
 
+            // 화면이 막힌 동안 공격당하지 않도록 게임을 멈춥니다. (이미 열려 있으면 정지 요청을 또 쌓지 않음)
+            if (IsOpen == false)
+            {
+                GameTime.Pause();
+            }
+
             IsOpen = true;
             content.SetActive(true);
             Cursor.visible = true;
@@ -111,6 +124,7 @@ namespace Study3D.FpsGame.UI
             IsOpen = false;
             onChosen = null;
             content.SetActive(false);
+            GameTime.Resume();
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
         }

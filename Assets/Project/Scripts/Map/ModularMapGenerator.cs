@@ -10,8 +10,7 @@ namespace Study3D.FpsGame.Map
 {
     // ModularMapGenerator
     // : 크기별 방 목록에서 진행도에 맞는 방을 꺼내, 통로(Path)로 이어 붙여 큰 맵 하나를 만듭니다.
-    // - 방 순서 (6개): [S, S, S/M, M, M/L, L]
-    //   '/' 슬롯은 50:50 으로 둘 중 하나 → Small 2~3개, Medium 1~2개, Large 1~2개. 모든 크기가 최소 한 번씩 나옴
+    // - 방 순서: Small 들 → Medium 들 → Large 들 (크기별 개수는 인스펙터의 최소~최대 사이에서 랜덤)
     //   (초반 = 적응·자원 수집, 중반 = 조합 테스트·재료 수집, 후반 = 완성된 조합 시험)
     // - 연결: (시작방 →) 방 → 통로 → 방 → 통로 → ... → 방 (통로 원본이 없으면 방끼리 바로 붙임)
     //   시작방이 있으면 생성기 위치에 먼저 놓고, 그 출구(EndGateWay)에 통로 없이 첫 방을 바로 붙임. 플레이 중이면 플레이어를 시작방으로 옮김
@@ -24,32 +23,6 @@ namespace Study3D.FpsGame.Map
     public class ModularMapGenerator : MonoBehaviour
     {
         private const string ContainerName = "GeneratedRooms";
-
-        private enum RoomSize { Small, Medium, Large }
-
-        // 슬롯 하나에 올 수 있는 크기 두 개
-        private struct Slot
-        {
-            public RoomSize first;
-            public RoomSize second;
-
-            public Slot(RoomSize first, RoomSize second)
-            {
-                this.first = first;
-                this.second = second;
-            }
-        }
-
-        // 슬롯별 크기. 두 번째 값이 다르면 50:50 으로 둘 중 하나
-        private static readonly Slot[] Slots =
-        {
-            new Slot(RoomSize.Small, RoomSize.Small),
-            new Slot(RoomSize.Small, RoomSize.Small),
-            new Slot(RoomSize.Small, RoomSize.Medium),
-            new Slot(RoomSize.Medium, RoomSize.Medium),
-            new Slot(RoomSize.Medium, RoomSize.Large),
-            new Slot(RoomSize.Large, RoomSize.Large),
-        };
 
         private struct Placement
         {
@@ -74,8 +47,20 @@ namespace Study3D.FpsGame.Map
         [SerializeField] private List<GameObject> smallRooms = new List<GameObject>();
         [SerializeField] private List<GameObject> mediumRooms = new List<GameObject>();
         [SerializeField] private List<GameObject> largeRooms = new List<GameObject>();
+
+        [Header("방 개수 (크기별 최소~최대, 그 사이에서 랜덤)")]
+        [Min(1)] [SerializeField] private int smallCountMin = 2;
+        [Min(1)] [SerializeField] private int smallCountMax = 3;
+        [Min(1)] [SerializeField] private int mediumCountMin = 1;
+        [Min(1)] [SerializeField] private int mediumCountMax = 2;
+        [Min(1)] [SerializeField] private int largeCountMin = 1;
+        [Min(1)] [SerializeField] private int largeCountMax = 2;
+
+        [Header("통로")]
         [Tooltip("방과 방 사이에 끼울 통로 원본. 여러 개면 랜덤, 비워두면 방끼리 바로 붙임")]
         [SerializeField] private List<GameObject> pathTemplates = new List<GameObject>();
+
+        [Header("랜덤")]
         [Tooltip("0 이면 매번 랜덤")]
         [SerializeField] private int seed;
 
@@ -180,7 +165,7 @@ namespace Study3D.FpsGame.Map
             }
         }
 
-        // 슬롯 순서대로 크기를 정하고, 그 크기 목록에서 방을 하나씩 랜덤으로 꺼냄
+        // Small → Medium → Large 순서로, 크기마다 정한 개수만큼 그 크기 목록에서 랜덤으로 꺼냄
         private List<GameObject> PickRooms(System.Random random)
         {
             if (smallRooms.Count == 0 || mediumRooms.Count == 0 || largeRooms.Count == 0)
@@ -188,36 +173,26 @@ namespace Study3D.FpsGame.Map
                 Debug.LogError("[ModularMap] Small / Medium / Large 방 목록에 각각 하나 이상 넣어 주세요.", this);
                 return null;
             }
+            if (smallCountMax < smallCountMin || mediumCountMax < mediumCountMin || largeCountMax < largeCountMin)
+            {
+                Debug.LogError("[ModularMap] 방 개수의 최대가 최소보다 작습니다.", this);
+                return null;
+            }
 
             List<GameObject> order = new List<GameObject>();
-            foreach (Slot slot in Slots)
-            {
-                RoomSize size;
-                if (random.Next(2) == 0)
-                {
-                    size = slot.first;
-                }
-                else
-                {
-                    size = slot.second;
-                }
-
-                List<GameObject> list = GetRoomList(size);
-                order.Add(list[random.Next(list.Count)]);
-            }
+            AddRooms(order, smallRooms, smallCountMin, smallCountMax, random);
+            AddRooms(order, mediumRooms, mediumCountMin, mediumCountMax, random);
+            AddRooms(order, largeRooms, largeCountMin, largeCountMax, random);
             return order;
         }
 
-        private List<GameObject> GetRoomList(RoomSize size)
+        // min ~ max (둘 다 포함) 중 개수를 정하고, 그만큼 list 에서 랜덤으로 꺼내 order 뒤에 붙임
+        private static void AddRooms(List<GameObject> order, List<GameObject> list, int min, int max, System.Random random)
         {
-            switch (size)
+            int count = random.Next(min, max + 1);
+            for (int i = 0; i < count; i++)
             {
-                case RoomSize.Small:
-                    return smallRooms;
-                case RoomSize.Medium:
-                    return mediumRooms;
-                default:
-                    return largeRooms;
+                order.Add(list[random.Next(list.Count)]);
             }
         }
 

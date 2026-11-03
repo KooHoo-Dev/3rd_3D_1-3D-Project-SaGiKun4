@@ -81,7 +81,7 @@ namespace Study3D.FpsGame.Map
         private void Update()
         {
             float target = closed ? 1f : 0f;
-            progress = Mathf.MoveTowards(progress, target, Time.deltaTime / Mathf.Max(moveTime, 0.01f));
+            progress = Mathf.MoveTowards(progress, target, GameTime.DeltaTime / Mathf.Max(moveTime, 0.01f));
             Apply();
             if (Mathf.Approximately(progress, target))
             {

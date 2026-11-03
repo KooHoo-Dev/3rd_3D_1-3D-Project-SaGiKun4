@@ -60,6 +60,13 @@ namespace Study3D.FpsGame.UI
                 Instance = null;
             }
 
+            // 열린 채로 씬이 바뀌면 정지 요청이 남지 않게 풀어 줍니다.
+            if (IsOpen)
+            {
+                IsOpen = false;
+                GameTime.Resume();
+            }
+
             if (player != null)
             {
                 player.OnDied -= Close;
@@ -111,6 +118,7 @@ namespace Study3D.FpsGame.UI
             IsOpen = true;
             CurrentMode = mode;
             player.SetInMenu(true);
+            GameTime.Pause(); // 화면이 막힌 동안 공격당하지 않도록 게임을 멈춥니다.
             menuView.ShowPanel(mode);
             // 켜질 때 카드 목록이 덱을 다시 읽어 채웁니다.
             menuView.gameObject.SetActive(true);
@@ -127,6 +135,7 @@ namespace Study3D.FpsGame.UI
             IsOpen = false;
             menuView.gameObject.SetActive(false);
             player.SetInMenu(false);
+            GameTime.Resume();
 
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
