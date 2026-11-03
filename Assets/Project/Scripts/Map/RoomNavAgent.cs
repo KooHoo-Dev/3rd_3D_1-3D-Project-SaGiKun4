@@ -53,6 +53,10 @@ namespace Study3D.FpsGame.Map
         private float losTimer;
         private bool losVisible;
 
+        // 스킬용 시야 확인 (CanSeeGoal). 매 프레임 묻더라도 LosInterval 마다 한 번만 계산하고 결과를 기억해 둠
+        private float nextGoalCheckTime;
+        private bool canSeeGoal;
+
         private void Awake()
         {
             enemy = GetComponent<Enemy.Enemy>();
@@ -97,6 +101,8 @@ namespace Study3D.FpsGame.Map
         {
             roomTimer = 0f;
             losVisible = false;
+            canSeeGoal = false;
+            nextGoalCheckTime = GameTime.Time + Random.Range(0f, LosInterval); // 몬스터마다 확인 타이밍을 흩어 둠
         }
 
         private void OnDisable()
@@ -301,6 +307,67 @@ namespace Study3D.FpsGame.Map
 
             towardPortal = true;
             return CrossingPoint(room.GetPortal(portal), pos);
+        }
+
+        // 스킬용: 지금 자리에서 목표(플레이어가 서 있는 지도 위 지점)까지 막힘 없이 직진할 수 있는지
+        // - 지도가 몬스터 반지름만큼 깎여 있어서, true 면 몸이 장애물에 닿지 않고 곧장 갈 수 있음 (물리 Raycast 는 몸 두께를 못 봄)
+        // - 지도 밖(등장 중 등)이거나 플레이어가 지도 위에 없으면(사물 위 등) false
+        // - LosInterval 마다 한 번만 계산하고, 그 사이에는 기억해 둔 결과를 돌려줌
+        public bool CanSeeGoal()
+        {
+            if (GameTime.Time < nextGoalCheckTime)
+                return canSeeGoal;
+
+            nextGoalCheckTime = GameTime.Time + LosInterval;
+            canSeeGoal = CheckGoalVisible();
+            return canSeeGoal;
+        }
+
+        private bool CheckGoalVisible()
+        {
+            if (room == null || room.IsGoalOffMap)
+                return false;
+
+            if (room.TryGetGoal(out int goal, out Vector3 goalPoint) == false)
+                return false;
+
+            if (region == goal)
+                return true; // 같은 영역은 볼록이라 막힘 없음
+
+            Vector3 pos = room.transform.InverseTransformPoint(transform.position);
+            return room.HasLineOfSight(pos, region, goalPoint, goal);
+        }
+
+        // 스킬용: direction(월드, 수평) 쪽으로 distance 만큼 지도를 따라 직진합니다. 높이는 도착한 영역의 바닥에 맞춥니다.
+        // - 도착 지점이 지도 밖(벽, 장애물, 낭떠러지)이면 움직이지 않고 false → 돌진은 여기서 멈추면 됨
+        // - 밀어내기는 하지 않음 (돌진 궤도가 다른 몬스터에 밀려 틀어지지 않도록)
+        // - 한 번에 너무 멀리 가면 얇은 장애물을 건너뛸 수 있으므로, 한 프레임 이동량(속도 × 시간)으로 불러야 함
+        public bool MoveStraight(Vector3 direction, float distance)
+        {
+            if (room == null)
+                return false;
+
+            Vector3 localDirection = room.transform.InverseTransformDirection(direction);
+            localDirection.y = 0f;
+            if (localDirection.sqrMagnitude < 0.0001f)
+                return false;
+
+            Vector3 pos = room.transform.InverseTransformPoint(transform.position);
+            Vector3 next = pos + localDirection.normalized * distance;
+            int found = room.FindRegion(next, region, HeightTolerance);
+            if (found < 0)
+                return false;
+
+            // 영역이 바뀌면 추격용으로 골라 둔 연결점은 맞지 않으므로 버림 (돌진이 끝나고 추격할 때 다시 고름)
+            if (found != region)
+            {
+                region = found;
+                ResetPath();
+            }
+
+            next.y = room.HeightAt(region, next);
+            transform.position = room.transform.TransformPoint(next);
+            return true;
         }
 
         // 연결점 선분 위에서 나와 가장 가까운 점 (양 끝 = 장애물 모서리는 살짝 피함)

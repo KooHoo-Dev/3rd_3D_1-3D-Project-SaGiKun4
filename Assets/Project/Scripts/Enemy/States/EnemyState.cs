@@ -18,6 +18,12 @@ namespace Study3D.FpsGame.Enemy.States
             Enemy = enemy;
         }
 
+        // true 면 이 상태에서는 맞아도 경직(Hit 상태)으로 넘어가지 않습니다. 체력은 그대로 깎입니다. (Enemy.TakeDamage)
+        public virtual bool IgnoreHitReaction
+        {
+            get { return false; }
+        }
+
         public void Enter()
         {
             enterFrame = Time.frameCount;

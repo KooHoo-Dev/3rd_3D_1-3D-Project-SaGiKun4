@@ -238,8 +238,9 @@ namespace Study3D.FpsGame.Weapon.Cards
             float distance = speed * deltaTime;
             int contactMask = CombatSystem.Instance.EnemyMask | CombatSystem.Instance.EnvironmentMask;
 
+            // 트리거는 무시합니다. 적의 공격 판정(칼, 돌진 판정)도 Enemy 레이어의 트리거라서, 맞으면 피해 없이 카드만 사라지기 때문입니다.
             if (Physics.BoxCast(transform.position, HalfExtents, transform.forward, out RaycastHit hit,
-                    transform.rotation, distance, contactMask))
+                    transform.rotation, distance, contactMask, QueryTriggerInteraction.Ignore))
             {
                 // hit.point는 상자 모서리가 닿은 지점이라 중심이 아닙니다. 중심은 진행 방향으로 닿은 거리만큼만 옮깁니다.
                 transform.position += transform.forward * hit.distance;

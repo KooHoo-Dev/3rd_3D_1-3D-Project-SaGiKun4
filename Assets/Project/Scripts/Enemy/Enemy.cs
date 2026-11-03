@@ -10,6 +10,7 @@ namespace Study3D.FpsGame.Enemy
     // : 카드에 맞을 수 있는 가장 기본 적 입니다.
     // - CombatSystem에 자기 Collider를 등록해야 SendDamage가 이 적을 찾을 수 있습니다.
     // - 행동은 FSM으로 처리합니다. (Idle → Chase → Attack, 어느 상태든 피격 시 Hit, HP 0이면 Die)
+    //   프리팹에 EnemySkill 컴포넌트가 붙어 있으면 추격 중에 쓸 수 있는 스킬을 골라 Skill 상태로 넘어갑니다.
     // - 이동, 거리 계산, 애니메이션 재생 같은 상태들이 쓰는 기능은 Enemy.AI.cs에 있습니다.
     // - 오브젝트 풀에서 재사용되므로, 켜질 때마다(OnEnable) 체력과 상태를 처음으로 되돌립니다.
     //   (풀이 없으면 Destroy로 사라집니다)
@@ -45,7 +46,11 @@ namespace Study3D.FpsGame.Enemy
         // 사망 애니메이션이 끝나 사라지기 직전에 호출됩니다. (방 스포너가 남은 적 수를 셀 때 사용)
         public event Action<Enemy> Despawned;
 
+        // 지금 사용 중인 스킬. 스킬 상태에서만 값이 있습니다.
+        public EnemySkill CurrentSkill { get; private set; }
+
         private StateMachine<EnemyState> stateMachine;
+        private EnemySkill[] skills;
         private bool isRegistered;
         private bool needsStart; // 켜진 뒤 첫 Update에서 첫 상태로 시작 (OnEnable에서는 애니메이터가 아직 준비되지 않았을 수 있음)
 
@@ -67,7 +72,11 @@ namespace Study3D.FpsGame.Enemy
                 new EnemyAttackState(this),
                 new EnemyHitState(this),
                 new EnemyDieState(this),
+                new EnemySkillState(this),
             });
+
+            // 이 프리팹에 붙어 있는 스킬만 사용합니다. (없으면 빈 배열 → 지금처럼 접근 → 공격만 함)
+            skills = GetComponents<EnemySkill>();
         }
 
         private void OnEnable()
@@ -135,6 +144,30 @@ namespace Study3D.FpsGame.Enemy
 
         #endregion
 
+        #region 스킬
+
+        // 위에서부터(컴포넌트 순서) 지금 쓸 수 있는 스킬을 하나 골라 CurrentSkill 로 정합니다. 골랐으면 true
+        public bool TryPickSkill()
+        {
+            foreach (EnemySkill skill in skills)
+            {
+                if (skill.CanUse(this))
+                {
+                    CurrentSkill = skill;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // 스킬 상태가 끝날 때 부릅니다.
+        public void ClearSkill()
+        {
+            CurrentSkill = null;
+        }
+
+        #endregion
+
         #region 등장
 
         // 켜기 전에 호출하면 이 지점까지 걸어 들어온 뒤 추격합니다.
@@ -179,8 +212,9 @@ namespace Study3D.FpsGame.Enemy
                 return;
             }
 
-            // 등장 중에는 피격 모션 없이 계속 걸어옵니다. (맵 밖에서 멈추면 길찾기 없이 쫓아오게 됨)
-            if (stateMachine.CurrentState is EnemyEnterState)
+            // 등장 중, 경직을 무시하는 스킬 사용 중에는 피격 모션 없이 하던 행동을 계속합니다. (EnemyState.IgnoreHitReaction)
+            EnemyState currentState = stateMachine.CurrentState;
+            if (currentState != null && currentState.IgnoreHitReaction)
                 return;
 
             // 피격 중에 또 맞으면 피격 모션을 처음부터 다시 재생합니다.

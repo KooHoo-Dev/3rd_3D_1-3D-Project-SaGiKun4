@@ -119,6 +119,16 @@ namespace Study3D.FpsGame.Enemy
             LookAt(dir.normalized, deltaTime);
         }
 
+        // 제자리에서 정해진 방향(수평)으로 몸만 돌립니다. (스킬이 고정한 방향을 바라볼 때 사용)
+        public void LookAtDirection(Vector3 direction, float deltaTime)
+        {
+            direction.y = 0f;
+            if (direction.sqrMagnitude < 0.0001f)
+                return;
+
+            LookAt(direction.normalized, deltaTime);
+        }
+
         private void LookAt(Vector3 dir, float deltaTime)
         {
             Quaternion target = Quaternion.LookRotation(dir);

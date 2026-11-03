@@ -50783,7 +50783,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.07873535}
+  m_AnchoredPosition: {x: 0, y: 0.085632324}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &926909372
@@ -80212,7 +80212,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -35.999573, y: -40}
+  m_AnchoredPosition: {x: -35.999542, y: -40}
   m_SizeDelta: {x: -152, y: 56}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1452761009
@@ -89816,8 +89816,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 209813390}
   m_HandleRect: {fileID: 209813389}
   m_Direction: 0
-  m_Value: 1
-  m_Size: 1
+  m_Value: 0
+  m_Size: 0.9999759
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -95588,7 +95588,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: -0.01828003, y: 0}
+  m_AnchoredPosition: {x: -0.0040283203, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1738424389
@@ -100966,7 +100966,7 @@ MonoBehaviour:
   damageTextPoolKey: DamageText
   damageTextDuration: 0.5
   hitEffectPrefab: {fileID: 8542432686031417657, guid: 4cfcff3ec8316444faed36afa06e2a91, type: 3}
-  hitEffectScale: 0.5
+  hitEffectScale: 0.3
   maxEffectSpawnsPerFrame: 20
   maxActiveEffectsPerKind: 40
 --- !u!1 &1834573418
@@ -103910,8 +103910,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 320656524}
   m_HandleRect: {fileID: 320656523}
   m_Direction: 2
-  m_Value: 0.99997294
-  m_Size: 0.20586725
+  m_Value: 0.99996734
+  m_Size: 0.2568964
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

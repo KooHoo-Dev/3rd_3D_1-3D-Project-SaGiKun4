@@ -8,6 +8,12 @@ namespace Study3D.FpsGame.Enemy.States
     {
         public EnemyEnterState(Enemy enemy) : base(enemy) { }
 
+        // 맵 밖에서 멈추면 길찾기 없이 쫓아오게 되므로, 맞아도 계속 걸어옵니다.
+        public override bool IgnoreHitReaction
+        {
+            get { return true; }
+        }
+
         protected override void OnEnter()
         {
             Enemy.PlayAnim(Enemy.RunAnim);
