@@ -100965,6 +100965,8 @@ MonoBehaviour:
   bloodPoolKey: Blood
   damageTextPoolKey: DamageText
   damageTextDuration: 0.5
+  hitEffectPrefab: {fileID: 8542432686031417657, guid: 4cfcff3ec8316444faed36afa06e2a91, type: 3}
+  hitEffectScale: 0.5
   maxEffectSpawnsPerFrame: 20
   maxActiveEffectsPerKind: 40
 --- !u!1 &1834573418
