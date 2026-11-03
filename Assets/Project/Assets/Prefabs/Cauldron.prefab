@@ -43,7 +43,7 @@ GameObject:
   - component: {fileID: 411673235773622088}
   - component: {fileID: 190006958818335463}
   m_Layer: 0
-  m_Name: Blacksmith
+  m_Name: Cauldron
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -99,7 +99,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c738710180cf20949901018b2082503c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Study3D.FpsGame.Interaction.BlacksmithInteractable
-  displayName: "\uB300\uC7A5\uAC04"
+  displayName: "\uAC00\uB9C8\uC1A5"
   actionText: "\uC544\uC774\uD15C \uAC15\uD654\uD558\uAE30"
   promptAnchor: {fileID: 7337717506595551425}
 --- !u!1 &1145877494798480496
