@@ -809,7 +809,7 @@ MonoBehaviour:
   ignoreHit: 1
   minRange: 6
   maxRange: 15
-  chargeTime: 4
+  chargeTime: 3
   chargeAnimState: Taunting
   dashSpeed: 15
   overshoot: 2
