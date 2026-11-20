@@ -68,6 +68,10 @@ namespace Study3D.FpsGame.Map
         [Tooltip("하나라도 들어 있으면 크기 규칙을 무시하고 이 목록의 방을 순서대로 모두 붙임")]
         [SerializeField] private List<GameObject> testRooms = new List<GameObject>();
 
+        [Header("보스방")]
+        [Tooltip("모든 방 뒤에 통로로 이어 붙일 보스방 원본. 비워두면 붙이지 않음 (나중에는 포탈 + 씬 전환으로 바뀔 예정)")]
+        [SerializeField] private GameObject bossRoom;
+
         [Header("연결")]
         [Tooltip("뒤 조각의 입구 문을 꺼서 앞 조각 출구 문과 이중으로 그려지지 않게 함")]
         [SerializeField] private bool hideDuplicateGate = true;
@@ -122,6 +126,13 @@ namespace Study3D.FpsGame.Map
             }
             if (order == null)
                 return;
+
+            // 보스방은 마지막 방 뒤에 붙입니다. (testRooms 원본 목록을 바꾸지 않도록 복사해서 추가)
+            if (bossRoom != null)
+            {
+                order = new List<GameObject>(order);
+                order.Add(bossRoom);
+            }
 
             layoutCache.Clear();
             placed.Clear();

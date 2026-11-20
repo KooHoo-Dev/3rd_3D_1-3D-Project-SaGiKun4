@@ -4812,6 +4812,60 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.4999914, y: 0.5, z: 2.4999998}
   m_Center: {x: -1.2499957, y: 0.2, z: 1.2499999}
+--- !u!1 &2113295072329864806
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4055255704654946447}
+  - component: {fileID: 3146013474788151212}
+  m_Layer: 6
+  m_Name: Stair
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4055255704654946447
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2113295072329864806}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4627436939747490962}
+  - {fileID: 71473728713145903}
+  m_Father: {fileID: 2917357690141558636}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3146013474788151212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2113295072329864806}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifier
+  m_SerializedVersion: 0
+  m_OverrideArea: 1
+  m_Area: 3
+  m_OverrideGenerateLinks: 0
+  m_GenerateLinks: 0
+  m_IgnoreFromBuild: 0
+  m_ApplyToChildren: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &2114519692010539391
 GameObject:
   m_ObjectHideFlags: 0
@@ -11666,8 +11720,6 @@ Transform:
   - {fileID: 3315782825215527237}
   - {fileID: 2131606714456305444}
   - {fileID: 5923052772764760941}
-  - {fileID: 4627436939747490962}
-  - {fileID: 71473728713145903}
   - {fileID: 6509138292884049308}
   - {fileID: 2822077990064110612}
   - {fileID: 571913143722260648}
@@ -11678,6 +11730,7 @@ Transform:
   - {fileID: 8010379049384307540}
   - {fileID: 6720431132710500054}
   - {fileID: 5958889686111959181}
+  - {fileID: 4055255704654946447}
   m_Father: {fileID: 1749888413775410518}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5092242561603971262
@@ -22837,7 +22890,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 2917357690141558636}
+    m_TransformParent: {fileID: 4055255704654946447}
     m_Modifications:
     - target: {fileID: 423054113237209483, guid: c175e40cd97f24140b772ef36ca16edc, type: 3}
       propertyPath: m_Name
@@ -25525,7 +25578,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 2917357690141558636}
+    m_TransformParent: {fileID: 4055255704654946447}
     m_Modifications:
     - target: {fileID: 423054113237209483, guid: c175e40cd97f24140b772ef36ca16edc, type: 3}
       propertyPath: m_Name

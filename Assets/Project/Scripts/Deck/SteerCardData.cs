@@ -22,8 +22,14 @@ namespace Study3D.FpsGame.Deck
         // origin에서 radius 안의 적 중, 벽에 가려지지 않은 가장 가까운 적의 Collider를 찾습니다. 없으면 null 입니다.
         // - exclude(직전에 맞힌 적 등)는 후보에서 뺍니다.
         // - 등록된 몬스터의 Collider만 후보가 됩니다. (죽은 적은 Collider가 꺼져 있어 잡히지 않습니다)
-        protected static Collider FindNearestEnemy(Vector3 origin, float radius, IDamageable exclude)
+        // - 보스 카드(projectile.IsHostile)는 적 대신 플레이어를 찾습니다.
+        protected static Collider FindNearestEnemy(Projectile projectile, Vector3 origin, float radius, IDamageable exclude)
         {
+            if (projectile.IsHostile)
+            {
+                return FindPlayer(origin, radius, exclude);
+            }
+
             CombatSystem combat = CombatSystem.Instance;
             int count = Physics.OverlapSphereNonAlloc(origin, radius, SearchBuffer, combat.EnemyMask);
 
@@ -49,6 +55,22 @@ namespace Study3D.FpsGame.Deck
             }
 
             return nearest;
+        }
+
+        // 보스 카드용: 플레이어가 radius 안에 있고 벽에 가려지지 않았으면 플레이어 Collider, 아니면 null
+        private static Collider FindPlayer(Vector3 origin, float radius, IDamageable exclude)
+        {
+            Player.LocalPlayer player = Player.Player.LocalPlayer;
+            if (player == null || player.IsDead || player == exclude)
+                return null;
+
+            Vector3 center = player.MainCollider.bounds.center;
+            if ((center - origin).sqrMagnitude > radius * radius)
+                return null;
+            if (Physics.Linecast(origin, center, CombatSystem.Instance.EnvironmentMask))
+                return null;
+
+            return player.MainCollider;
         }
     }
 }

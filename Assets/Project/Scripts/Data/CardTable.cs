@@ -32,6 +32,12 @@ namespace Study3D.FpsGame.Data
             return null;
         }
 
+        // 표에 있는 모든 카드 정의
+        public IEnumerable<CardDef> GetAll()
+        {
+            return defs.Values;
+        }
+
         // 카드의 level 단계 스펙. 스펙이 없는 카드면 null, 표를 넘는 레벨이면 마지막 단계
         public CardSpecDef GetSpec(int id, int level)
         {

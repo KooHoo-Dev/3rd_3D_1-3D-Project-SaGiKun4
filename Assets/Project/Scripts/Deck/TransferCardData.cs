@@ -38,7 +38,7 @@ namespace Study3D.FpsGame.Deck
             if (context.IsEnemy == false || context.Count <= 0)
                 return;
 
-            Collider next = FindNearestEnemy(context.Center, Radius,context.Projectile.LastHitTarget);
+            Collider next = FindNearestEnemy(context.Projectile, context.Center, Radius, context.Projectile.LastHitTarget);
             if (next == null)
                 return;
 

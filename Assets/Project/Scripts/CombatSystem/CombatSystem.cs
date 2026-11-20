@@ -16,7 +16,13 @@ namespace Study3D.FpsGame
         [Tooltip("맵 안의 구조물(상자, 기둥 등) 레이어 이름. 카드가 튕기거나 관통할 수 있습니다")]
         [SerializeField] private string propLayerName = "Prop";
 
+        [Header("플레이어 판정")]
+        [Tooltip("보스 카드가 맞힐 플레이어 레이어 이름. 플레이어의 CharacterController 가 있는 오브젝트가 이 레이어여야 합니다")]
+        [SerializeField] private string playerLayerName = "LocalBody";
+
         public static CombatSystem Instance { get; private set; }
+
+        public int PlayerMask { get; private set; }
 
         public int EnemyMask { get; private set; }
         public int WorldMask { get; private set; }
@@ -54,6 +60,7 @@ namespace Study3D.FpsGame
             WorldMask = GetLayerMask(worldLayerName);
             PropMask = GetLayerMask(propLayerName);
             EnvironmentMask = WorldMask | PropMask;
+            PlayerMask = GetLayerMask(playerLayerName);
         }
 
         // GetMask는 없는 이름을 조용히 무시하므로, 오타나 미등록 레이어를 여기서 알려줍니다.

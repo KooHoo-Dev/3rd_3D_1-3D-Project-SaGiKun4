@@ -55,6 +55,22 @@ namespace Study3D.FpsGame.Deck
             float finalRadius = Radius * context.Multiplier.Effect;
             // 발사체 피해에 이미 Damage 배율과 화력 배율(분열 상한으로 넘겨받은 몫)이 들어 있습니다.
             int finalDamage = CeilMultiply(context.Projectile.Damage, DamageRatio);
+
+            // 보스 카드의 폭발은 적 대신 플레이어에게 피해를 줍니다.
+            if (context.Projectile.IsHostile)
+            {
+                ExplodeOnPlayer(context, finalRadius, finalDamage);
+            }
+            else
+            {
+                ExplodeOnEnemies(context, finalRadius, finalDamage);
+            }
+
+            PlayExplosion(context, finalRadius);
+        }
+
+        private void ExplodeOnEnemies(CardContext context, float finalRadius, int finalDamage)
+        {
             Collider[] colliders = Physics.OverlapSphere(context.Point, finalRadius, CombatSystem.Instance.EnemyMask);
 
             // 한 적의 여러 Collider가 반경 안에 있어도 한 번만 피해를 줍니다.
@@ -71,12 +87,47 @@ namespace Study3D.FpsGame.Deck
                 int attackId = context.Projectile.AttackId;
                 CombatSystem.Instance.SendDamage(Player.Player.LocalPlayer, collider, finalDamage, context.Point, attackId);
             }
+        }
 
+        // 보스 카드의 폭발: 플레이어 몸이 반경 안에 들어오면 피해를 줍니다.
+        private void ExplodeOnPlayer(CardContext context, float finalRadius, int finalDamage)
+        {
+            Player.LocalPlayer player = Player.Player.LocalPlayer;
+            if (player == null || player.IsDead)
+                return;
+
+            Vector3 closest = player.MainCollider.ClosestPoint(context.Point);
+            if ((closest - context.Point).sqrMagnitude > finalRadius * finalRadius)
+                return;
+
+            CombatEvent combatEvent = new CombatEvent();
+            combatEvent.Sender = null;
+            combatEvent.Receiver = player;
+            combatEvent.Damage = finalDamage;
+            combatEvent.HitPosition = closest;
+            combatEvent.Collider = player.MainCollider;
+            CombatSystem.Instance.AddInGameEvent(combatEvent);
+        }
+
+        // 폭발 이펙트와 소리
+        private void PlayExplosion(CardContext context, float finalRadius)
+        {
             // 이펙트의 원이 실제 폭발 범위와 같은 크기로 보이도록 맞춥니다.
             // 카드 표의 EffectRadius: 이펙트를 크기 1로 재생했을 때 원의 반경 (비어 있으면 1로 봄)
             float effectRadius = Def.EffectRadius > 0f ? Def.EffectRadius : 1f;
             float effectScale = finalRadius / effectRadius;
             PlayEffect(context, effectScale);
+            PlayExplosionSound(context.Point);
+        }
+
+        // 폭발 지점에서 3D로 재생합니다. (멀수록 작게, 너무 멀면 생략)
+        // 같은 프레임에 여러 번 터져도 AudioManager가 한 번만 재생합니다.
+        private void PlayExplosionSound(Vector3 point)
+        {
+            if (AudioManager.Instance == null)
+                return;
+
+            AudioManager.Instance.PlaySfxAt(AudioManager.Sfx.Explosion, point);
         }
 
         public override string Description {

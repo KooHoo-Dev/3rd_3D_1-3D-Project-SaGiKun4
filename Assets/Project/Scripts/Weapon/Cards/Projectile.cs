@@ -66,6 +66,25 @@ namespace Study3D.FpsGame.Weapon.Cards
         // 조향 카드(유도 등)가 쫓고 있는 적의 Collider. 없으면 null 입니다.
         public Collider SteerTarget { get; set; }
 
+        // 보스가 쏜 발사체 (LaunchHostile)
+        // - 적 대신 플레이어(LocalBody 레이어)를 맞히고, 벽과 구조물에는 플레이어 카드와 똑같이 부딪힙니다.
+        // - 적(보스 포함)은 맞히지 않고 지나갑니다. 플레이어 카드와도 서로 통과합니다.
+        // - 킬 그래프에 잡히지 않도록 공격 번호(AttackId)는 0 이고, AttackTracker 에 세지 않습니다.
+        private IDamageable hostileOwner;
+        private float flightSpeed; // 이번 발사의 날아가는 속도 (플레이어 카드 = speed, 보스 카드 = 보스가 정한 값)
+
+        public bool IsHostile
+        {
+            get { return hostileOwner != null; }
+        }
+
+        // 조준 보정: 총구에서 출발한 발사체를 조준점까지 보낸 뒤, 카메라 레이 방향으로 꺾어 시선과 같은 직선을 따라가게 합니다.
+        // - 총구 → 조준점 방향을 그대로 유지하면, 관통한 뒤에 시선과 어긋난 대각선으로 날아가기 때문입니다.
+        // - 조준점에 닿기 전에 카드가 방향을 바꾸면(조향, 반사) 그 방향을 따르도록 보정을 끕니다.
+        private bool hasAim;
+        private Vector3 aimPoint;     // 카메라 레이가 맞은 위치 (못 맞혔으면 사거리 끝)
+        private Vector3 aimDirection; // 카메라 레이 방향
+
         private float age;
         private bool isDead;
         private bool keepFlying;      // 이번 충돌 뒤에도 계속 날아갈지 (반응 카드, 충돌 중 조향이 켭니다)
@@ -114,14 +133,41 @@ namespace Study3D.FpsGame.Weapon.Cards
         }
 
         // Spawn 직후 Weapon이 호출합니다. 실을 카드를 받고 발사 시점 카드를 실행합니다.
-        public void Launch(IReadOnlyList<CardData> launchCards, int baseDamage, CardMultiplier multiplier, int attackId)
+        // aimPoint, aimDirection : 조준점과 카메라 레이 방향. 조준점을 지나면 레이 방향으로 꺾습니다.
+        public void Launch(IReadOnlyList<CardData> launchCards, int baseDamage, CardMultiplier multiplier, int attackId,
+            Vector3 aimPoint, Vector3 aimDirection)
         {
             ResetState(multiplier);
             this.baseDamage = Mathf.CeilToInt(baseDamage * multiplier.Damage);
             AttackId = attackId;
+            // 발사 시점 조향 카드가 보정을 끌 수 있도록 카드 실행보다 먼저 정합니다.
+            SetAim(aimPoint, aimDirection);
             // 발사 시점 카드보다 먼저 세어 둡니다.
             AttackTracker.AddProjectile(AttackId);
 
+            LoadCards(launchCards, multiplier);
+            RunTiming(CardTiming.Shoot, FlightContext(), 0);
+        }
+
+        // 보스가 Spawn 직후 호출합니다. 플레이어를 맞히는 발사체로 발사합니다. (IsHostile)
+        // - 피해는 배율 없이 damage 그대로, 크기는 프리팹 크기 × sizeScale, 속도는 flySpeed 입니다.
+        // - 조준 보정 없이 생성할 때 받은 회전 방향으로 직진합니다.
+        public void LaunchHostile(IReadOnlyList<CardData> launchCards, int damage, float flySpeed, float sizeScale, IDamageable owner)
+        {
+            CardMultiplier multiplier = CardMultiplier.One;
+            multiplier.Size = sizeScale;
+            ResetState(multiplier);
+            hostileOwner = owner;
+            flightSpeed = flySpeed;
+            baseDamage = damage;
+            AttackId = 0;
+
+            LoadCards(launchCards, multiplier);
+            RunTiming(CardTiming.Shoot, FlightContext(), 0);
+        }
+
+        private void LoadCards(IReadOnlyList<CardData> launchCards, CardMultiplier multiplier)
+        {
             for (int i = 0; i < launchCards.Count; i++)
             {
                 cards.Add(launchCards[i]);
@@ -129,7 +175,6 @@ namespace Study3D.FpsGame.Weapon.Cards
             }
 
             BuildTimingSlots();
-            RunTiming(CardTiming.Shoot, FlightContext(), 0);
         }
 
         // 분열된 자식의 초기화: 부모의 카드와 런타임 값을 복사하되, 자신을 만든 분열 카드(splitContext.Slot)는 빼서 다시 분열하지 않게 합니다.
@@ -143,8 +188,14 @@ namespace Study3D.FpsGame.Weapon.Cards
             baseDamage = parent.baseDamage;
             // 분열을 몇 번 거쳐도 처음 발사한 공격으로 셉니다.
             AttackId = parent.AttackId;
+            // 보스 카드에서 분열된 자식도 보스 카드입니다.
+            hostileOwner = parent.hostileOwner;
+            flightSpeed = parent.flightSpeed;
             // 부모가 아직 살아 있을 때 자식을 먼저 세므로, 분열 중에 살아 있는 수가 0이 되지 않습니다.
-            AttackTracker.AddProjectile(AttackId);
+            if (IsHostile == false)
+            {
+                AttackTracker.AddProjectile(AttackId);
+            }
             Power = parent.Power;
             ApplyPowerScale();
             if (splitContext.Target != null && splitContext.IsEnemy == false)
@@ -174,6 +225,9 @@ namespace Study3D.FpsGame.Weapon.Cards
             counts.Clear();
             lastHitTarget = null;
             SteerTarget = null;
+            hostileOwner = null;
+            flightSpeed = speed;
+            hasAim = false; // 분열된 자식은 일부러 퍼뜨린 방향을 따르므로 보정을 이어받지 않습니다.
             age = 0f;
             isDead = false;
             keepFlying = false;
@@ -233,10 +287,37 @@ namespace Study3D.FpsGame.Weapon.Cards
         // (Rigidbody 없이 Transform으로 움직이므로 충돌 콜백 대신 직접 검사합니다. 빠른 발사체가 벽을 뚫는 것도 막아줍니다)
         // - 상자 크기 = 메시 크기 × 현재 스케일 이라서, Size 배율로 커진 만큼 판정도 커집니다.
         // - BoxCast는 출발할 때 이미 겹쳐 있는 Collider는 감지하지 않습니다. 관통은 이 성질을 이용합니다.
+        // - 조준 보정 중이면 이번 이동이 조준점을 넘는지 보고, 넘으면 조준점까지 이동 → 레이 방향으로 꺾기 → 남은 거리 이동 순서로 나눠 갑니다.
         private void Move(float deltaTime)
         {
-            float distance = speed * deltaTime;
-            int contactMask = CombatSystem.Instance.EnemyMask | CombatSystem.Instance.EnvironmentMask;
+            float distance = flightSpeed * deltaTime;
+
+            if (hasAim)
+            {
+                float aimRemain = GetAimRemain();
+                if (aimRemain <= distance)
+                {
+                    if (MoveStep(aimRemain))
+                        return;
+
+                    TurnToAim();
+                    distance -= aimRemain;
+                }
+            }
+
+            MoveStep(distance);
+        }
+
+        // distance만큼 앞으로 이동합니다. 도중에 부딪혔으면 닿은 위치에서 멈추고 true를 반환합니다.
+        private bool MoveStep(float distance)
+        {
+            // 보스 카드는 적 대신 플레이어를 맞힙니다.
+            int targetMask = CombatSystem.Instance.EnemyMask;
+            if (IsHostile)
+            {
+                targetMask = CombatSystem.Instance.PlayerMask;
+            }
+            int contactMask = targetMask | CombatSystem.Instance.EnvironmentMask;
 
             // 트리거는 무시합니다. 적의 공격 판정(칼, 돌진 판정)도 Enemy 레이어의 트리거라서, 맞으면 피해 없이 카드만 사라지기 때문입니다.
             if (Physics.BoxCast(transform.position, HalfExtents, transform.forward, out RaycastHit hit,
@@ -245,24 +326,58 @@ namespace Study3D.FpsGame.Weapon.Cards
                 // hit.point는 상자 모서리가 닿은 지점이라 중심이 아닙니다. 중심은 진행 방향으로 닿은 거리만큼만 옮깁니다.
                 transform.position += transform.forward * hit.distance;
                 OnContact(hit);
-                return;
+                return true;
             }
 
             // Space.Self 기준 Vector3.forward = 발사체 자신의 +z 방향 입니다.
             transform.Translate(Vector3.forward * distance, Space.Self);
+            return false;
+        }
+
+        // 조준 보정을 켭니다.
+        private void SetAim(Vector3 point, Vector3 direction)
+        {
+            if (direction.sqrMagnitude < 0.0001f)
+            {
+                hasAim = false;
+                return;
+            }
+
+            hasAim = true;
+            aimPoint = point;
+            aimDirection = direction;
+        }
+
+        // 진행 방향 기준으로 조준점까지 남은 거리. 관통 등으로 이미 지나쳤으면 0 입니다.
+        private float GetAimRemain()
+        {
+            float remain = Vector3.Dot(aimPoint - transform.position, transform.forward);
+            if (remain < 0f)
+                return 0f;
+
+            return remain;
+        }
+
+        // 조준점에 닿았으면 카메라 레이 방향으로 꺾고 보정을 끝냅니다.
+        // 조준점은 카메라 레이 위의 점이라서, 꺾인 뒤의 경로는 카메라 레이와 겹칩니다.
+        private void TurnToAim()
+        {
+            hasAim = false;
+            transform.rotation = Quaternion.LookRotation(aimDirection);
         }
 
         // 적중 → 충돌 시점 카드 실행 → (계속 날아가게 한 카드가 없으면) 소멸 순서로 처리합니다.
         // - 무엇과 부딪혔는지만 분류하고, 카드의 종류는 알지 못합니다.
         private void OnContact(RaycastHit hit)
         {
-            ContactKind contactKind = CombatSystem.Instance.GetContactKind(hit.collider);
+            ContactKind contactKind = GetContactKind(hit.collider);
             if (contactKind == ContactKind.Ignore) return;
 
+            // 맞힐 대상(플레이어 카드 = 적, 보스 카드 = 플레이어)이면 "적" 으로 분류됩니다.
             bool isEnemy = contactKind == ContactKind.Enemy;
             if (isEnemy)
             {
-                IDamageable target = CombatSystem.Instance.GetMonsterOrNull(hit.collider);
+                IDamageable target = GetTargetOrNull(hit.collider);
                 // 직전에 피해를 준 적에 다시 닿은 경우: 피해, 카드 발동 없이 그대로 통과합니다.
                 if (target != null && target == lastHitTarget)
                 {
@@ -271,7 +386,7 @@ namespace Study3D.FpsGame.Weapon.Cards
                 }
 
                 lastHitTarget = target;
-                CombatSystem.Instance.SendDamage(Player.Player.LocalPlayer, hit.collider, Damage, hit.point, AttackId);
+                SendHitDamage(target, hit.collider, hit.point);
             }
             else
             {
@@ -286,6 +401,55 @@ namespace Study3D.FpsGame.Weapon.Cards
             RunTiming(CardTiming.Hit, context, 0);
 
             if (keepFlying == false) Die(context);
+        }
+
+        // 무엇과 부딪혔는지 분류합니다. 보스 카드는 플레이어를 "적"(맞힐 대상)으로 분류합니다.
+        private ContactKind GetContactKind(Collider collider)
+        {
+            if (IsHostile)
+            {
+                Player.LocalPlayer player = Player.Player.LocalPlayer;
+                if (player != null && collider == player.MainCollider)
+                {
+                    return ContactKind.Enemy;
+                }
+            }
+
+            return CombatSystem.Instance.GetContactKind(collider);
+        }
+
+        // 맞힌 대상. 플레이어 카드는 등록된 적, 보스 카드는 플레이어 입니다.
+        public IDamageable GetTargetOrNull(Collider collider)
+        {
+            if (IsHostile)
+            {
+                return Player.Player.LocalPlayer;
+            }
+
+            return CombatSystem.Instance.GetMonsterOrNull(collider);
+        }
+
+        // 맞힌 대상에게 발사체 피해를 줍니다.
+        // - 플레이어 카드: 적에게 (CombatSystem.SendDamage 가 등록된 적인지 확인)
+        // - 보스 카드: 플레이어에게 (적의 칼 판정 EnemyWeapon 과 같은 방식)
+        private void SendHitDamage(IDamageable target, Collider collider, Vector3 point)
+        {
+            if (IsHostile == false)
+            {
+                CombatSystem.Instance.SendDamage(Player.Player.LocalPlayer, collider, Damage, point, AttackId);
+                return;
+            }
+
+            if (target == null)
+                return;
+
+            CombatEvent combatEvent = new CombatEvent();
+            combatEvent.Sender = hostileOwner;
+            combatEvent.Receiver = target;
+            combatEvent.Damage = Damage;
+            combatEvent.HitPosition = point;
+            combatEvent.Collider = collider;
+            CombatSystem.Instance.AddInGameEvent(combatEvent);
         }
 
         // 해당 시점에 걸린 카드들을 실린 순서대로 실행합니다.
@@ -348,6 +512,7 @@ namespace Study3D.FpsGame.Weapon.Cards
                 return;
 
             transform.rotation = Quaternion.LookRotation(direction);
+            hasAim = false; // 카드가 정한 방향을 따릅니다.
             if (context.Target == null)
                 return; // 비행 중 조향
 
@@ -367,6 +532,7 @@ namespace Study3D.FpsGame.Weapon.Cards
         public void Redirect(Vector3 point, Vector3 normal, Vector3 direction)
         {
             transform.rotation = Quaternion.LookRotation(direction);
+            hasAim = false; // 카드가 정한 방향을 따릅니다.
             PushOutOfSurface(point, normal);
         }
 

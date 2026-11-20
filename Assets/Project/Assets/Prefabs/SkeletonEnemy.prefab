@@ -1649,6 +1649,8 @@ MonoBehaviour:
   goldDropChance: 0.5
   goldMinCount: 1
   goldMaxCount: 3
+  hitSounds: 030000000400000005000000
+  dieSounds: 02000000
 --- !u!114 &8302051090746460329
 MonoBehaviour:
   m_ObjectHideFlags: 0

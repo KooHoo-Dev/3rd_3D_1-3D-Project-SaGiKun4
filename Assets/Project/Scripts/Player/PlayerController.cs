@@ -43,6 +43,10 @@ namespace Study3D.FpsGame.Player
         // 카메라 자식으로 둔 1인칭 팔/총(뷰모델)의 Animator. 몸과 같은 파라미터를 받습니다. (없으면 비워두세요)
         [SerializeField] private Animator viewModelAnimator;
 
+        [Header("소리")]
+        [Tooltip("발사할 때 이 중 하나를 무작위로 재생합니다 (비워두면 소리 없음)")]
+        [SerializeField] private AudioManager.Sfx[] shotSounds;
+
         // 아래는 내부변수들
         private CharacterController controller;
         private Vector3 velocity;
@@ -53,6 +57,9 @@ namespace Study3D.FpsGame.Player
 
         // 마우스로 누적한 상하 시점 각도 (+ = 아래, - = 위). 카메라 스크립트가 읽어갑니다.
         public float VerticalLookAngle => verticalLookAngle;
+
+        // 달리기 키를 누른 채 앞으로 움직이고 있는지. 화면 속도선 연출(ScreenEdgeEffect)이 읽어갑니다.
+        public bool IsRunningForward { get; private set; }
 
         // canAct가 false면(강화 화면 등) 입력이 없는 것으로 처리합니다. 중력과 멈추는 애니메이션은 그대로 진행됩니다.
         private void UpdateMovement(bool canAct)
@@ -71,7 +78,14 @@ namespace Study3D.FpsGame.Player
             Vector3 moveVector = (transform.right * moveX) + (transform.forward * moveZ);
             // moveVector의 길이만큼 현재 프레임의 이동량이 조정이 됩니다.
             controller.Move(moveVector * (speed * GameTime.DeltaTime));
+            // 적에게 밀려나는 중이면 밀리는 양을 더 움직입니다. (LocalPlayer.Knockback)
+            Vector3 knockbackStep = Player.LocalPlayer.ConsumeKnockbackStep(GameTime.DeltaTime);
+            if (knockbackStep.sqrMagnitude > 0f)
+            {
+                controller.Move(knockbackStep);
+            }
             UpdateMoveAnimation(isRunning);
+            IsRunningForward = isRunning && moveZ > 0.1f;
 
             // CharacterController는 쉬운만큼 까다로워서
             // 여러군데에서 나눠서 호출할 경우 버그를 찾기가 어려울수도 있습니다. 
@@ -221,6 +235,7 @@ namespace Study3D.FpsGame.Player
                     // 해당 animator의 발사동작은 Any State에 들어가므로,
                     // 남은 트리거를 지우고 다시 겁니다.
                     PlayTrigger(Fire);
+                    PlayShotSound();
                 }
             }
 
@@ -239,9 +254,41 @@ namespace Study3D.FpsGame.Player
             if (SimpleInput.GetKeyDown(Key.R)) Player.LocalPlayer.RequestReload();
         }
         
+        // 발사 소리. shotSounds 중 하나를 무작위로 고릅니다.
+        // 플레이어 자신의 소리라서 거리와 상관없이 같은 크기로(2D) 재생합니다.
+        private void PlayShotSound()
+        {
+            if (shotSounds == null || shotSounds.Length == 0)
+                return;
+
+            if (AudioManager.Instance == null)
+                return;
+
+            int index = Random.Range(0, shotSounds.Length);
+            AudioManager.Instance.PlaySfx(shotSounds[index]);
+        }
+
         private void PlayReloadAnimation()
         {
             PlayTrigger(Reload);
+
+            // 플레이어 자신의 소리라서 거리와 상관없이 같은 크기로(2D) 재생합니다.
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySfx(AudioManager.Sfx.Spin);
+            }
+        }
+
+        // 재장전 소리(3.3초)가 애니메이션(1.5초)보다 길어서, 재장전이 끝나면 짧게 줄이며 멈춥니다.
+        // 그리고 실린더가 닫히는 찰칵 소리를 냅니다. (애니메이션의 ReloadComplete 신호에 맞춰 나오므로 재장전 끝과 항상 맞습니다)
+        private void StopReloadSound()
+        {
+            const float RELOAD_SOUND_FADE_TIME = 0.2f;
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.StopSfx(AudioManager.Sfx.Spin, RELOAD_SOUND_FADE_TIME);
+                AudioManager.Instance.PlaySfx(AudioManager.Sfx.Click);
+            }
         }
     }
 }

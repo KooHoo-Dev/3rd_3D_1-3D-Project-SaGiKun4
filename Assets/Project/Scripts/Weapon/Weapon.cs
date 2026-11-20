@@ -104,28 +104,26 @@ namespace Study3D.FpsGame.Weapon
         // - 데미지는 여기서 바로 주지 않습니다. (날아간 Card가 맞힌 시점에 처리합니다)
         private void FireRay(Ray ray, CardData card)
         {
-            Quaternion cardRotation;
             // 적뿐 아니라 벽, 바닥(환경)도 맞혀야 조준한 곳으로 카드를 보낼 수 있습니다.
             int hitMask = CombatSystem.Instance.EnemyMask | CombatSystem.Instance.EnvironmentMask;
+            // 조준점: 레이가 맞은 위치. 맞은 위치가 없으면 사거리 끝 지점을 조준점으로 삼습니다.
+            Vector3 aimPoint = ray.origin + ray.direction * Range;
             // 적의 공격 판정(트리거)은 조준 대상이 아니므로 무시합니다. (발사체 충돌 검사와 같은 기준)
             if (Physics.Raycast(ray, out RaycastHit hit, Range, hitMask, QueryTriggerInteraction.Ignore))
             {
-                // ShotPoint -> 맞은 위치 방향 벡터를 카드의 +z로 삼아, 플레이어가 바라본 곳으로 날아가게 합니다.
-                // (LookRotation은 월드 up 기준이라 z 회전(롤)이 0으로 만들어집니다)
-                Vector3 direction = hit.point - shotPoint.position;
-                cardRotation = Quaternion.LookRotation(direction);
+                aimPoint = hit.point;
             }
-            else
-            {
-                // 맞은 위치가 없으면 ShotPoint의 회전에서 z 회전만 제거해서 총구 정면(+z)으로 날아갑니다.
-                Vector3 euler = shotPoint.eulerAngles;
-                cardRotation = Quaternion.Euler(euler.x, euler.y, 0f);
-            }
+
+            // ShotPoint -> 조준점 방향 벡터를 카드의 +z로 삼아, 플레이어가 바라본 곳으로 날아가게 합니다.
+            // (LookRotation은 월드 up 기준이라 z 회전(롤)이 0으로 만들어집니다)
+            // 조준점을 지나면 발사체가 스스로 카메라 레이 방향으로 꺾습니다. (관통해도 시선과 같은 직선으로 날아가도록)
+            Quaternion cardRotation = Quaternion.LookRotation(aimPoint - shotPoint.position);
 
             // 카메라와 총구 사이에 적이나 벽이 있으면(적에 바짝 붙어 총구가 적 몸 안에 들어간 경우 등) 카메라 위치에서 발사합니다.
             // - 발사체 판정은 출발할 때 이미 겹쳐 있는 Collider를 감지하지 못해서, 총구에서 쏘면 그 적을 맞히지 못합니다.
             // - 또 조준점이 총구보다 뒤에 있게 되어, 총구 → 조준점 방향이 거꾸로(플레이어 쪽으로) 튕겨 나옵니다.
             Vector3 spawnPosition = shotPoint.position;
+            // - 이때는 처음부터 카메라 레이 위를 날아가므로, 조준점에서 꺾어도 방향이 그대로입니다.
             if (Physics.Linecast(ray.origin, shotPoint.position, hitMask))
             {
                 spawnPosition = ray.origin;
@@ -137,7 +135,7 @@ namespace Study3D.FpsGame.Weapon
             // 이번 발사에 새 공격 번호를 붙입니다.
             lastAttackId++;
             int attackId = lastAttackId;
-            projectile.Launch(BuildLaunchCards(card), Damage, multiplier, attackId);
+            projectile.Launch(BuildLaunchCards(card), Damage, multiplier, attackId, aimPoint, ray.direction);
         }
 
         // 받은 카드의 종류에 따라 이번 발사에 실을 카드 목록을 만듭니다. 발사체는 이 순서대로 카드를 실행합니다.

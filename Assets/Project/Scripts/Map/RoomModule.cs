@@ -160,6 +160,7 @@ namespace Study3D.FpsGame.Map
         // 방 원본(프리팹 에셋 포함)에서 배치용 정보를 계산합니다.
         // - Renderer.bounds 는 에셋 상태에서 쓸 수 없으므로 MeshFilter 의 메시 범위를 루트 로컬로 옮겨서 합칩니다.
         // - needsEntry 가 false 면 입구 문이 없어도 됨 (시작방은 출구만 있으면 됨)
+        // - 출구 문은 없어도 됨 (보스방처럼 확실한 끝 방). 없으면 출구 차단막도 만들지 않습니다.
         public static RoomLayout CalculateLayout(GameObject root, bool needsEntry = true)
         {
             RoomModule module = root.GetComponent<RoomModule>();
@@ -173,7 +174,7 @@ namespace Study3D.FpsGame.Map
 
             RoomLayout layout = new RoomLayout { bounds = MeshBounds(root.transform, root.transform, true) };
             layout.entry = CalculateGate(root.transform, entryDoor, EntryTag, needsEntry);
-            layout.exit = CalculateGate(root.transform, exitDoor, ExitTag, true);
+            layout.exit = CalculateGate(root.transform, exitDoor, ExitTag, false);
             return layout;
         }
 

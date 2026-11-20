@@ -57,7 +57,7 @@ namespace Study3D.FpsGame.Deck
             }
 
             context.Count = Spec.Interval;
-            Collider target = FindNearestEnemy(context.Center, Radius, projectile.LastHitTarget);
+            Collider target = FindNearestEnemy(projectile, context.Center, Radius, projectile.LastHitTarget);
             if (target == null)
                 return null;
 
@@ -78,7 +78,7 @@ namespace Study3D.FpsGame.Deck
         {
             if (target == null || target.enabled == false || target.gameObject.activeInHierarchy == false)
                 return false;
-            if (CombatSystem.Instance.GetMonsterOrNull(target) == projectile.LastHitTarget)
+            if (projectile.GetTargetOrNull(target) == projectile.LastHitTarget)
                 return false;
 
             float maxRange = Radius * Spec.LoseRange;

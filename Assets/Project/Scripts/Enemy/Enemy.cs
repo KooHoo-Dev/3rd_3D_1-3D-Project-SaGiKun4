@@ -33,6 +33,12 @@ namespace Study3D.FpsGame.Enemy
         [SerializeField] private int goldMinCount = 1; // 당첨되면 이 범위에서 랜덤 개수
         [SerializeField] private int goldMaxCount = 5;
 
+        [Header("소리")]
+        [Tooltip("맞았을 때 이 중 하나를 무작위로 재생합니다 (비워두면 소리 없음)")]
+        [SerializeField] private AudioManager.Sfx[] hitSounds;
+        [Tooltip("죽을 때 이 중 하나를 무작위로 재생합니다 (비워두면 소리 없음)")]
+        [SerializeField] private AudioManager.Sfx[] dieSounds;
+
         public Collider MainCollider => mainCollider;
         public GameObject GameObject => gameObject;
         public Health Health { get; private set; }
@@ -208,9 +214,13 @@ namespace Study3D.FpsGame.Enemy
             {
                 // 킬을 알립니다. 이미 죽은 적은 맨 위에서 걸러지므로 적 하나당 한 번만 알립니다.
                 CombatSystem.Instance.ReportKill(combatEvent.AttackId);
+                PlayRandomSound(dieSounds);
                 stateMachine.ChangeState<EnemyDieState>();
                 return;
             }
+
+            // 죽는 공격에는 피격 소리 없이 사망 소리만 냅니다.
+            PlayRandomSound(hitSounds);
 
             // 등장 중, 경직을 무시하는 스킬 사용 중에는 피격 모션 없이 하던 행동을 계속합니다. (EnemyState.IgnoreHitReaction)
             EnemyState currentState = stateMachine.CurrentState;
@@ -261,6 +271,19 @@ namespace Study3D.FpsGame.Enemy
         private static bool Roll(float chance)
         {
             return chance > 0f && UnityEngine.Random.value <= chance;
+        }
+
+        // sounds 중 하나를 골라 몸 중앙에서 3D로 재생합니다. (멀수록 작게, 방향 구분)
+        private void PlayRandomSound(AudioManager.Sfx[] sounds)
+        {
+            if (sounds == null || sounds.Length == 0)
+                return;
+
+            if (AudioManager.Instance == null)
+                return;
+
+            int index = UnityEngine.Random.Range(0, sounds.Length);
+            AudioManager.Instance.PlaySfxAt(sounds[index], mainCollider.bounds.center);
         }
 
         // 사망 애니메이션이 끝나면 호출됩니다.
